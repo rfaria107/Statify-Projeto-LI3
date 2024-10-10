@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "../Include/usuario.h"
-#include "../Include/gestor_sistemas.h"
+#include "../include/usuario.h"
+#include "../include/gestor_sistemas.h"
 
 // Função para adicionar um usuário ao "gestor_sistemas"
 void adicionar_usuario(GestorSistema *gestor, Usuario *usuario) {

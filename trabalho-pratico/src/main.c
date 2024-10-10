@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "../Include/gestor_sistemas.h"
-#include "../Include/usuario.h"
+#include "../include/gestor_sistemas.h"
+#include "../include/usuario.h"
 
 int main() {
     GestorSistema gestor;
@@ -11,7 +11,7 @@ int main() {
     adicionar_usuario(&gestor, &u1);
 
     // Busca o usuário
-    Usuario *usuarioBuscado = buscar_usuario(&gestor, "john_doe");
+    Usuario *usuarioBuscado = buscar_usuario(&gestor, "john_do");
     if (usuarioBuscado) {
         imprimir_usuario(usuarioBuscado);
     } else {

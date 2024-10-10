@@ -1,4 +1,4 @@
-#include "../Include/gestor_sistemas.h"
+#include "../include/gestor_sistemas.h"
 
 // Função para inicializar o sistema com as hash tables (Glib)
 void inicializar_gestor(GestorSistema *gestor) {

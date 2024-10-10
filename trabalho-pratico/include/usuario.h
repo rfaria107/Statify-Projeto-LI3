@@ -4,7 +4,7 @@
 #include <glib.h>
 #include <ctype.h>  // Para usar isdigit
 #include <string.h> // Para usar strlen
-#include "../Include/gestor_sistemas.h"
+#include "../include/gestor_sistemas.h"
 
 typedef struct {
     char username[50];
@@ -14,6 +14,7 @@ typedef struct {
     char birth_date[11]; // Formato: YYYY/MM/DD
     char country[50];
     char subscription_type[10];
+    char liked_musics_id [100];
 } Usuario;
 
 // Funções de manipulação de usuários
