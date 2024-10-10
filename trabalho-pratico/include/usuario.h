@@ -30,4 +30,7 @@ int validarDataFutura(int ano, int mes, int dia);
 int validarDataUsuario(const Usuario *usuario);
 int calcularIdade(const Usuario *usuario);
 
+// Função de validação 
+bool validaEmail(const Usuario *usuario);
+
 #endif

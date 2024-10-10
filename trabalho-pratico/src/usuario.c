@@ -90,9 +90,55 @@ int calcularIdade(const Usuario *usuario) {
 }
 // Função para imprimir as informações de um usuário
 void imprimir_usuario(Usuario *usuario) {
-    int idade= calcularIdade (usuario);
+    int idade = calcularIdade (usuario);
     printf("Username: %s\nEmail: %s\nNome: %s %s\nIdade: %d\nPaís: %s\nSubscrição: %s\n", 
         usuario->username, usuario->email, usuario->first_name, usuario->last_name, 
         idade, usuario->country, usuario->subscription_type);
 }
 
+// Função que valida o email 
+
+bool validaEmail(const Usuario *usuario) {
+    const char *email = usuario->email;
+
+    int arroba_count = 0;
+    int ponto_count = 0;
+    int a = -1;
+    int p = -1;
+    bool antes_arroba = true;
+
+    for (int i = 0; email[i] != '\0'; i++) {
+        if (email[i] == '@') {
+            arroba_count++;
+            antes_arroba = false;  // Muda para após o '@'
+            a = i;  
+        } else if (email[i] == '.') {
+            ponto_count++;
+            p = i; 
+        } else if (antes_arroba) {
+
+            if (!islower(email[i]) && !isdigit(email[i])) {
+                return false;
+            }
+        } else {
+
+            if (!islower(email[i])) {
+                return false;
+            }
+        }
+    }
+
+    // Verificações finais:
+    // 1. O '@' deve existir e não pode ser o primeiro ou último caractere.
+    // 2. O '.' deve existir após o '@' e não pode ser imediatamente após '@'.
+    // 3. O comprimento entre o último '.' e o final da string deve ser 2 ou 3.
+    if (arroba_count != 1 || ponto_count != 1) return false;
+    if (a == 0 || p == a + 1 || p == -1 || (p - a <= 1)) return false;
+    int tamanho_apos_ponto = 0;
+    for (int i = p + 1; email[i] != '\0'; i++) {
+        tamanho_apos_ponto++;
+    }
+    if (tamanho_apos_ponto < 2 || tamanho_apos_ponto > 3) return false;
+
+    return true;
+}
