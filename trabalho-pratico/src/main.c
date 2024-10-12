@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "../include/gestor_sistemas.h"
 #include "../include/usuario.h"
 
@@ -11,7 +12,7 @@ int main() {
     adicionar_usuario(&gestor, &u1);
 
     // Busca o usuário
-    Usuario *usuarioBuscado = buscar_usuario(&gestor, "john_do");
+    Usuario *usuarioBuscado = buscar_usuario(&gestor, "john_doe");
     if (usuarioBuscado) {
         imprimir_usuario(usuarioBuscado);
     } else {

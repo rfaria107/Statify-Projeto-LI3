@@ -1,15 +1,20 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include "../include/usuario.h"
 #include "../include/gestor_sistemas.h"
 
 // Função para adicionar um usuário ao "gestor_sistemas"
 void adicionar_usuario(GestorSistema *gestor, Usuario *usuario) {
-    g_hash_table_insert(gestor->usuarios, g_strdup(usuario->username), usuario);
+    if (validaEmail(usuario)) {  // Valida o email antes de adicionar o usuário
+        g_hash_table_insert(gestor->usuarios, g_strdup(usuario->username), usuario);
+    } else {
+        printf("Email inválido. Usuário não adicionado.\n");
+    }
 }
-
 // Função para buscar um usuário pelo id de usuário
 Usuario* buscar_usuario(GestorSistema *gestor, const char *username) {
-    return (Usuario*) g_hash_table_lookup(gestor->usuarios, username);
+    if (validaEmail){ 
+    return (Usuario*) g_hash_table_lookup(gestor->usuarios, username);}
 }
 
 // Função para remover um usuário
