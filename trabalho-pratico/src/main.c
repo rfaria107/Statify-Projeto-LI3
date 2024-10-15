@@ -24,3 +24,18 @@ int main() {
 
     return 0;
 }
+
+int main() {
+
+    // Exemplo para musica
+
+    Musica m1 = {1,"Song","12","93:03:63","POP",2024,"Lyrics"};
+    if (validaDuracao(&m1)) {
+        printf("Duração Válida.\n");
+
+    } else {
+        printf("Duração inválida.\n");
+    }
+
+    return 0;
+}

@@ -16,4 +16,10 @@ typedef struct {
     char lyrics[MAX_LYRICS_LENGTH];
 } Musica;
 
+// Funções de manipulação de músicas
+Musica* buscar_musicas(GestorSistema *gestor, const char *musicas)
+
+// Função valida
+bool validaDuracao (const Musica *musica);
+
 #endif // MUSICA_H
