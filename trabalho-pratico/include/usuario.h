@@ -33,4 +33,7 @@ int calcularIdade(const Usuario *usuario);
 // Função de validação 
 bool validaEmail(const Usuario *usuario);
 
+// Valida email
+bool valida_subscricao (Usuario *usuario);
+
 #endif

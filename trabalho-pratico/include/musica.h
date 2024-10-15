@@ -10,7 +10,7 @@ typedef struct {
     int id;
     char title[MAX_TITLE_LENGTH];
     char artist_id[MAX_NAME_LENGTH]; // Lista de IDs dos artistas
-    int duration; // em segundos
+    char duration; // em segundos
     char genre[MAX_GENRE_LENGTH];
     int year;
     char lyrics[MAX_LYRICS_LENGTH];

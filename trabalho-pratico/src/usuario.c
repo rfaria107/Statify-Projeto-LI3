@@ -5,11 +5,11 @@
 
 // Função para adicionar um usuário ao "gestor_sistemas"
 void adicionar_usuario(GestorSistema *gestor, Usuario *usuario) {
-    if (validaEmail(usuario)) {  // Valida o email antes de adicionar o usuário
+    if (validaEmail(usuario) && valida_subscricao (usuario)) {  // Valida o email antes de adicionar o usuário
         g_hash_table_insert(gestor->usuarios, g_strdup(usuario->username), usuario);
     } else {
         printf("Email inválido. Usuário não adicionado.\n");
-    }
+    } 
 }
 // Função para buscar um usuário pelo id de usuário
 Usuario* buscar_usuario(GestorSistema *gestor, const char *username) {
@@ -21,6 +21,16 @@ Usuario* buscar_usuario(GestorSistema *gestor, const char *username) {
 void remover_usuario(GestorSistema *gestor, const char *username) {
     g_hash_table_remove(gestor->usuarios, username);
 }
+
+
+// Função para imprimir as informações de um usuário
+void imprimir_usuario(Usuario *usuario) {
+    int idade = calcularIdade (usuario);
+    printf("Username: %s\nEmail: %s\nNome: %s %s\nIdade: %d\nPaís: %s\nSubscrição: %s\n", 
+        usuario->username, usuario->email, usuario->first_name, usuario->last_name, 
+        idade, usuario->country, usuario->subscription_type);
+}
+
 
 // Valida se a data está no formato correto "YYYY/MM/DD"
 int validarFormatoData(const char *data) {
@@ -93,13 +103,7 @@ int calcularIdade(const Usuario *usuario) {
 
     return idade;
 }
-// Função para imprimir as informações de um usuário
-void imprimir_usuario(Usuario *usuario) {
-    int idade = calcularIdade (usuario);
-    printf("Username: %s\nEmail: %s\nNome: %s %s\nIdade: %d\nPaís: %s\nSubscrição: %s\n", 
-        usuario->username, usuario->email, usuario->first_name, usuario->last_name, 
-        idade, usuario->country, usuario->subscription_type);
-}
+
 
 // Função que valida o email 
 
@@ -147,3 +151,12 @@ bool validaEmail(const Usuario *usuario) {
 
     return true;
 }
+
+// Validar a subscrição do usuario
+bool valida_subscricao (Usuario *usuario) {
+    if (!strcmp ("normal", usuario->subscription_type) && !strcmp ("premium", usuario->subscription_type)) return false;
+
+    return true;
+}
+
+
