@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
-#include "../include/entidades/usuario.h"
+#include "../../include/entidades/usuario.h"
 
 // Valida se a data está no formato correto "YYYY/MM/DD"
 gboolean validarFormatoData(const gchar *data) {
@@ -75,13 +75,7 @@ int calcularIdade(const Usuario *usuario) {
     return idade;
 }
 
-// Função para imprimir as informações de um usuário
-void imprimir_usuario(const Usuario *usuario) {
-    int idade = calcularIdade(usuario);
-    printf("Username: %s\nEmail: %s\nNome: %s %s\nIdade: %d\nPaís: %s\nSubscrição: %s\n", 
-        usuario->username, usuario->email, usuario->first_name, usuario->last_name, 
-        idade, usuario->country, usuario->subscription_type);
-}
+
 
 // Função que valida o email
 gboolean validaEmail(const Usuario *usuario) {

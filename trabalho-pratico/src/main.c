@@ -1,73 +1,45 @@
 #include <stdio.h>
 #include <glib.h>
-#include "../include/gestores/gestor_usuarios.h"
 #include "../include/entidades/usuario.h"
+#include "../include/gestores/gestor_usuarios.h"
 
-// Funções fictícias para validar usuário (podes substituir pelas tuas)
-gboolean validaEmail(Usuario *usuario) {
-    return g_str_has_suffix(usuario->email, "@example.com");  // Validação simples para teste
-}
 
-gboolean valida_subscricao(Usuario *usuario) {
-    return g_strcmp0(usuario->subscription_type, "Premium") == 0;  // Exemplo: validar se o tipo de subscrição é 'Premium'
-}
-
-gboolean validarDataUsuario(Usuario *usuario) {
-    return g_strcmp0(usuario->birth_date, "2006/01/01") < 0;  // Exemplo: a data de nascimento deve ser anterior a 2006
-}
 
 int main() {
-    // Inicializa o Gestor de Usuarios
-    GestorUsuarios gestor;
-    inicializar_gestor_usuarios(&gestor);
+    // Criação do Gestor de Usuários
+    GestorUsuarios *gestor = g_new(GestorUsuarios, 1);
+    gestor->usuarios = g_hash_table_new(g_str_hash, g_str_equal);
 
-    // Cria uma lista de músicas curtidas para testar
-    gchar* musicas_alice[] = {"song1", "song2", NULL};  // Lista terminada com NULL
-    gchar* musicas_bob[] = {"song3", NULL};
+    // Criação de um usuário exemplo
+    Usuario *usuario = g_new(Usuario, 1);
+    usuario->username = g_strdup("johndoe");
+    usuario->email = g_strdup("johndoe@example.com");
+    usuario->first_name = g_strdup("John");
+    usuario->last_name = g_strdup("Doe");
+    usuario->birth_date = g_strdup("2000/01/01");
+    usuario->country = g_strdup("USA");
+    usuario->subscription_type = g_strdup("premium");
+    usuario->liked_musics_count = 0;
+    usuario->liked_musics_id = NULL;
 
-    // Cria alguns usuários para testar
-    Usuario usuario1 = {
-        .username = "Alice",
-        .email = "alice@example.com",
-        .first_name = "Alice",
-        .last_name = "Smith",
-        .birth_date = "1998/03/12",
-        .country = "Portugal",
-        .subscription_type = "Premium",
-        .liked_musics_id = musicas_alice,
-        .liked_musics_count = 2
-    };
+    // Adiciona o usuário ao gestor
+    adicionar_usuario(gestor, usuario);
 
-    Usuario usuario2 = {
-        .username = "Bob",
-        .email = "bob@example.com",
-        .first_name = "Bob",
-        .last_name = "Johnson",
-        .birth_date = "1990/07/25",
-        .country = "Portugal",
-        .subscription_type = "Premium",
-        .liked_musics_id = musicas_bob,
-        .liked_musics_count = 1
-    };
+    // Imprime as informações do usuário
+    imprimir_usuario(gestor, usuario->username);
 
-   
-
-    // Adiciona usuários
-    adicionar_usuario(&gestor, &usuario1);
-    adicionar_usuario(&gestor, &usuario2);
- 
-
-    // Testa buscar e imprimir usuários
-    printf("\nBuscando e imprimindo informações de 'Alice':\n");
-    imprimir_usuario(&gestor, "Alice");
-
-    printf("\nBuscando e imprimindo informações de 'Bob':\n");
-    imprimir_usuario(&gestor, "Bob");
-
-    
-
-    // Libera os recursos do Gestor de Usuarios
-    liberar_gestor_usuarios(&gestor);
+    // Libera memória
+    g_free(usuario->username);
+    g_free(usuario->email);
+    g_free(usuario->first_name);
+    g_free(usuario->last_name);
+    g_free(usuario->birth_date);
+    g_free(usuario->country);
+    g_free(usuario->subscription_type);
+    g_free(usuario);
+    g_hash_table_destroy(gestor->usuarios);
+    g_free(gestor);
 
     return 0;
 }
+

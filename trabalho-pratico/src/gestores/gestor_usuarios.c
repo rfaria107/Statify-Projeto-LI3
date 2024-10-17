@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <glib.h>
-#include "../include/gestores/gestor_usuarios.h"
-#include "../include/entidades/usuario.h"
+#include "../../include/gestores/gestor_usuarios.h"
+#include "../../include/entidades/usuario.h"
 
 // Inicializa o Gestor de Usuarios
 void inicializar_gestor_usuarios(GestorUsuarios *gestor) {
