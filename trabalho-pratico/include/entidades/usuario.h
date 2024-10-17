@@ -17,23 +17,19 @@ typedef struct {
     gint liked_musics_count;   // Número de músicas curtidas
 } Usuario;
 
-// Funções de manipulação de usuários
-void adicionar_usuario(GestorUsuarios *gestor, Usuario *usuario);
-Usuario* buscar_usuario(GestorUsuarios *gestor, const gchar *username);
-void remover_usuario(GestorUsuarios *gestor, const gchar *username);
-void imprimir_usuario(const Usuario *usuario);
+
 
 // Funções de validação de datas
-int validarFormatoData(const gchar *data);
-int validarMesEDia(int mes, int dia);
-int validarDataFutura(int ano, int mes, int dia);
-int validarDataUsuario(const Usuario *usuario);
-int calcularIdade(const Usuario *usuario);
+gboolean validarFormatoData(const gchar *data);
+gboolean validarMesEDia(gint mes, gint dia);
+gboolean validarDataFutura(gint ano, gint mes, gint dia);
+gboolean validarDataUsuario(const Usuario *usuario);
+gint calcularIdade(const Usuario *usuario);
 
 // Função de validação 
-bool validaEmail(const Usuario *usuario);
+gboolean validaEmail(const Usuario *usuario);
 
 // Valida subscrição
-bool valida_subscricao(const Usuario *usuario);
+gboolean valida_subscricao(const Usuario *usuario);
 
 #endif

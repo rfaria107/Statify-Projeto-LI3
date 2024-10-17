@@ -12,5 +12,6 @@ void inicializar_gestor_usuarios(GestorUsuarios *gestor);
 void liberar_gestor_usuarios(GestorUsuarios *gestor);
 void adicionar_usuario(GestorUsuarios *gestor, Usuario *usuario);
 Usuario* buscar_usuario(GestorUsuarios *gestor, const gchar *username);
+void imprimir_usuario(GestorUsuarios *gestor, const gchar *username) ;
 
 #endif // GESTOR_USUARIOS_H

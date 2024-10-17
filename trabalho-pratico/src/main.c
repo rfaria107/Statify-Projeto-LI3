@@ -1,74 +1,73 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <glib.h>
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/entidades/usuario.h"
-#include "../include/gestores/gestor_sistemas.h"
 
-// Função para adicionar um usuário ao gestor de usuários
-void adicionar_usuario(GestorUsuarios *gestor) {
-    Usuario *usuario = malloc(sizeof(Usuario)); // Alocando memória para um novo usuário
-    if (usuario == NULL) {
-        printf("Erro ao alocar memória para o usuário.\n");
-        return;
-    }
-
-    // Coletando informações do usuário
-    printf("Digite o nome de usuário: ");
-    scanf("%s", usuario->username);
-    
-    printf("Digite o email: ");
-    scanf("%s", usuario->email);
-    
-    printf("Digite o primeiro nome: ");
-    scanf("%s", usuario->first_name);
-    
-    printf("Digite o último nome: ");
-    scanf("%s", usuario->last_name);
-    
-    printf("Digite o país: ");
-    scanf("%s", usuario->country);
-    
-    printf("Digite o tipo de subscrição (normal/premium): ");
-    scanf("%s", usuario->subscription_type);
-
-    // Adicionando o usuário ao gestor
-    if (validaEmail(usuario) && valida_subscricao(usuario) && validarDataUsuario(usuario)) {
-        g_hash_table_insert(gestor->usuarios, g_strdup(usuario->username), usuario);
-        printf("Usuário '%s' adicionado com sucesso!\n", usuario->username);
-    } else {
-        printf("Usuário não adicionado devido a informações inválidas.\n");
-        free(usuario); // Libera a memória se não for adicionado
-    }
+// Funções fictícias para validar usuário (podes substituir pelas tuas)
+gboolean validaEmail(Usuario *usuario) {
+    return g_str_has_suffix(usuario->email, "@example.com");  // Validação simples para teste
 }
 
-// Função para verificar se um usuário é válido pelo username
-void verificar_usuario_por_id(GestorUsuarios *gestor, const gchar *username) {
-    Usuario *usuario_valido = buscar_usuario(gestor, username);
-    
-    if (usuario_valido != NULL) {
-        printf("Usuário '%s' é válido e foi encontrado!\n", usuario_valido->username);
-    } else {
-        printf("Usuário '%s' não é válido ou não foi encontrado.\n", username);
-    }
+gboolean valida_subscricao(Usuario *usuario) {
+    return g_strcmp0(usuario->subscription_type, "Premium") == 0;  // Exemplo: validar se o tipo de subscrição é 'Premium'
+}
+
+gboolean validarDataUsuario(Usuario *usuario) {
+    return g_strcmp0(usuario->birth_date, "2006/01/01") < 0;  // Exemplo: a data de nascimento deve ser anterior a 2006
 }
 
 int main() {
-    GestorSistema gestor;
-    inicializar_gestor_sistema(&gestor); // Inicializando o gestor de sistemas
+    // Inicializa o Gestor de Usuarios
+    GestorUsuarios gestor;
+    inicializar_gestor_usuarios(&gestor);
 
-    // Adicionar usuário
-    adicionar_usuario(&gestor.gestor_usuarios); // Passando o gestor de usuários
+    // Cria uma lista de músicas curtidas para testar
+    gchar* musicas_alice[] = {"song1", "song2", NULL};  // Lista terminada com NULL
+    gchar* musicas_bob[] = {"song3", NULL};
 
-    // Verificar usuário
-    char username[50];
-    printf("Digite o nome de usuário para verificar: ");
-    scanf("%s", username);
-    verificar_usuario_por_id(&gestor.gestor_usuarios, username); // Verifica no gestor de usuários
+    // Cria alguns usuários para testar
+    Usuario usuario1 = {
+        .username = "Alice",
+        .email = "alice@example.com",
+        .first_name = "Alice",
+        .last_name = "Smith",
+        .birth_date = "1998/03/12",
+        .country = "Portugal",
+        .subscription_type = "Premium",
+        .liked_musics_id = musicas_alice,
+        .liked_musics_count = 2
+    };
 
-    // Liberar recursos
-    liberar_gestor_sistema(&gestor); // Liberando o gestor de sistemas
+    Usuario usuario2 = {
+        .username = "Bob",
+        .email = "bob@example.com",
+        .first_name = "Bob",
+        .last_name = "Johnson",
+        .birth_date = "1990/07/25",
+        .country = "Portugal",
+        .subscription_type = "Premium",
+        .liked_musics_id = musicas_bob,
+        .liked_musics_count = 1
+    };
+
+   
+
+    // Adiciona usuários
+    adicionar_usuario(&gestor, &usuario1);
+    adicionar_usuario(&gestor, &usuario2);
+ 
+
+    // Testa buscar e imprimir usuários
+    printf("\nBuscando e imprimindo informações de 'Alice':\n");
+    imprimir_usuario(&gestor, "Alice");
+
+    printf("\nBuscando e imprimindo informações de 'Bob':\n");
+    imprimir_usuario(&gestor, "Bob");
+
+    
+
+    // Libera os recursos do Gestor de Usuarios
+    liberar_gestor_usuarios(&gestor);
 
     return 0;
 }
