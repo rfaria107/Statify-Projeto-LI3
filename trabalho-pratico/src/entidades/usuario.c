@@ -56,7 +56,7 @@ gboolean validarDataUsuario(const Usuario *usuario) {
 }
 
 // Calcula a idade do usuário com base na data de nascimento
-int calcularIdade(const Usuario *usuario) {
+gint calcularIdade(const Usuario *usuario) {
     if (!validarDataUsuario(usuario)) {
         return -1;  // Data Inválida
     }
@@ -124,3 +124,17 @@ gboolean valida_subscricao(const Usuario *usuario) {
     }
     return TRUE;
 }
+
+// Função que valida se as músicas que têm gosto existem
+gboolean valida_liked_musics_id(const Usuario *usuario, GHashTable *musicas) {
+    
+    for (int i = 0; usuario->liked_musics_id[i] != NULL; i++) {
+        Musica *musica_encontrada = (Musica *)g_hash_table_lookup(musicas, usuario->liked_musics_id[i]);
+
+        if (musica_encontrada == NULL) {
+            return FALSE; 
+        }
+    }
+    return TRUE;
+}
+f
