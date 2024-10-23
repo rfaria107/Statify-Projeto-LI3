@@ -14,7 +14,6 @@ typedef struct {
     gchar* country;            // País (string dinâmica)
     gchar* subscription_type;  // Tipo de assinatura (string dinâmica)
     gchar** liked_musics_id;   // Lista de IDs de músicas curtidas (array dinâmico de strings)
-    gint liked_musics_count;   // Número de músicas curtidas
 } Usuario;
 
 
