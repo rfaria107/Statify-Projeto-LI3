@@ -6,8 +6,8 @@
 
 #include <glib.h>
 
-typedef struct {
-    gint id;                    // Identificador único do artista (inteiro)
+typedef struct artista{
+    gchar* id;                    // Identificador único do artista (inteiro)
     gchar* name;                // Nome do artista (string dinâmica)
     gchar* description;         // Descrição do artista (string dinâmica)
     gdouble recipe_per_stream;  // Receita por stream (valor em double)
@@ -15,7 +15,7 @@ typedef struct {
     gint constituent_count;     // Número de membros (para grupos musicais)
     gchar* country;             // País de origem (string dinâmica)
     gchar* type;                // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
-} Artista;
+} *Artista;
 
 
 #endif // ARTISTA_H
