@@ -26,10 +26,13 @@ gboolean validarDataFutura(gint ano, gint mes, gint dia);
 gboolean validarDataUsuario(const Usuario *usuario);
 gint calcularIdade(const Usuario *usuario);
 
-// Função de validação 
+// Função de validar email
 gboolean validaEmail(const Usuario *usuario);
 
-// Valida subscrição
+// Funçao de validar subscrição
 gboolean valida_subscricao(const Usuario *usuario);
+
+// Função de validar se existem as musicas que os usuarios têm like 
+gboolean valida_liked_musics_id(const Usuario *usuario, GHashTable *musicas);
 
 #endif

@@ -9,11 +9,10 @@
 #define MAX_LYRICS_LENGTH 1000
 
 typedef struct {
-    gint id;                 // ID único da música
+    gint id;                // ID único da música
     gchar* title;           // Título da música (string dinâmica)
     gchar** artist_ids;     // Lista de IDs dos artistas (array dinâmico de strings)
-    gint artist_count;      // Número de artistas na lista
-    gint duration;          // Duração da música em segundos
+    gchar* duration;        // Duração da música em segundos
     gchar* genre;           // Gênero (string dinâmica)
     gint year;              // Ano de lançamento
     gchar* lyrics;          // Letra da música (string dinâmica)
@@ -23,6 +22,13 @@ typedef struct {
 Musica* buscar_musicas(GestorMusicas *gestor, const char *id); // Corrigido para GestorSistema
 
 // Função de validação
-bool validaDuracao(const Musica *musica);
+gboolean tudoNum(const char *str);
+gboolean validaDuracao(const Musica *musica);
+gboolean valida_artist_id(const Musica *musica, GHashTable *artistas);
+
+// Funções para calcular a discografia de cada artista
+gint duracao_para_segundos(const gchar* duracao);
+gchar* segundos_para_duracao(gint total_segundos);
+gchar* calcular_discografia(GHashTable *musicas, const Artista *artista);
 
 #endif // MUSICA_H

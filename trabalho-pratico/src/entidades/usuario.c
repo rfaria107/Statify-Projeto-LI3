@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
-#include "../include/entidades/usuario.h"
+#include "../../include/entidades/usuario.h"
 
 // Valida se a data está no formato correto "YYYY/MM/DD"
 gboolean validarFormatoData(const gchar *data) {
@@ -56,7 +56,7 @@ gboolean validarDataUsuario(const Usuario *usuario) {
 }
 
 // Calcula a idade do usuário com base na data de nascimento
-int calcularIdade(const Usuario *usuario) {
+gint calcularIdade(const Usuario *usuario) {
     if (!validarDataUsuario(usuario)) {
         return -1;  // Data Inválida
     }
@@ -75,13 +75,7 @@ int calcularIdade(const Usuario *usuario) {
     return idade;
 }
 
-// Função para imprimir as informações de um usuário
-void imprimir_usuario(const Usuario *usuario) {
-    int idade = calcularIdade(usuario);
-    printf("Username: %s\nEmail: %s\nNome: %s %s\nIdade: %d\nPaís: %s\nSubscrição: %s\n", 
-        usuario->username, usuario->email, usuario->first_name, usuario->last_name, 
-        idade, usuario->country, usuario->subscription_type);
-}
+
 
 // Função que valida o email
 gboolean validaEmail(const Usuario *usuario) {
@@ -130,3 +124,17 @@ gboolean valida_subscricao(const Usuario *usuario) {
     }
     return TRUE;
 }
+
+// Função que valida se as músicas que têm gosto existem
+gboolean valida_liked_musics_id(const Usuario *usuario, GHashTable *musicas) {
+    
+    for (int i = 0; usuario->liked_musics_id[i] != NULL; i++) {
+        Musica *musica_encontrada = (Musica *)g_hash_table_lookup(musicas, usuario->liked_musics_id[i]);
+
+        if (musica_encontrada == NULL) {
+            return FALSE; 
+        }
+    }
+    return TRUE;
+}
+f
