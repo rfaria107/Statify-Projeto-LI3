@@ -20,7 +20,7 @@ void parser_principal(FILE *file, GestorSistema *gestorsis, char tipo)
 
         if (tipo == 'a') // se o parser estiver a ser usado para processar um artista deve dar malloc a um novo artista e processar a linha atualmente contida no buffer
         {
-            Artista artista = g_malloc(sizeof(*artista));
+            Artista *artista = g_malloc(sizeof(artista));
             parse_csv_line_artista(&(gestorsis->gestor_artistas), buffer, artista);
         }
 
@@ -55,15 +55,15 @@ void parse_csv_line_artista(GestorArtistas *gestorartistas, gchar *linha, Artist
     }
 
     // preencher o artista
-    (*artista)->id = g_strdup(g_ptr_array_index(fields, 0));
-    (*artista)->name = g_strdup(g_ptr_array_index(fields, 1));
-    (*artista)->description = g_strdup(g_ptr_array_index(fields, 2));
-    (*artista)->recipe_per_stream = g_ascii_strtod(g_ptr_array_index(fields, 3), NULL);
+    (artista)->id = g_strdup(g_ptr_array_index(campostemp, 0));
+    (artista)->name = g_strdup(g_ptr_array_index(campostemp, 1));
+    (artista)->description = g_strdup(g_ptr_array_index(campostemp, 2));
+    (artista)->recipe_per_stream = g_ascii_strtod(g_ptr_array_index(campostemp, 3), NULL);
     // falta o constituent count
-    (*artista)->country = g_strdup(g_ptr_array_index(fields, 5));
-    (*artista)->type = g_strdup(g_ptr_array_index(fields, 6));
+    (artista)->country = g_strdup(g_ptr_array_index(campostemp, 5));
+    (artista)->type = g_strdup(g_ptr_array_index(campostemp, 6));
 
-    inserir_artista(gestorartistas, artista);
+    inserir_artista(gestorartistas, *artista);
 
     g_ptr_array_free(campostemp, TRUE);
     g_strfreev(tokens);
