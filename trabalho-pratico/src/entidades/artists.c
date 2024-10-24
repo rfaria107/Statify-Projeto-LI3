@@ -12,7 +12,7 @@ gboolean valida_artista_individual(const Artista *artista) {
     // Verifica se o artista é nulo
     if (artista == NULL) {
         return FALSE;
-    }
+    } 
 
     // Verifica se o tipo do artista é "individual"
     if (g_strcmp0(artista->type, "individual") == 0) {
