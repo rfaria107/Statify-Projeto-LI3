@@ -2,6 +2,7 @@
 #define GESTOR_ARTISTAS_H
 
 #include <glib.h>
+#include "../../include/entidades/artists.h"
 
 typedef struct gestorartistas{
     GHashTable *artistas; // Tabela hash de artistas

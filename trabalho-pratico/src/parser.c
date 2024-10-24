@@ -1,7 +1,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
-#include "parser.h"
+#include "../include/parser.h"
 #include "../include/string_utils.h"
 #include "../include/entidades/artists.h"
 #include "../include/gestores/gestor_sistemas.h"

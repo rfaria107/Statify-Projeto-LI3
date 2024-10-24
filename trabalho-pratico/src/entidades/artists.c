@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "../../include/entidades/artists.h"
-#include "../include/gestores/gestor_artistas.h"
+#include "../../include/gestores/gestor_artistas.h"
 #include "../../include/gestores/gestor_musicas.h"
 #include "../../include/entidades/musica.h"
 

@@ -2,6 +2,7 @@
 #define MUSICA_H
 
 #include <glib.h>
+#include "../../include/gestores/gestor_sistemas.h"
 
 #define MAX_NAME_LENGTH 50
 #define MAX_TITLE_LENGTH 100
@@ -19,7 +20,7 @@ typedef struct {
 } Musica;
 
 // Funções de manipulação de músicas
-Musica* buscar_musicas(GestorMusicas *gestor, const char *id); // Corrigido para GestorSistema
+Musica* buscar_musicas(GestorMusicas *gestor, const gint id); // Corrigido para GestorSistema
 
 // Função de validação
 gboolean tudoNum(const char *str);

@@ -2,6 +2,10 @@
 #include <glib.h>
 #include "../include/entidades/usuario.h"
 #include "../include/gestores/gestor_usuarios.h"
+#include "../include/gestores/gestor_musicas.h"
+#include "../include/gestores/gestor_artistas.h"
+#include "../include/parser.h"
+
 
 
 
@@ -24,9 +28,6 @@ int main(int argc, char *argv[])
     parserprincipal(musicas, 'm');
     fclose(musicas);
 
-    // Cria uma lista de músicas curtidas para testar
-    gchar *musicas_alice[] = {"song1", "song2", NULL}; // Lista terminada com NULL
-    gchar *musicas_bob[] = {"song3", NULL};
 
     // Criação de um usuário exemplo
     Usuario *usuario = g_new(Usuario, 1);
@@ -37,14 +38,13 @@ int main(int argc, char *argv[])
     usuario->birth_date = g_strdup("2000/01/01");
     usuario->country = g_strdup("USA");
     usuario->subscription_type = g_strdup("premium");
-    usuario->liked_musics_count = 0;
     usuario->liked_musics_id = NULL;
 
     // Adiciona o usuário ao gestor
-    adicionar_usuario(gestor, usuario);
-
+    adicionar_usuario(&gestor, usuario);
+    
     // Imprime as informações do usuário
-    imprimir_usuario(gestor, usuario->username);
+    imprimir_usuario(&gestor, usuario->username);
 
     // Libera memória
     g_free(usuario->username);
@@ -55,8 +55,7 @@ int main(int argc, char *argv[])
     g_free(usuario->country);
     g_free(usuario->subscription_type);
     g_free(usuario);
-    g_hash_table_destroy(gestor->usuarios);
-    g_free(gestor);
+    g_hash_table_destroy(gestor.usuarios);
 
     return 0;
 }

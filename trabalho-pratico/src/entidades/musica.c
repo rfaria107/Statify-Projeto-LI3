@@ -3,11 +3,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include "../include/entidades/musica.h"
-#include "../include/gestores/gestor_musicas.h"
-#include "../include/gestores/gestor_usuarios.h"
-#include "../include/entidades/usuario.h"
-#include "../include/entidades/artists.h"
+#include "../../include/entidades/musica.h"
+#include "../../include/gestores/gestor_musicas.h"
+#include "../../include/gestores/gestor_usuarios.h"
+#include "../../include/entidades/usuario.h"
+#include "../../include/entidades/artists.h"
 
 // Função para buscar uma música pelo ID único de música
 Musica* buscar_musicas(GestorMusicas *gestor, const gint id) {
@@ -94,9 +94,6 @@ gchar* calcular_discografia(GHashTable *musicas, const Artista *artista) {
     return segundos_para_duracao(duracao_total_segundos);
 }
 
-int num_musicas_curtidas (Usuario *usuario) {
-
-}
 void genero_mais_curtido(int idade_min, int idade_max, GHashTable *gestor_usuarios, GestorMusicas *gestor_musicas) {
     GHashTableIter iter;
     gpointer key, value;
@@ -106,18 +103,22 @@ void genero_mais_curtido(int idade_min, int idade_max, GHashTable *gestor_usuari
     g_hash_table_iter_init(&iter, gestor_usuarios);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         Usuario *usuario = (Usuario *)value;
-        int idade = calcular_idade(usuario->birth_date); 
+        int idade = calcularIdade(usuario); 
         
         // Verifica se o usuário está dentro da faixa etária
         if (idade >= idade_min && idade <= idade_max) {
-            for (int i = 0; i < usuario->liked_musics_id; i++) {
-                int music_id = usuario->liked_musics_id[i];
-                Musica *musica = buscar_musicas(gestor_musicas, music_id); // Obter música pelo ID
+            // Itera pelas músicas curtidas pelo usuário
+            for (int i = 0; usuario->liked_musics_id[i] != NULL; i++) {
+                // Converte o ID da música de string para inteiro, se necessário
+                int music_id = atoi(usuario->liked_musics_id[i]);
+                
+                // Busca a música pelo ID
+                Musica *musica = buscar_musicas(gestor_musicas, music_id); 
                 
                 if (musica != NULL) {
-                    const char *genero = musica->genre; // Obtém o género da música
+                    const char *genero = musica->genre; // Obtém o gênero da música
                     
-                    // Atualiza a contagem de cada género
+                    // Atualiza a contagem de cada gênero
                     gpointer count_ptr = g_hash_table_lookup(genero_contagem, genero);
                     int count = (count_ptr != NULL) ? GPOINTER_TO_INT(count_ptr) : 0;
                     g_hash_table_insert(genero_contagem, g_strdup(genero), GINT_TO_POINTER(count + 1));
@@ -126,7 +127,7 @@ void genero_mais_curtido(int idade_min, int idade_max, GHashTable *gestor_usuari
         }
     }
     
-    // Determina o género mais popular
+    // Determina o gênero mais popular
     GHashTableIter contagem_iter;
     gpointer genero, contagem;
     const char *genero_mais_popular = NULL;
@@ -143,12 +144,12 @@ void genero_mais_curtido(int idade_min, int idade_max, GHashTable *gestor_usuari
     
     // Imprime o resultado
     if (genero_mais_popular != NULL) {
-        printf("O género mais popular é: %s\n", genero_mais_popular);
+        printf("O gênero mais popular é: %s\n", genero_mais_popular);
     } else {
-        printf("Nenhum género foi encontrado.\n");
+        printf("Nenhum gênero foi encontrado.\n");
     }
     
-    // Liberta a memória da hashtable temporaria criada para recolher os generos
+    // Liberta a memória da hashtable temporaria criada para recolher os gêneros
     g_hash_table_destroy(genero_contagem);
 }
 
