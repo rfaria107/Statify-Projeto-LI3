@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/gestores/gestor_sistemas.h" // Inclua seu cabeçalho do GestorSistemas
+#include "../include/gestores/gestor_sistemas.h"
 
 
 int main() {
-    GestorSistemas *gestor = inicializar_gestor_sistemas(); // Inicializa o gestor
+    GestorSistema *gestor = inicializar_gestor_sistemas(); // Inicializa o gestor
     FILE *input_file = fopen("input_exemplo.txt", "r");
     char command[100]; // Ajuste o tamanho conforme necessário
 

@@ -1,7 +1,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
-#include "../include/string_utils.h"
+#include "../include/parsing/string_utils.h"
 
 void trim_quotes(GString *string) {
     // função para retirar as aspas no início e fim de uma string

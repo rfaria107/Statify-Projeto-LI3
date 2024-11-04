@@ -2,7 +2,7 @@
 #define GESTOR_USUARIOS_H
 
 #include <glib.h>
-#include "../entidades/usuario.h"
+#include "../../include/entidades/usuario.h"
 
 typedef struct {
     GHashTable *usuarios; // Tabela hash para armazenar usuários

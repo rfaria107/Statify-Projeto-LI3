@@ -2,7 +2,7 @@
 #define USUARIO_H
 
 #include <glib.h>
-#include "../include/gestores/gestor_usuarios.h"
+#include "../include/parsing/rowreader.h"
 
 typedef struct {
     char* username;

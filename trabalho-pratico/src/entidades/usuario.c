@@ -3,8 +3,8 @@
 #include <glib.h>
 #include "../../include/entidades/usuario.h"
 #include "../../include/entidades/musica.h"
-#include "../include/parsing/rowreader.h"
-
+#include "../../include/parsing/rowreader.h"
+ 
 
 Usuario* create_usuario(char* username, char* email, char* first_name, 
                         char* last_name, char* birth_date, 
