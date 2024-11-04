@@ -1,6 +1,6 @@
 # Variáveis
 CC := gcc
-CFLAGS = -Wall -g `pkg-config --cflags glib-2.0`
+CFLAGS = -Wall -g `pkg-config --cflags glib-2.0` -I$(INC_DIR)
 SRC_DIR = src
 INC_DIR = include
 
@@ -53,8 +53,7 @@ $(SRC_DIR)/gestores/gestor_sistemas.o: $(SRC_DIR)/gestores/gestor_sistemas.c
 $(SRC_DIR)/parser.o: $(SRC_DIR)/parser.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/string_utils.o: $(SRC_DIR)/string_utils.c  # Certifique-se de que este arquivo exista
-	$(CC) $(CFLAGS) -c $< -o $@
+$(SRC_DIR)/string_utils.o: $(SRC_DIR)/string_utils.c  # Certifique-se de que 
 
 # Limpar arquivos gerados
 clean:

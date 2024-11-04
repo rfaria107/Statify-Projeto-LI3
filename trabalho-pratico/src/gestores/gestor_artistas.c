@@ -17,3 +17,4 @@ void inserir_artista(GestorArtistas *gestor, Artista artista)
     g_hash_table_insert(gestor->artistas, g_strdup(artista.id), &artista); 
 }
 
+

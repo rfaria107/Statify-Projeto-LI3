@@ -1,62 +1,31 @@
 #include <stdio.h>
-#include <glib.h>
-#include "../include/entidades/usuario.h"
-#include "../include/gestores/gestor_usuarios.h"
-#include "../include/gestores/gestor_musicas.h"
-#include "../include/gestores/gestor_artistas.h"
-#include "../include/parser.h"
+#include <stdlib.h>
+#include <string.h>
+#include "../include/gestores/gestor_sistemas.h" // Inclua seu cabeçalho do GestorSistemas
 
 
+int main() {
+    GestorSistemas *gestor = inicializar_gestor_sistemas(); // Inicializa o gestor
+    FILE *input_file = fopen("input_exemplo.txt", "r");
+    char command[100]; // Ajuste o tamanho conforme necessário
 
+    while (fgets(command, sizeof(command), input_file)) {
+        char *token = strtok(command, " ");
+        if (strcmp(token, "1") == 0) {
+            char *user_id = strtok(NULL, " ");
+            query_user_summary(gestor, user_id);
+        } else if (strcmp(token, "2") == 0) {
+            int N = atoi(strtok(NULL, " "));
+            char *country = strtok(NULL, " ");
+            query_top_artists(gestor, N, country);
+        } else if (strcmp(token, "3") == 0) {
+            int min_age = atoi(strtok(NULL, " "));
+            int max_age = atoi(strtok(NULL, " "));
+            query_popular_genres(gestor, min_age, max_age);
+        }
+    }
 
-int main(int argc, char *argv[])
-{
-    // Inicializa o Gestor de Usuarios
-    GestorUsuarios gestor;
-    inicializar_gestor_usuarios(&gestor);
-
-    FILE *artistas = fopen(strcat(argv[2], "/com_erros/artists"), "r");
-    // dar parse aos artistas
-    parserprincipal(artistas, 'a');
-    fclose(artistas);
-    FILE *users = fopen(strcat(argv[2], "/com_erros/users"), "r");
-    // dar parse aos users
-    parserprincipal(users, 'u');
-    fclose(users);
-    FILE *musicas = fopen(strcat(argv[2], "/com_erros/musics"), "r");
-    // dar parse às musicas
-    parserprincipal(musicas, 'm');
-    fclose(musicas);
-
-
-    // Criação de um usuário exemplo
-    Usuario *usuario = g_new(Usuario, 1);
-    usuario->username = g_strdup("johndoe");
-    usuario->email = g_strdup("johndoe@example.com");
-    usuario->first_name = g_strdup("John");
-    usuario->last_name = g_strdup("Doe");
-    usuario->birth_date = g_strdup("2000/01/01");
-    usuario->country = g_strdup("USA");
-    usuario->subscription_type = g_strdup("premium");
-    usuario->liked_musics_id = NULL;
-
-    // Adiciona o usuário ao gestor
-    adicionar_usuario(&gestor, usuario);
-    
-    // Imprime as informações do usuário
-    imprimir_usuario(&gestor, usuario->username);
-
-    // Libera memória
-    g_free(usuario->username);
-    g_free(usuario->email);
-    g_free(usuario->first_name);
-    g_free(usuario->last_name);
-    g_free(usuario->birth_date);
-    g_free(usuario->country);
-    g_free(usuario->subscription_type);
-    g_free(usuario);
-    g_hash_table_destroy(gestor.usuarios);
-
+    fclose(input_file);
+    free_gestor_sistemas(gestor); // Libera a memória do gestor
     return 0;
 }
-

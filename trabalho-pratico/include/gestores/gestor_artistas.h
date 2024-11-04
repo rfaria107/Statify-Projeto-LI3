@@ -12,4 +12,6 @@ typedef struct gestorartistas{
 void inicializar_gestor_artistas(GestorArtistas *gestor);
 void liberar_gestor_artistas(GestorArtistas *gestor);
 void inserir_artista(GestorArtistas *gestor, Artista artista);
+void preencher_artista(Artista *artista, GPtrArray *campostemp);
+
 #endif
