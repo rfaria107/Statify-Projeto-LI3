@@ -2,8 +2,7 @@
 #include <glib.h>
 #include "../include/entidades/usuario.h"
 #include "../include/gestores/gestor_usuarios.h"
-
-
+#include "../include/parser.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,17 +10,17 @@ int main(int argc, char *argv[])
     GestorUsuarios gestor;
     inicializar_gestor_usuarios(&gestor);
 
-    FILE *artistas = fopen(strcat(argv[2], "/com_erros/artists"), "r");
+    FILE *artistas = fopen(strcat(argv[2], "/com_erros/artists.csv"), "r");
     // dar parse aos artistas
-    parserprincipal(artistas, 'a');
+    parser_principal(artistas, gestorsis ,'a');
     fclose(artistas);
-    FILE *users = fopen(strcat(argv[2], "/com_erros/users"), "r");
+    FILE *users = fopen(strcat(argv[2], "/com_erros/users.csv"), "r");
     // dar parse aos users
-    parserprincipal(users, 'u');
+    parser_principal(users, 'u');
     fclose(users);
-    FILE *musicas = fopen(strcat(argv[2], "/com_erros/musics"), "r");
+    FILE *musicas = fopen(strcat(argv[2], "/com_erros/musics.csv"), "r");
     // dar parse às musicas
-    parserprincipal(musicas, 'm');
+    parser_principal(musicas, 'm');
     fclose(musicas);
 
     // Cria uma lista de músicas curtidas para testar
@@ -60,4 +59,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
