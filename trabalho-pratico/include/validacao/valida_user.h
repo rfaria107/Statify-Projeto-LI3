@@ -7,7 +7,6 @@
 
 #include "../../include/entidades/usuario.h"
 
-
 // Funções de validação de datas
 gboolean validarFormatoData(const gchar *data);
 gboolean validarMesEDia(gint mes, gint dia);

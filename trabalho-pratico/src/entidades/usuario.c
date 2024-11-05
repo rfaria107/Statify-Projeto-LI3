@@ -4,7 +4,19 @@
 #include "../../include/entidades/usuario.h"
 #include "../../include/entidades/musica.h"
 #include "../../include/parsing/rowreader.h"
- 
+#include "../../include/gestores/gestor_usuarios.h"
+
+typedef struct Usuario {
+    char* username;
+    char* email;
+    char* first_name;
+    char* last_name;
+    char* birth_date;
+    char* country;
+    char* subscription_type;
+    char** liked_musics_id; // Array de IDs de músicas curtidas
+}Usuario;
+
 
 Usuario* create_usuario(char* username, char* email, char* first_name, 
                         char* last_name, char* birth_date, 

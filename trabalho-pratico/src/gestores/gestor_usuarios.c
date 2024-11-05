@@ -1,6 +1,23 @@
 #include <stdio.h>
 #include <glib.h>
 #include "../../include/gestores/gestor_usuarios.h"
+#include "../../include/entidades/usuario.h"
+#include "../../include/validacao/valida_user.h"
+
+typedef struct Usuario {
+    char* username;
+    char* email;
+    char* first_name;
+    char* last_name;
+    char* birth_date;
+    char* country;
+    char* subscription_type;
+    char** liked_musics_id; // Array de IDs de músicas curtidas
+}Usuario;
+
+typedef struct GestorUsuarios {
+    GHashTable *usuarios; // Tabela hash para armazenar usuários
+} GestorUsuarios;
 
 // Inicializa o Gestor de Usuarios
 void inicializar_gestor_usuarios(GestorUsuarios *gestor)
@@ -17,17 +34,8 @@ void liberar_gestor_usuarios(GestorUsuarios *gestor)
 // Adiciona um usuário ao Gestor de Usuarios se for válido
 void adicionar_usuario(GestorUsuarios *gestor, Usuario *usuario)
 {
-    if (validaEmail(usuario) && valida_subscricao(usuario) && validarDataUsuario(usuario))
-    {
-        g_hash_table_insert(gestor->usuarios, g_strdup(usuario->username), usuario);
-        printf("Usuário '%s' adicionado com sucesso!\n", usuario->username);
-    }
-    else
-    {
-        printf("Usuário não adicionado devido a informações inválidas.\n");
-    }
+        g_hash_table_insert(gestor->usuarios, g_strdup_inline  (usuario->username), usuario);
 }
-
 
 // Busca um usuário no Gestor de Usuarios
 Usuario* buscar_usuario (GestorUsuarios *gestor, Usuario *usuario) {

@@ -4,14 +4,12 @@
 #include <glib.h>
 #include "../entidades/usuario.h"
 
-typedef struct {
-    GHashTable *usuarios; // Tabela hash para armazenar usuários
-} GestorUsuarios;
+typedef struct GestorUsuarios GestorUsuarios;
+typedef struct Usuario Usuario;
 
 void inicializar_gestor_usuarios(GestorUsuarios *gestor);
 void liberar_gestor_usuarios(GestorUsuarios *gestor);
 void adicionar_usuario(GestorUsuarios *gestor, Usuario *usuario);
-Usuario* buscar_usuario(GestorUsuarios *gestor, const gchar *username);
-void imprimir_usuario(GestorUsuarios *gestor, const gchar *username) ;
+Usuario* buscar_usuario(GestorUsuarios *gestor, Usuario *usuario);
 
 #endif // GESTOR_USUARIOS_H
