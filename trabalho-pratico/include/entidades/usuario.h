@@ -2,36 +2,35 @@
 #define USUARIO_H
 
 #include <glib.h>
-#include <ctype.h>  
-#include <string.h> 
+#include "../include/parsing/rowreader.h"
 
 typedef struct {
-    gchar* username;           // Nome de usuário (string dinâmica)
-    gchar* email;              // Email (string dinâmica)
-    gchar* first_name;         // Primeiro nome (string dinâmica)
-    gchar* last_name;          // Sobrenome (string dinâmica)
-    gchar* birth_date;         // Data de nascimento (string dinâmica no formato YYYY/MM/DD)
-    gchar* country;            // País (string dinâmica)
-    gchar* subscription_type;  // Tipo de assinatura (string dinâmica)
-    gchar** liked_musics_id;   // Lista de IDs de músicas curtidas (array dinâmico de strings)
+    char* username;
+    char* email;
+    char* first_name;
+    char* last_name;
+    char* birth_date;
+    char* country;
+    char* subscription_type;
+    char** liked_musics_id; // Array de IDs de músicas curtidas
 } Usuario;
 
+// Funções para manipulação de usuários
+Usuario* inicializar_usuario();
+Usuario* create_usuario(char* username, char* email, char* first_name, 
+                        char* last_name, char* birth_date, 
+                        char* country, char* subscription_type, 
+                        char** liked_musics_id);
+void free_usuario(Usuario* usuario);
+int parse_usuario_and_add_him(RowReader* reader, GestorUsuarios* gestorUser);
 
+// Funções de acesso aos atributos do usuário
+char* user_get_id(Usuario* user);
+char* user_get_email(Usuario* user);
+char* user_get_first_name(Usuario* user);
+char* user_get_last_name(Usuario* user);
+char* user_get_country(Usuario* user);
+char* user_get_subscription_type(Usuario* user);
+char** user_get_liked_musics_id(Usuario* user);
 
-// Funções de validação de datas
-gboolean validarFormatoData(const gchar *data);
-gboolean validarMesEDia(gint mes, gint dia);
-gboolean validarDataFutura(gint ano, gint mes, gint dia);
-gboolean validarDataUsuario(const Usuario *usuario);
-gint calcularIdade(const Usuario *usuario);
-
-// Função de validar email
-gboolean validaEmail(const Usuario *usuario);
-
-// Funçao de validar subscrição
-gboolean valida_subscricao(const Usuario *usuario);
-
-// Função de validar se existem as musicas que os usuarios têm like 
-gboolean valida_liked_musics_id(const Usuario *usuario, GHashTable *musicas);
-
-#endif
+#endif // USUARIO_H

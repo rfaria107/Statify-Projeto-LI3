@@ -1,9 +1,9 @@
 #ifndef GESTOR_SISTEMA_H
 #define GESTOR_SISTEMA_H
 
-#include "gestor_usuarios.h"
-#include "gestor_artistas.h"
-#include "gestor_musicas.h"
+#include "../include/gestores/gestor_musicas.h"
+#include "../include/gestores/gestor_usuarios.h"
+#include "../include/gestores/gestor_artistas.h"
 
 typedef struct {
     GestorUsuarios gestor_usuarios; // Gestor de usuários

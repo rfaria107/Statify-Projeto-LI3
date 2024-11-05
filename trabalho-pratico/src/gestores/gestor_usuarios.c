@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <glib.h>
 #include "../../include/gestores/gestor_usuarios.h"
-#include "../../include/entidades/usuario.h"
 
 // Inicializa o Gestor de Usuarios
 void inicializar_gestor_usuarios(GestorUsuarios *gestor)
@@ -29,28 +28,14 @@ void adicionar_usuario(GestorUsuarios *gestor, Usuario *usuario)
     }
 }
 
+
 // Busca um usuário no Gestor de Usuarios
-Usuario *buscar_usuario(GestorUsuarios *gestor, const gchar *username)
-{
-    return (Usuario *)g_hash_table_lookup(gestor->usuarios, username);
+Usuario* buscar_usuario (GestorUsuarios *gestor, Usuario *usuario) {
+    gchar *id_usuario = user_get_id(usuario); // Obtenha o ID através de user_get_id()
+    Usuario *resultado = (Usuario*) g_hash_table_lookup(gestor->usuarios, id_usuario);
+    g_free(id_usuario); // Libere a cópia do ID gerada por user_get_id()
+    return resultado;
 }
 
-// Imprime informações do usuário, se existir
-void imprimir_usuario(GestorUsuarios *gestor, const gchar *username)
-{
-    Usuario *usuario = buscar_usuario(gestor, username);
-    int idade = calcularIdade(usuario);
 
-    if (usuario != NULL)
-    {
-        printf("Email: %s\n", usuario->email);
-        printf("First: %s\n", usuario->first_name);
-        printf("Last: %s\n", usuario->last_name);
-        printf("Idade: %d\n", idade);
-        printf("País: %s\n", usuario->country);
-    }
-    else
-    {
-        printf("Usuário '%s' não encontrado.\n", username);
-    }
-}
+

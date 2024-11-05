@@ -19,6 +19,17 @@ typedef struct {
     gchar* lyrics;          // Letra da música (string dinâmica)
 } Musica;
 
-char **parse_liked_musics (RowReader* reader);
+// Funções de manipulação de músicas
+Musica* buscar_musicas(GestorMusicas *gestor, const gint id); // Corrigido para GestorSistema
+
+// Função de validação
+gboolean tudoNum(const char *str);
+gboolean validaDuracao(const Musica *musica);
+gboolean valida_artist_id(const Musica *musica, GHashTable *artistas);
+
+// Funções para calcular a discografia de cada artista
+gint duracao_para_segundos(const gchar* duracao);
+gchar* segundos_para_duracao(gint total_segundos);
+gchar* calcular_discografia(GHashTable *musicas, const Artista *artista);
 
 #endif // MUSICA_H
