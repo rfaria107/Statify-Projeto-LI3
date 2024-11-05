@@ -13,15 +13,15 @@ int main(int argc, char *argv[])
 
     FILE *artistas = fopen(strcat(argv[2], "/com_erros/artists"), "r");
     // dar parse aos artistas
-    parserprincipal(artistas, 'a');
+    parser_principal(artistas, 'a');
     fclose(artistas);
     FILE *users = fopen(strcat(argv[2], "/com_erros/users"), "r");
     // dar parse aos users
-    parserprincipal(users, 'u');
+    parser_principal(users, 'u');
     fclose(users);
     FILE *musicas = fopen(strcat(argv[2], "/com_erros/musics"), "r");
     // dar parse às musicas
-    parserprincipal(musicas, 'm');
+    parser_principal(musicas, 'm');
     fclose(musicas);
 
     // Cria uma lista de músicas curtidas para testar

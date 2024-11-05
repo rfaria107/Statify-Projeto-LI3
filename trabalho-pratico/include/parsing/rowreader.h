@@ -7,12 +7,7 @@
 
 #define DELIMITER ';' // Delimitador para o CSV
 
-typedef struct rowReader {
-
-  char *row;
-  char delimiter;
-
-} RowReader;
+typedef struct rowReader RowReader;
 
 // Função para inicializar o RowReader
 RowReader *initialize_row_reader(char *line, char delimiter);

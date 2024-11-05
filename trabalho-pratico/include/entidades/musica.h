@@ -13,6 +13,6 @@ typedef struct Musica Musica;
 
 char **parse_liked_musics (RowReader* reader);
 Musica* inicializar_musica();
-
+int parse_musica_and_add_him(RowReader *reader, GestorMusicas *gestorMusic);
 
 #endif // MUSICA_H

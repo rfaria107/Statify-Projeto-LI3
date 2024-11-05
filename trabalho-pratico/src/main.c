@@ -2,10 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../include/gestores/gestor_sistemas.h"
+#include "../include/parsing/parser.h"
 
+int main(int argc, char* argv[]) {
+    GestorSistema *gestor = inicializar_gestor_sistema(gestor); // Inicializa o gestor
 
-int main() {
-    GestorSistema *gestor = inicializar_gestor_sistemas(); // Inicializa o gestor
+    FILE *artistas = fopen(strcat(argv[2], "/com_erros/artists.csv"), "r");
+    // dar parse aos artistas
+    parser_principal(artistas, gestor, 'a');
+    fclose(artistas);
+    FILE *users = fopen(strcat(argv[2], "/com_erros/users.csv"), "r");
+    // dar parse aos users
+    parser_principal(users, gestor, 'u');
+    fclose(users);
+    FILE *musicas = fopen(strcat(argv[2], "/com_erros/musics.csv"), "r");
+    // dar parse às musicas
+    parser_principal(musicas, gestor, 'm');
+    fclose(musicas);
+
     FILE *input_file = fopen("input_exemplo.txt", "r");
     char command[100]; // Ajuste o tamanho conforme necessário
 

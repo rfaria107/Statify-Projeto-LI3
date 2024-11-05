@@ -8,38 +8,44 @@
 #include "../../include/gestores/gestor_musicas.h"
 #include "../../include/entidades/musica.h"
 
-typedef struct Artista{
-    gchar* id;                  // Identificador único do artista (inteiro)
-    gchar* name;                // Nome do artista (string dinâmica)
-    gchar* description;         // Descrição do artista (string dinâmica)
-    gdouble recipe_per_stream;  // Receita por stream (valor em double)
-    gchar** id_constituent;     // Lista de IDs de membros (para grupos musicais), array dinâmico de strings
-    gchar* country;             // País de origem (string dinâmica)
-    gchar* type;                // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
-}Artista;
+typedef struct Artista
+{
+    gchar *id;                 // Identificador único do artista (inteiro)
+    gchar *name;               // Nome do artista (string dinâmica)
+    gchar *description;        // Descrição do artista (string dinâmica)
+    gdouble recipe_per_stream; // Receita por stream (valor em double)
+    gchar **id_constituent;    // Lista de IDs de membros (para grupos musicais), array dinâmico de strings
+    gchar *country;            // País de origem (string dinâmica)
+    gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
+} Artista;
 
-gboolean valida_artista_individual(const Artista *artista) {
+gboolean valida_artista_individual(const Artista *artista)
+{
     // Verifica se o artista é nulo
-    if (artista == NULL) {
+    if (artista == NULL)
+    {
         return FALSE;
-    } 
+    }
 
     // Verifica se o tipo do artista é "individual"
-    if (g_strcmp0(artista->type, "individual") == 0) {
+    if (g_strcmp0(artista->type, "individual") == 0)
+    {
         // Verifica se o id_constituent é nulo, já que um artista individual não deve ter constituintes
-        if (artista->id_constituent != NULL) {
-            return FALSE;  // Artista individual não pode ter constituinte
+        if (artista->id_constituent != NULL)
+        {
+            return FALSE; // Artista individual não pode ter constituinte
         }
     }
 
     // Valida se campos obrigatórios estão preenchidos
-    if (artista->id == NULL || artista->name == NULL || 
-        artista->recipe_per_stream <= 0 || artista->country == NULL || 
-        artista->type == NULL) {
-        return FALSE;  // Algum campo obrigatório está faltando
+    if (artista->id == NULL || artista->name == NULL ||
+        artista->recipe_per_stream <= 0 || artista->country == NULL ||
+        artista->type == NULL)
+    {
+        return FALSE; // Algum campo obrigatório está faltando
     }
 
-    return TRUE;  // Artista individual válido
+    return TRUE; // Artista individual válido
 }
 
 void free_artista(Artista *artista)

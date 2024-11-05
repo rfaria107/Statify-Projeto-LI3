@@ -6,7 +6,7 @@
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/gestores/gestor_usuarios.h"
-#include "parser.h"
+#include "..include/parsing/parser.h"
 
 void parser_principal(FILE *file, GestorSistema *gestorsis, char tipo)
 {
@@ -67,7 +67,7 @@ void parse_csv_line_artista(GestorArtistas *gestorartistas, gchar *linha, Artist
     artista->country = g_strdup(g_ptr_array_index(campostemp, 5));
     artista->type = g_strdup(g_ptr_array_index(campostemp, 6));
 
-    if (valida_artista_individual(artista))
+    if (valida_artista(artista))
         inserir_artista(gestorartistas, artista);
     else
     {
@@ -133,7 +133,7 @@ void parse_csv_line_users(GestorUsuarios *gestorusuarios, gchar *linha, Usuario 
     g_ptr_array_free(campostemp, TRUE);
     g_strfreev(tokens);
 }
-
+//musicas
 void parse_csv_line_artista(GestorArtistas *gestorartistas, gchar *linha, Artista artista)
 {                                                                   // função para preencher o struct de um artista a partir de uma linha de texto
     gint numcampos = 7;                                             // campos a preencher
