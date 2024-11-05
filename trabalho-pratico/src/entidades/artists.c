@@ -42,7 +42,7 @@ gboolean valida_artista_individual(const Artista *artista) {
     return TRUE;  // Artista individual válido
 }
 
-void free_artista(Artista artista)
+void free_artista(Artista *artista)
 {
     if (!artista)
         return;
