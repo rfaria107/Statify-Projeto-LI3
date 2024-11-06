@@ -3,16 +3,16 @@
 
 #include <glib.h>
 #include "../../include/gestores/gestor_sistemas.h"
-
-#define MAX_NAME_LENGTH 50
-#define MAX_TITLE_LENGTH 100
-#define MAX_GENRE_LENGTH 30
-#define MAX_LYRICS_LENGTH 1000
+#include "../../include/parsing/rowreader.h"
+#include "../../include/gestores/gestor_musicas.h"
 
 typedef struct Musica Musica;
+typedef struct GestorMusicas GestorMusicas;
 
-char **parse_liked_musics (RowReader* reader);
-Musica* inicializar_musica();
+Musica *create_musica(int id, char *title, char **artist_ids, char *duration, char *genre, int year, char *lyrics);
+char **parse_liked_musics(RowReader *reader);
+Musica *inicializar_musica();
 int parse_musica_and_add_him(RowReader *reader, GestorMusicas *gestorMusic);
+Musica* buscar_musicas(GestorMusicas *gestor, const gint id);
 
 #endif // MUSICA_H

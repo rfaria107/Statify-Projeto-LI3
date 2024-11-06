@@ -6,7 +6,7 @@
 #include "../../include/parsing/rowreader.h"
 #include "../../include/gestores/gestor_usuarios.h"
 
-typedef struct Usuario
+struct Usuario
 {
     char *username;
     char *email;
@@ -16,7 +16,7 @@ typedef struct Usuario
     char *country;
     char *subscription_type;
     char **liked_musics_id; // Array de IDs de músicas curtidas
-} Usuario;
+};
 
 Usuario *create_usuario(char *username, char *email, char *first_name,
                         char *last_name, char *birth_date,
@@ -60,7 +60,7 @@ Usuario *create_usuario(char *username, char *email, char *first_name,
 
 Usuario *inicializar_usuario()
 {
-    Usuario *usuario = (Usuario *)malloc(sizeof(Usuario)); // Aloca memória para o usuário
+    Usuario *usuario = malloc(sizeof(Usuario)); // Aloca memória para o usuário
     if (!usuario)
     {
         return NULL; // Retorna NULL se a alocação falhar
@@ -78,6 +78,7 @@ Usuario *inicializar_usuario()
 
     return usuario; // Retorna o ponteiro para o usuário inicializado
 }
+
 void free_usuario(Usuario *usuario)
 {
     if (usuario)

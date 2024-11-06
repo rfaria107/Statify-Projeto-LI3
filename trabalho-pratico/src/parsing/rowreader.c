@@ -1,7 +1,8 @@
 #include "../include/parsing/rowreader.h"
 #include "../include/parsing/string_utils.h"
 
-typedef struct rowReader {
+typedef struct rowReader
+{
 
   char *row;
   char delimiter;

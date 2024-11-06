@@ -9,7 +9,7 @@
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/parsing/rowreader.h"
 
-void parser_principal(FILE *file, char tipo)
+void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 {
     char buffer[BUFSIZ];
     gboolean first_line = TRUE;
@@ -26,19 +26,20 @@ void parser_principal(FILE *file, char tipo)
 
         if (tipo == 'a') // se o parser estiver a ser usado para processar um artista deve dar malloc a um novo artista e processar a linha atualmente contida no buffer
         {
-            Artista *artista = g_malloc(sizeof(Artista));
+            Artista *artista = inicializar_artista();//pode nao ser o sizeof correto
             parse_csv_line_artista(reader, artista);
+            //inserir_artista(gestor->gestor_artistas,artista);
         }
 
         if (tipo == 'u') // mesma coisa mas para um user
         {
-            Usuario *usuario = g_malloc(sizeof(Usuario));
+            Usuario *usuario = inicializar_usuario();
             parse_csv_line_usuario(reader, usuario);
         }
 
         if (tipo == 'm') // mesma coisa para uma musica
         {
-            Musica *musica = g_malloc(sizeof(Musica));
+            Musica *musica = inicializar_musica();
             parse_csv_line_musica(reader, musica);
         }
     }
@@ -108,7 +109,7 @@ int parse_csv_line_artista(RowReader *reader, Artista *artista)
     preencher_artista(artista, campostemp);
 
     // Insere o artista no gestor de artistas
-    inserir_artista(gestorartistas, *artista);
+    //inserir_artista(gestorartistas, artista);
 
     // Libera memória usada
     g_ptr_array_free(campostemp, TRUE);
@@ -143,7 +144,7 @@ int parse_csv_line_musica(RowReader *reader, Musica *musica)
         return 0;
     }
 
-    *musica = preenche_musica(campostemp);
+    musica = preenche_musica(campostemp);
 
     g_ptr_array_free(campostemp, TRUE);
     

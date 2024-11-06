@@ -1,11 +1,12 @@
-#ifndef ARTISTA_H
-#define ARTISTA_H
+    #ifndef ARTISTA_H
+    #define ARTISTA_H
 
-#include <glib.h>
+    #include <glib.h>
 
-typedef struct Artista Artista;
+    typedef struct Artista Artista;
 
-// Função que valida se um artista individual nao tem elementos.  individual/group
-gboolean valida_artista_individual(const Artista *artista);
-
-#endif // ARTISTA_H
+    // Função que valida se um artista individual nao tem elementos.  individual/group
+    gboolean valida_artista_individual(const Artista *artista);
+    void free_artista(Artista *artista);
+    Artista *inicializar_artista();
+    #endif // ARTISTA_H

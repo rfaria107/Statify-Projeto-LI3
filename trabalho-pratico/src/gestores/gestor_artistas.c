@@ -1,12 +1,13 @@
 #include "../../include/gestores/gestor_artistas.h"
 #include "../../include/entidades/artists.h"
+#include <glib.h>
 
-typedef struct GestorArtistas
+struct GestorArtistas
 {
     GHashTable *artistas; // Tabela hash de artistas
-} GestorArtistas;
+};
 
-typedef struct Artista
+struct Artista
 {
     gchar *id;                 // Identificador único do artista (inteiro)
     gchar *name;               // Nome do artista (string dinâmica)
@@ -15,7 +16,7 @@ typedef struct Artista
     gchar **id_constituent;    // Lista de IDs de membros (para grupos musicais), array dinâmico de strings
     gchar *country;            // País de origem (string dinâmica)
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
-} Artista;
+};
 
 void inicializar_gestor_artistas(GestorArtistas *gestor)
 {
@@ -29,5 +30,5 @@ void liberar_gestor_artistas(GestorArtistas *gestor)
 
 void inserir_artista(GestorArtistas *gestor, Artista *artista)
 {
-    g_hash_table_insert(gestor->artistas, g_strdup_inline(artista->id), artista);
+    g_hash_table_insert(gestor->artistas, g_strdup(artista->id), artista);
 }

@@ -13,8 +13,11 @@ OBJ = $(SRC_DIR)/main.o \
       $(SRC_DIR)/gestores/gestor_musicas.o \
       $(SRC_DIR)/gestores/gestor_artistas.o \
       $(SRC_DIR)/gestores/gestor_sistemas.o \
-      $(SRC_DIR)/parser.o \
-      $(SRC_DIR)/string_utils.o  # Adicione aqui se necessário
+      $(SRC_DIR)/parsing/parser.o \
+	  $(SRC_DIR)/parsing/rowreader.o \
+      $(SRC_DIR)/parsing/string_utils.o \
+	  $(SRC_DIR)/validacao/valida_musica.o \
+	  $(SRC_DIR)/validacao/valida_user.o \ # Adicione aqui se necessário
 
 TARGET = main
 
@@ -50,11 +53,20 @@ $(SRC_DIR)/gestores/gestor_artistas.o: $(SRC_DIR)/gestores/gestor_artistas.c
 $(SRC_DIR)/gestores/gestor_sistemas.o: $(SRC_DIR)/gestores/gestor_sistemas.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/parser.o: $(SRC_DIR)/parser.c
+$(SRC_DIR)/parsing/parser.o: $(SRC_DIR)/parsing/parser.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/string_utils.o: $(SRC_DIR)/string_utils.c  # Certifique-se de que 
+$(SRC_DIR)/parsing/rowreader.o: $(SRC_DIR)/parsing/rowreader.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
+$(SRC_DIR)/parsing/string_utils.o: $(SRC_DIR)/parsing/string_utils.c  # Certifique-se de que 
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/validacao/valida_musica.o: $(SRC_DIR)/validacao/valida_musica.c  # Certifique-se de que 
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/validacao/valida_user.o: $(SRC_DIR)/validacao/valida_user.c  # Certifique-se de que 
+	$(CC) $(CFLAGS) -c $< -o $@	
 # Limpar arquivos gerados
 clean:
 	rm -f $(OBJ) $(TARGET)

@@ -4,7 +4,7 @@
 #include "../../include/entidades/usuario.h"
 #include "../../include/validacao/valida_user.h"
 
-typedef struct Usuario {
+struct Usuario {
     char* username;
     char* email;
     char* first_name;
@@ -13,11 +13,11 @@ typedef struct Usuario {
     char* country;
     char* subscription_type;
     char** liked_musics_id; // Array de IDs de músicas curtidas
-}Usuario;
+};
 
-typedef struct GestorUsuarios {
+struct GestorUsuarios {
     GHashTable *usuarios; // Tabela hash para armazenar usuários
-} GestorUsuarios;
+};
 
 // Inicializa o Gestor de Usuarios
 void inicializar_gestor_usuarios(GestorUsuarios *gestor)

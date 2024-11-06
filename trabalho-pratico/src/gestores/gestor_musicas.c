@@ -1,9 +1,10 @@
 #include "../../include/gestores/gestor_musicas.h"
+#include <glib.h>
 
-typedef struct GestorMusicas
+struct GestorMusicas
 {
     GHashTable *musicas; // Tabela hash de músicas
-} GestorMusicas;
+};
 
 void inicializar_gestor_musicas(GestorMusicas *gestor)
 {

@@ -10,7 +10,7 @@
 #include "../../include/entidades/artists.h"
 #include "../../include/parsing/rowreader.h"
 
-typedef struct Musica
+struct Musica
 {
     gint id;            // ID único da música
     gchar *title;       // Título da música (string dinâmica)
@@ -19,15 +19,15 @@ typedef struct Musica
     gchar *genre;       // Gênero (string dinâmica)
     gint year;          // Ano de lançamento
     gchar *lyrics;      // Letra da música (string dinâmica)
-} Musica;
+};
 
 // Função para criar músicas
 
-Musica *create_musica(int id, char *title, char **artist_ids,
+Musica* create_musica(int id, char *title, char **artist_ids,
                       char *duration, char *genre, int year,
                       char *lyrics)
 {
-    Musica *musica = inicializar_musica();
+    Musica* musica = inicializar_musica();
 
     // Define os atributos da musica;
     musica->id = id;
@@ -60,9 +60,9 @@ Musica *create_musica(int id, char *title, char **artist_ids,
     return musica;
 }
 
-Musica *inicializar_musica()
+Musica* inicializar_musica()
 {
-    Musica *musica = (Musica *)malloc(sizeof(Musica));
+    Musica *musica = malloc(sizeof(Musica));
     if (!musica)
     {
         return NULL;
@@ -80,7 +80,7 @@ Musica *inicializar_musica()
     return musica;
 }
 
-void free_musica(Musica *musica)
+void free_musica(Musica* musica)
 {
     if (musica)
     {
@@ -106,7 +106,7 @@ void free_musica(Musica *musica)
     }
 }
 
-int parse_musica_and_add_him(RowReader *reader, GestorMusicas *gestorMusic)
+int parse_musica_and_add_him(RowReader* reader, GestorMusicas* gestorMusic)
 {
 
     gchar *id_str = reader_next_cell(reader);
@@ -152,7 +152,7 @@ int parse_musica_and_add_him(RowReader *reader, GestorMusicas *gestorMusic)
     return 0;
 }
 
-char **parse_liked_musics(RowReader *reader)
+char **parse_liked_musics(RowReader* reader)
 {
     char *liked_musics_id = reader_next_cell(reader);
 
@@ -194,4 +194,9 @@ char **parse_liked_musics(RowReader *reader)
     // Libera a memória
     g_free(liked_musics_copy);
     return liked_musics;
+}
+
+// Função para buscar uma música pelo ID único de música
+Musica* buscar_musicas(GestorMusicas *gestor, const gint id) {
+    return (Musica*) g_hash_table_lookup(gestor->musicas, GINT_TO_POINTER(id));
 }

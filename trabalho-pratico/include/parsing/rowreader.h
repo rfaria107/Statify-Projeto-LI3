@@ -16,7 +16,7 @@ RowReader *initialize_row_reader(char *line, char delimiter);
 void reader_set_row(RowReader *reader, char *line);
 
 // Função para ler a próxima célula
-void *reader_next_cell(RowReader *reader);
+char *reader_next_cell(RowReader *reader);
 
 // Função para liberar a memória do RowReader
 void free_row_reader(RowReader *reader);

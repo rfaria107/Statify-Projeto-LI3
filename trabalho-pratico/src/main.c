@@ -1,11 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
+
+#include "../include/entidades/artists.h"
+#include "../include/entidades/musica.h"
+#include "../include/entidades/usuario.h"
+#include "../include/gestores/gestor_artistas.h"
+#include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_sistemas.h"
+#include "../include/gestores/gestor_usuarios.h"
 #include "../include/parsing/parser.h"
+#include "../include/parsing/rowreader.h"
+#include "../include/parsing/string_utils.h"
+#include "../include/validacao/valida_musica.h"
+#include "../include/validacao/valida_user.h"
+
 
 int main(int argc, char* argv[]) {
-    GestorSistema *gestor = inicializar_gestor_sistema(gestor); // Inicializa o gestor
+    GestorSistema *gestor;
+    inicializar_gestor_sistema(gestor); // Inicializa o gestor
 
     FILE *artistas = fopen(strcat(argv[2], "/com_erros/artists.csv"), "r");
     // dar parse aos artistas

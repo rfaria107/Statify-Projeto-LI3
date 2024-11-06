@@ -8,7 +8,7 @@
 #include "../../include/gestores/gestor_musicas.h"
 #include "../../include/entidades/musica.h"
 
-typedef struct Artista
+struct Artista
 {
     gchar *id;                 // Identificador único do artista (inteiro)
     gchar *name;               // Nome do artista (string dinâmica)
@@ -17,7 +17,7 @@ typedef struct Artista
     gchar **id_constituent;    // Lista de IDs de membros (para grupos musicais), array dinâmico de strings
     gchar *country;            // País de origem (string dinâmica)
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
-} Artista;
+};
 
 gboolean valida_artista_individual(const Artista *artista)
 {
@@ -46,6 +46,26 @@ gboolean valida_artista_individual(const Artista *artista)
     }
 
     return TRUE; // Artista individual válido
+}
+
+Artista *inicializar_artista()
+{
+    Artista *artista = malloc(sizeof(Artista)); // Aloca memória para o usuário
+    if (!artista)
+    {
+        return NULL; // Retorna NULL se a alocação falhar
+    }
+
+    // Inicializa os campos do usuário
+    artista->id = NULL;
+    artista->name = NULL;
+    artista->description = NULL;
+    artista->recipe_per_stream = 0.0;
+    artista->id_constituent = NULL;
+    artista->country = NULL;
+    artista->type = NULL;
+
+    return artista; // Retorna o ponteiro para o usuário inicializado
 }
 
 void free_artista(Artista *artista)
