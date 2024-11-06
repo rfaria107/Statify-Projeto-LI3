@@ -19,6 +19,18 @@ struct GestorUsuarios {
     GHashTable *usuarios; // Tabela hash para armazenar usuários
 };
 
+GHashTable *get_hash_usuarios(GestorUsuarios *gestor){
+    return (gestor->usuarios);
+}
+
+GestorUsuarios* criar_gestor_usuarios() {
+    GestorUsuarios *gestor = malloc(sizeof(GestorUsuarios));
+    if (gestor) {
+        inicializar_gestor_usuarios(gestor);
+    }
+    return gestor;
+}
+
 // Inicializa o Gestor de Usuarios
 void inicializar_gestor_usuarios(GestorUsuarios *gestor)
 {
@@ -43,6 +55,11 @@ Usuario* buscar_usuario (GestorUsuarios *gestor, Usuario *usuario) {
     Usuario *resultado = (Usuario*) g_hash_table_lookup(gestor->usuarios, id_usuario);
     g_free(id_usuario); // Libere a cópia do ID gerada por user_get_id()
     return resultado;
+}
+
+void inserir_usuario(GestorUsuarios *gestor, Usuario *user)
+{
+    g_hash_table_insert(gestor->usuarios, g_strdup(get_username(user)), user);
 }
 
 

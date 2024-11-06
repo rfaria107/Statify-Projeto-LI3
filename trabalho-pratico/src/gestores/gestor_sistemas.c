@@ -20,11 +20,23 @@ GestorSistema* criar_gestor_sistema() {
     return gestor;
 }
 
+GestorUsuarios* get_gestor_usuarios(GestorSistema* gestor){
+    return(gestor->gestor_usuarios);
+}
+
+GestorArtistas* get_gestor_artistas(GestorSistema* gestor){
+    return(gestor->gestor_artistas);
+}
+
+GestorMusicas* get_gestor_musicas(GestorSistema* gestor){
+    return(gestor->gestor_musicas);
+}
+
 void inicializar_gestor_sistema(GestorSistema *gestor)
 {
-    inicializar_gestor_usuarios(gestor->gestor_usuarios);
-    inicializar_gestor_artistas(gestor->gestor_artistas);
-    inicializar_gestor_musicas(gestor->gestor_musicas);
+    criar_gestor_usuarios(gestor->gestor_usuarios);
+    criar_gestor_artistas(gestor->gestor_artistas);
+    criar_gestor_musicas(gestor->gestor_musicas);
 }
 
 void liberar_gestor_sistema(GestorSistema *gestor)

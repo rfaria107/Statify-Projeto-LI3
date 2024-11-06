@@ -8,7 +8,8 @@
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/entidades/usuario.h"
 #include "../include/entidades/artists.h"
-
+#include "../include/validacao/valida_musica.h"
+/*
 // Função para validar a duração
 gboolean tudoNum(const char *str)
 {
@@ -171,3 +172,4 @@ void genero_mais_curtido(int idade_min, int idade_max, GHashTable *gestor_usuari
     // Liberta a memória da hashtable temporaria criada para recolher os gêneros
     g_hash_table_destroy(genero_contagem);
 }
+*/

@@ -10,6 +10,7 @@ typedef struct GestorUsuarios GestorUsuarios;
 
 // Funções para manipulação de usuários
 Usuario* inicializar_usuario();
+gchar* get_username(Usuario *user);
 Usuario* create_usuario(char* username, char* email, char* first_name, 
                         char* last_name, char* birth_date, 
                         char* country, char* subscription_type, 

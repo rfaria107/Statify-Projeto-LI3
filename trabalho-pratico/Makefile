@@ -17,7 +17,7 @@ OBJ = $(SRC_DIR)/main.o \
 	  $(SRC_DIR)/parsing/rowreader.o \
       $(SRC_DIR)/parsing/string_utils.o \
 	  $(SRC_DIR)/validacao/valida_musica.o \
-	  $(SRC_DIR)/validacao/valida_user.o \ # Adicione aqui se necessário
+	  $(SRC_DIR)/validacao/valida_user.o \
 
 TARGET = main
 

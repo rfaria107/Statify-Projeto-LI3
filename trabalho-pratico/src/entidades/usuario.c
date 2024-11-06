@@ -8,20 +8,22 @@
 
 struct Usuario
 {
-    char *username;
-    char *email;
-    char *first_name;
-    char *last_name;
-    char *birth_date;
-    char *country;
-    char *subscription_type;
-    char **liked_musics_id; // Array de IDs de músicas curtidas
+    gchar *username;
+    gchar *email;
+    gchar *first_name;
+    gchar *last_name;
+    gchar *birth_date;
+    gchar *country;
+    gchar *subscription_type;
+    gchar **liked_musics_id; // Array de IDs de músicas curtidas
 };
 
-Usuario *create_usuario(char *username, char *email, char *first_name,
-                        char *last_name, char *birth_date,
-                        char *country, char *subscription_type,
-                        char **liked_musics_id)
+gchar *get_username(Usuario *user)
+{
+    return (g_strdup(user->username));
+}
+
+Usuario *create_usuario(char *username, char *email, char *first_name, char *last_name, char *birth_date, char *country, char *subscription_type, char **liked_musics_id)
 {
     Usuario *usuario = inicializar_usuario(); // Aloca memória para o usuário
 
@@ -104,37 +106,27 @@ void free_usuario(Usuario *usuario)
         g_free(usuario); // Libera a estrutura do usuário em si
     }
 }
-
+/*
 int parse_usuario_and_add_him(RowReader *reader, GestorUsuarios *gestorUser)
 {
 
     char *username = reader_next_cell(reader);
-    if (is_empty_value(username))
-        return 1;
+
 
     char *email = reader_next_cell(reader);
-    if (invalid_email(email))
-        return 1;
 
     char *first_name = reader_next_cell(reader);
-    if (is_empty_value(first_name))
-        return 1;
 
     char *last_name = reader_next_cell(reader);
-    if (is_empty_value(last_name))
-        return 1;
+
 
     char *birth_date_str = reader_next_cell(reader);
-    if (invalid_date(birth_date_str))
-        return 1;
 
     char *country = reader_next_cell(reader);
-    if (is_empty_value(country))
-        return 1;
+
 
     char *subscription_type = reader_next_cell(reader);
-    if (is_empty_value(subscription_type))
-        return 1;
+
 
     // Parsing liked music IDs
     char **liked_musics_id = parse_liked_musics(reader);
@@ -154,6 +146,7 @@ int parse_usuario_and_add_him(RowReader *reader, GestorUsuarios *gestorUser)
 
     return 0;
 }
+*/
 
 char *user_get_id(Usuario *user) { return g_strdup(user->username); }
 

@@ -19,6 +19,10 @@ struct Artista
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
 };
 
+gchar *get_artist_id(Artista *artista){
+    return(g_strdup(artista->id));
+}
+
 gboolean valida_artista_individual(const Artista *artista)
 {
     // Verifica se o artista é nulo
@@ -89,3 +93,22 @@ void free_artista(Artista *artista)
     g_free(artista->type);
     g_free(artista);
 }
+/*
+gchar *calcular_discografia(GestorMusicas *musicas, const Artista *artista)
+{
+    gint duracao_total_segundos = 0;
+
+    for (int i = 0; artista->id_constituent != NULL && artista->id_constituent[i] != NULL; i++)
+    {
+        gchar *id_musica = artista->id_constituent[i];
+        Musica *musica = (Musica *)g_hash_table_lookup(musicas, id_musica);
+
+        if (musica != NULL)
+        {
+            duracao_total_segundos += duracao_para_segundos(musica->duration);
+        }
+    }
+
+    return segundos_para_duracao(duracao_total_segundos);
+}
+*/

@@ -18,22 +18,26 @@
 
 
 int main(int argc, char* argv[]) {
-    GestorSistema *gestor;
-    inicializar_gestor_sistema(gestor); // Inicializa o gestor
 
-    FILE *artistas = fopen(strcat(argv[2], "/com_erros/artists.csv"), "r");
+    GestorSistema *gestor = criar_gestor_sistema();// Inicializa o gestor
+    char path[1024];
+
+    snprintf(path, sizeof(path), "%s/com_erros/artists.csv", argv[1]);
+    printf("Attempting to open: %s\n", path); 
+
+    FILE *artistas = fopen(path, "r");
     // dar parse aos artistas
     parser_principal(artistas, gestor, 'a');
     fclose(artistas);
-    FILE *users = fopen(strcat(argv[2], "/com_erros/users.csv"), "r");
+    //FILE *users = fopen(strcat(argv[1], "/com_erros/users.csv"), "r");
     // dar parse aos users
-    parser_principal(users, gestor, 'u');
-    fclose(users);
-    FILE *musicas = fopen(strcat(argv[2], "/com_erros/musics.csv"), "r");
+    //parser_principal(users, gestor, 'u');
+    //fclose(users);
+    //FILE *musicas = fopen(strcat(argv[1], "/com_erros/musics.csv"), "r");
     // dar parse às musicas
-    parser_principal(musicas, gestor, 'm');
-    fclose(musicas);
-
+    //parser_principal(musicas, gestor, 'm');
+    //fclose(musicas);
+/*
     FILE *input_file = fopen("input_exemplo.txt", "r");
     char command[100]; // Ajuste o tamanho conforme necessário
 
@@ -55,5 +59,6 @@ int main(int argc, char* argv[]) {
 
     fclose(input_file);
     free_gestor_sistemas(gestor); // Libera a memória do gestor
+    */
     return 0;
 }

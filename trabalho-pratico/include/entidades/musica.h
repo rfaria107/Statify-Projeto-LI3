@@ -13,6 +13,6 @@ Musica *create_musica(int id, char *title, char **artist_ids, char *duration, ch
 char **parse_liked_musics(RowReader *reader);
 Musica *inicializar_musica();
 int parse_musica_and_add_him(RowReader *reader, GestorMusicas *gestorMusic);
-Musica* buscar_musicas(GestorMusicas *gestor, const gint id);
+gint *get_music_id(Musica *musica);
 
 #endif // MUSICA_H

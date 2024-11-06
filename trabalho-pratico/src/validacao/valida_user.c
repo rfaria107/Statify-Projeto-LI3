@@ -3,7 +3,8 @@
 #include <glib.h>
 #include "../include/entidades/usuario.h"
 #include "../include/entidades/musica.h"
-
+#include "../include/validacao/valida_user.h"
+/*
 // Valida se a data está no formato correto "YYYY/MM/DD"
 gboolean validarFormatoData(const gchar *data)
 {
@@ -169,3 +170,4 @@ gboolean valida_liked_musics_id(const Usuario *usuario, GHashTable *musicas)
     }
     return TRUE;
 }
+*/
