@@ -75,6 +75,11 @@ void write_row(RowWriter *writer, int fields, ...) {
     va_end(args); // Finaliza a manipulação dos argumentos variáveis
 }
 
+void log_error(RowWriter *error_writer, const char *error_line) {
+    append_to_file_buffer(error_writer->buffer, error_line);
+    append_to_file_buffer(error_writer->buffer, "\n");  // Adiciona nova linha ao final do erro
+}
+
 // Escreve o conteúdo do buffer no arquivo e libera o RowWriter
 void free_and_finish_writing(RowWriter *writer) {
     write_file_buffer(writer->buffer); // Garante que tudo seja escrito no arquivo antes de fechá-lo (duvidas)
@@ -91,3 +96,4 @@ void free_and_finish_writing(RowWriter *writer) {
 
     free(writer);
 }
+

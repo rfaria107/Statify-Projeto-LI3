@@ -13,6 +13,8 @@ RowWriter *initialize_row_writer(const char *output_file_name, WriteMode writeMo
 // Inicializa um RowWriter para o arquivo de erros
 RowWriter *initialize_error_writer(const char *error_file_name);
 
+void log_error(RowWriter *error_writer, const char *error_line);
+
 // Escreve valores formatados para o arquivo especificado no RowWriter
 void write_row(RowWriter *writer, int fields, ...);
 
