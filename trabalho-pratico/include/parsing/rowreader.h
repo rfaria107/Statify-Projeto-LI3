@@ -1,5 +1,3 @@
-// row_reader.h
-
 #ifndef ROW_READER_H
 #define ROW_READER_H
 

@@ -16,8 +16,7 @@ OBJ = $(SRC_DIR)/main.o \
       $(SRC_DIR)/parsing/parser.o \
 	  $(SRC_DIR)/parsing/rowreader.o \
       $(SRC_DIR)/parsing/string_utils.o \
-	  $(SRC_DIR)/validacao/valida_musica.o \
-	  $(SRC_DIR)/validacao/valida_user.o \
+	  $(SRC_DIR)/validacao/valida.o \
 
 TARGET = main
 
@@ -62,11 +61,8 @@ $(SRC_DIR)/parsing/rowreader.o: $(SRC_DIR)/parsing/rowreader.c
 $(SRC_DIR)/parsing/string_utils.o: $(SRC_DIR)/parsing/string_utils.c  # Certifique-se de que 
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/validacao/valida_musica.o: $(SRC_DIR)/validacao/valida_musica.c  # Certifique-se de que 
+$(SRC_DIR)/validacao/valida.o: $(SRC_DIR)/validacao/valida.c  # Certifique-se de que 
 	$(CC) $(CFLAGS) -c $< -o $@
-
-$(SRC_DIR)/validacao/valida_user.o: $(SRC_DIR)/validacao/valida_user.c  # Certifique-se de que 
-	$(CC) $(CFLAGS) -c $< -o $@	
 # Limpar arquivos gerados
 clean:
 	rm -f $(OBJ) $(TARGET)

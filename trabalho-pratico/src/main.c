@@ -13,8 +13,7 @@
 #include "../include/parsing/parser.h"
 #include "../include/parsing/rowreader.h"
 #include "../include/parsing/string_utils.h"
-#include "../include/validacao/valida_musica.h"
-#include "../include/validacao/valida_user.h"
+#include "../include/validacao/valida.h"
 
 
 int main(int argc, char* argv[]) {

@@ -6,6 +6,7 @@
 #include "../../include/parsing/rowreader.h"
 #include "../../include/gestores/gestor_usuarios.h"
 
+
 struct Usuario
 {
     gchar *username;
@@ -17,11 +18,6 @@ struct Usuario
     gchar *subscription_type;
     gchar **liked_musics_id; // Array de IDs de músicas curtidas
 };
-
-gchar *get_username(Usuario *user)
-{
-    return (g_strdup(user->username));
-}
 
 Usuario *create_usuario(char *username, char *email, char *first_name, char *last_name, char *birth_date, char *country, char *subscription_type, char **liked_musics_id)
 {
@@ -148,19 +144,22 @@ int parse_usuario_and_add_him(RowReader *reader, GestorUsuarios *gestorUser)
 }
 */
 
-char *user_get_id(Usuario *user) { return g_strdup(user->username); }
 
-char *user_get_email(Usuario *user) { return g_strdup(user->email); }
+gchar *user_get_id(Usuario *user) { return g_strdup(user->username); }
 
-char *user_get_first_name(Usuario *user) { return g_strdup(user->first_name); }
+gchar *user_get_email(Usuario *user) { return g_strdup(user->email); }
 
-char *user_get_last_name(Usuario *user) { return g_strdup(user->last_name); }
+gchar *user_get_first_name(Usuario *user) { return g_strdup(user->first_name); }
 
-char *user_get_country(Usuario *user) { return g_strdup(user->country); }
+gchar *user_get_last_name(Usuario *user) { return g_strdup(user->last_name); }
 
-char *user_get_subscription_type(Usuario *user) { return g_strdup(user->subscription_type); }
+gchar *user_get_birth_date(Usuario *user) {return g_strdup(user->birth_date);}
 
-char **user_get_liked_musics_id(Usuario *user)
+gchar *user_get_country(Usuario *user) { return g_strdup(user->country); }
+
+gchar *user_get_subscription_type(Usuario *user) { return g_strdup(user->subscription_type); }
+
+gchar **user_get_liked_musics_id(Usuario *user)
 {
     if (!user->liked_musics_id)
         return NULL;
@@ -172,7 +171,7 @@ char **user_get_liked_musics_id(Usuario *user)
         count++;
     }
 
-    char **liked_musics_copy = malloc((count + 1) * sizeof(char *));
+    gchar **liked_musics_copy = malloc((count + 1) * sizeof(gchar *));
 
     // Copiar cada ID de música
     for (int i = 0; i < count; i++)
@@ -183,3 +182,21 @@ char **user_get_liked_musics_id(Usuario *user)
 
     return liked_musics_copy;
 }
+
+// Calcula a idade do usuário com base na data de nascimento
+gint calcularIdade(const Usuario *usuario) {
+
+    gint ano, mes, dia;
+    sscanf(usuario->birth_date, "%4d/%2d/%2d", &ano, &mes, &dia);
+
+    const int anoAtual = 2024, mesAtual = 9, diaAtual = 9;
+    gint idade = anoAtual - ano;
+
+    // Ajusta a idade se o aniversário ainda não foi completado (no ano atual)
+    if (mes > mesAtual || (mes == mesAtual && dia > diaAtual)) {
+        idade--;
+    }
+
+    return idade;
+}
+

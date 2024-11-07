@@ -2,7 +2,6 @@
 #include <glib.h>
 #include "../../include/gestores/gestor_usuarios.h"
 #include "../../include/entidades/usuario.h"
-#include "../../include/validacao/valida_user.h"
 
 struct Usuario {
     char* username;
@@ -15,7 +14,8 @@ struct Usuario {
     char** liked_musics_id; // Array de IDs de músicas curtidas
 };
 
-struct GestorUsuarios {
+struct GestorUsuarios
+{
     GHashTable *usuarios; // Tabela hash para armazenar usuários
 };
 
@@ -43,24 +43,14 @@ void liberar_gestor_usuarios(GestorUsuarios *gestor)
     g_hash_table_destroy(gestor->usuarios);
 }
 
-// Adiciona um usuário ao Gestor de Usuarios se for válido
-void adicionar_usuario(GestorUsuarios *gestor, Usuario *usuario)
-{
-        g_hash_table_insert(gestor->usuarios, g_strdup_inline  (usuario->username), usuario);
-}
-
 // Busca um usuário no Gestor de Usuarios
-Usuario* buscar_usuario (GestorUsuarios *gestor, Usuario *usuario) {
+Usuario *buscar_usuario(GestorUsuarios *gestor, Usuario *usuario) {
     gchar *id_usuario = user_get_id(usuario); // Obtenha o ID através de user_get_id()
-    Usuario *resultado = (Usuario*) g_hash_table_lookup(gestor->usuarios, id_usuario);
+    Usuario *resultado = (Usuario *) g_hash_table_lookup(gestor->usuarios, id_usuario);
     g_free(id_usuario); // Libere a cópia do ID gerada por user_get_id()
     return resultado;
 }
 
-void inserir_usuario(GestorUsuarios *gestor, Usuario *user)
-{
-    g_hash_table_insert(gestor->usuarios, g_strdup(get_username(user)), user);
+void inserir_usuario(GestorUsuarios *gestor, Usuario *user) {
+    g_hash_table_insert(gestor->usuarios, g_strdup(user_get_id(user)), user);
 }
-
-
-

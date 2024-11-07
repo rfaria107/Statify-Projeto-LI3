@@ -10,7 +10,6 @@ typedef struct Usuario Usuario;
 GestorUsuarios* criar_gestor_usuarios();
 void inicializar_gestor_usuarios(GestorUsuarios *gestor);
 void liberar_gestor_usuarios(GestorUsuarios *gestor);
-void adicionar_usuario(GestorUsuarios *gestor, Usuario* usuario);
 Usuario* buscar_usuario(GestorUsuarios *gestor, Usuario* usuario);
 GHashTable *get_hash_usuarios(GestorUsuarios *gestor);
 void inserir_usuario(GestorUsuarios *gestor, Usuario *user);

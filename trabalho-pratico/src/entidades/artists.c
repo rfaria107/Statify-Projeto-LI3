@@ -19,38 +19,30 @@ struct Artista
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
 };
 
-gchar *get_artist_id(Artista *artista){
-    return(g_strdup(artista->id));
+gchar *get_artist_id(Artista *artista){return(g_strdup(artista->id));}
+
+gchar *get_artist_name(Artista *artista){return(g_strdup(artista->name));}
+
+gchar *get_artist_description(Artista *artista){return(g_strdup(artista->description));}
+
+gdouble get_artist_recipe_per_stream(Artista *artista) {return artista->recipe_per_stream;}
+
+gchar **get_artist_id_constituent(Artista *artista) {
+    if (artista->id_constituent == NULL) return NULL;
+    
+    int count = 0;
+    while (artista->id_constituent[count] != NULL) count++;
+
+    gchar **copy = g_malloc0((count + 1) * sizeof(gchar *));
+    for (int i = 0; i < count; i++) {
+        copy[i] = g_strdup(artista->id_constituent[i]);
+    }
+    return copy;
 }
 
-gboolean valida_artista_individual(const Artista *artista)
-{
-    // Verifica se o artista é nulo
-    if (artista == NULL)
-    {
-        return FALSE;
-    }
+gchar *get_artist_country(Artista *artista) {return g_strdup(artista->country);}
 
-    // Verifica se o tipo do artista é "individual"
-    if (g_strcmp0(artista->type, "individual") == 0)
-    {
-        // Verifica se o id_constituent é nulo, já que um artista individual não deve ter constituintes
-        if (artista->id_constituent != NULL)
-        {
-            return FALSE; // Artista individual não pode ter constituinte
-        }
-    }
-
-    // Valida se campos obrigatórios estão preenchidos
-    if (artista->id == NULL || artista->name == NULL ||
-        artista->recipe_per_stream <= 0 || artista->country == NULL ||
-        artista->type == NULL)
-    {
-        return FALSE; // Algum campo obrigatório está faltando
-    }
-
-    return TRUE; // Artista individual válido
-}
+gchar *get_artist_type(Artista *artista) {return g_strdup(artista->type);}
 
 Artista *inicializar_artista()
 {
@@ -93,22 +85,44 @@ void free_artista(Artista *artista)
     g_free(artista->type);
     g_free(artista);
 }
-/*
-gchar *calcular_discografia(GestorMusicas *musicas, const Artista *artista)
+
+Artista *create_artista(gchar *id, gchar *name, gchar *description, gdouble recipe_per_stream, gchar **id_constituent, gchar *country, gchar *type)
 {
-    gint duracao_total_segundos = 0;
-
-    for (int i = 0; artista->id_constituent != NULL && artista->id_constituent[i] != NULL; i++)
+    Artista *artista = inicializar_artista(); // Aloca e inicializa o artista
+    if (!artista)
     {
-        gchar *id_musica = artista->id_constituent[i];
-        Musica *musica = (Musica *)g_hash_table_lookup(musicas, id_musica);
-
-        if (musica != NULL)
-        {
-            duracao_total_segundos += duracao_para_segundos(musica->duration);
-        }
+        return NULL; // Retorna NULL se a inicialização falhar
     }
 
-    return segundos_para_duracao(duracao_total_segundos);
+    // Define os atributos do artista, copiando as strings dinamicamente
+    artista->id = g_strdup(id);
+    artista->name = g_strdup(name);
+    artista->description = g_strdup(description);
+    artista->recipe_per_stream = recipe_per_stream;
+    artista->country = g_strdup(country);
+    artista->type = g_strdup(type);
+
+    // Inicializa a lista de IDs de membros, se fornecida
+    if (id_constituent)
+    {
+        int count = 0;
+        while (id_constituent[count] != NULL)
+        {
+            count++;
+        }
+
+        artista->id_constituent = g_malloc((count + 1) * sizeof(gchar *));
+        for (int i = 0; i < count; i++)
+        {
+            artista->id_constituent[i] = g_strdup(id_constituent[i]);
+        }
+        artista->id_constituent[count] = NULL; // Finaliza a lista com NULL
+    }
+    else
+    {
+        artista->id_constituent = NULL; // Caso não haja membros, define como NULL
+    }
+
+    return artista; // Retorna o artista criado
 }
-*/
+

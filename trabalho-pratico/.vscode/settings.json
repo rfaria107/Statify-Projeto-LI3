@@ -2,6 +2,7 @@
     "C_Cpp.errorSquiggles": "enabled",
     "files.associations": {
         "artists.h": "c",
-        "valida_user.h": "c"
+        "valida_user.h": "c",
+        "parser.h": "c"
     }
 }

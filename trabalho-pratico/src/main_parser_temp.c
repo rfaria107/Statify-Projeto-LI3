@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <glib.h>
+
+#include <stdio.h>
+#include <glib.h>
 #include "../include/entidades/usuario.h"
 #include "../include/gestores/gestor_usuarios.h"
 
