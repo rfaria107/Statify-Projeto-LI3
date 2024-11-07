@@ -2,11 +2,8 @@
 #define USUARIO_H
 
 #include <glib.h>
-#include "../include/parsing/rowreader.h"
-#include "../include/gestores/gestor_usuarios.h"
 
 typedef struct Usuario Usuario;
-typedef struct GestorUsuarios GestorUsuarios;
 
 // Funções para manipulação de usuários
 Usuario* inicializar_usuario();
@@ -15,7 +12,7 @@ Usuario* create_usuario(char* username, char* email, char* first_name,
                         char* country, char* subscription_type, 
                         char** liked_musics_id);
 void free_usuario(Usuario* usuario);
-int parse_usuario_and_add_him(RowReader* reader, GestorUsuarios* gestorUser);
+//int parse_usuario_and_add_him(RowReader* reader, GestorUsuarios* gestorUser);
 gint calcularIdade(const Usuario *usuario);
 
 // Funções de acesso aos atributos do usuário

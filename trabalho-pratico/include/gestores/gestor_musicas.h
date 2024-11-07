@@ -5,7 +5,6 @@
 #include "../include/entidades/musica.h"
 
 typedef struct GestorMusicas GestorMusicas;
-typedef struct Musica Musica;
 
 // Funções para inicialização e limpeza do gestor de músicas
 void inicializar_gestor_musicas(GestorMusicas* gestor);

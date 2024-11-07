@@ -14,10 +14,6 @@
 
 void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 {
-    GestorArtistas *gestorartistas = get_gestor_artistas(gestor);
-    GestorUsuarios *gestorusuarios = get_gestor_usuarios(gestor);
-    GestorMusicas *gestormusicas = get_gestor_musicas(gestor);
-
     char buffer[BUFSIZ];
     gboolean first_line = TRUE;
     RowReader *reader = initialize_row_reader(buffer, ';');
@@ -33,6 +29,7 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 
         if (tipo == 'a') // se o parser estiver a ser usado para processar um artista deve dar malloc a um novo artista e processar a linha atualmente contida no buffer
         {
+            GestorArtistas *gestorartistas = get_gestor_artistas(gestor);
             Artista *artista = NULL;
             // Artista *artista = inicializar_artista();
             if ((parse_csv_line_artista(reader, artista)) == 0)
@@ -46,6 +43,8 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 
         if (tipo == 'u') // mesma coisa mas para um user
         {
+            GestorUsuarios *gestorusuarios = get_gestor_usuarios(gestor);
+            GestorMusicas *gestormusicas = get_gestor_musicas(gestor);
             Usuario *usuario = NULL;
             // Usuario *usuario = inicializar_usuario();
             parse_csv_line_usuario(reader, usuario, gestormusicas);
@@ -54,6 +53,8 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 
         if (tipo == 'm') // mesma coisa para uma musica
         {
+
+            GestorMusicas *gestormusicas = get_gestor_musicas(gestor);
             Musica *musica = NULL;
             // Musica *musica = inicializar_musica();
             parse_csv_line_musica(reader, musica);
@@ -91,9 +92,7 @@ int parse_csv_line_artista(RowReader *reader, Artista *artista)
     }
 
     // Funcao auxiliar que Preenche o artista
-    artista = preenche_artista(campostemp, artista);
-
-    if (!artista)
+    if (preenche_artista(campostemp, artista) == 0)
         return 0;
 
     // Libera memória usada
@@ -102,7 +101,7 @@ int parse_csv_line_artista(RowReader *reader, Artista *artista)
     return 1;
 }
 
-Artista *preenche_artista(GPtrArray *campostemp, Artista *artista)
+int preenche_artista(GPtrArray *campostemp, Artista *artista)
 {
 
     gchar *id_str = g_ptr_array_index(campostemp, 0);
@@ -120,9 +119,9 @@ Artista *preenche_artista(GPtrArray *campostemp, Artista *artista)
     artista = create_artista(id_str, name, description, recipe_per_stream, id_constituent, country, type);
 
     if (!artista)
-        return NULL;
+        return 0;
 
-    return artista;
+    return 1;
 }
 
 int parse_csv_line_musica(RowReader *reader, Musica *musica)
@@ -152,7 +151,8 @@ int parse_csv_line_musica(RowReader *reader, Musica *musica)
         return 0;
     }
 
-    musica = preenche_musica(campostemp, musica);
+    if (preenche_musica(campostemp, musica) == 0)
+        return 0;
 
     if (!musica)
         return 0;
@@ -185,15 +185,15 @@ int preenche_musica(GPtrArray *campostemp, Musica *musica)
 
     gchar *lyrics = g_ptr_array_index(campostemp, 6);
 
-    if (validaDuracao(duration) == FALSE)
-        return NULL;
-
     musica = create_musica(id, title, artist_ids, duration, genre, year, lyrics);
 
-    if (!musica)
-        return NULL;
+    if (validaDuracao(musica) == FALSE)
+        return 0;
 
-    return musica;
+    if (!musica)
+        return 0;
+
+    return 1;
 }
 
 // Parser para usuarios
@@ -225,16 +225,15 @@ int parse_csv_line_usuario(RowReader *reader, Usuario *usuario, GestorMusicas *g
     }
 
     // Funcao auxiliar que Preenche o artista
-    usuario = preenche_usuario(campostemp, gestormusicas);
 
-    if (preenche_usuario == NULL)
+    if (preenche_usuario(campostemp, usuario, gestormusicas) == 0)
         return 0;
     g_ptr_array_free(campostemp, TRUE);
 
     return 1; // Retorna 1 se o parsing foi bem-sucedido
 }
 
-Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
+int preenche_usuario(GPtrArray *campostemp, Usuario *usuario, GestorMusicas *gestormusicas)
 {
     // Recupera os valores de cada campo do GPtrArray
     gchar *username = g_ptr_array_index(campostemp, 0);
@@ -248,13 +247,58 @@ Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
 
     gchar **liked_musics_id = g_strsplit(liked_musics_str, ",", -1);
 
-    Usuario *usuario = create_usuario(username, email, first_name, last_name, birth_date, country, subscription_type, liked_musics_id);
+    usuario = create_usuario(username, email, first_name, last_name, birth_date, country, subscription_type, liked_musics_id);
 
     if (valida_user(usuario, gestormusicas) == FALSE)
-        return NULL;
+        return 0;
 
     if (!usuario)
+        return 0;
+
+    return 1;
+}
+
+
+gchar **parse_liked_musics(RowReader* reader)
+{
+    gchar *liked_musics_id = reader_next_cell(reader);
+
+    if (liked_musics_id == NULL || strlen(liked_musics_id) <= 2)
         return NULL;
 
-    return usuario;
+    // Remove os parênteses
+    gchar *liked_musics_copy = g_strdup(liked_musics_id + 1); // Ignora o primeiro caractere
+    liked_musics_copy[strlen(liked_musics_copy) - 1] = '\0'; // Remove o último caractere
+
+    // Conta quantos IDs existem
+    int count = 0;
+    gchar *temp = liked_musics_copy;
+    while (strchr(temp, ','))
+    {
+        count++;
+        temp = strchr(temp, ',') + 1; // Move para o próximo caractere após a vírgula
+    }
+    count++; // Conta também o último ID
+
+    // Aloca memória para o array de strings
+    gchar **liked_musics = malloc((count + 1) * sizeof(char *));
+    if (!liked_musics)
+    {
+        g_free(liked_musics_copy);
+        return NULL;
+    }
+
+    // Tokeniza a string e armazena os IDs no array
+    int i = 0;
+    gchar *token = strtok(liked_musics_copy, ", ");
+    while (token != NULL)
+    {
+        liked_musics[i++] = g_strdup(token); // Duplica o token para o array
+        token = strtok(NULL, ", ");
+    }
+    liked_musics[i] = NULL;
+
+    // Libera a memória
+    g_free(liked_musics_copy);
+    return liked_musics;
 }

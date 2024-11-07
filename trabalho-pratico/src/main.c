@@ -19,33 +19,34 @@ int main(int argc, char *argv[])
 {
 
     GestorSistema *gestor = criar_gestor_sistema(); // Inicializa o gestor
-    
-    char *pathartistas = calloc(200, sizeof(char));
-    snprintf(pathartistas, sizeof(pathartistas), "%s/com_erros/artists.csv", argv[2]);
+
+    char *path = g_strdup(argv[2]);    
+    char *pathartistas = strcat(path,"/com_erros/artists.csv");
+
     FILE *fileartistas = fopen(pathartistas, "r");
     // dar parse aos artistas
     parser_principal(fileartistas, gestor, 'a');
     fclose(fileartistas);
     free(pathartistas);
 
-    char *pathusers = calloc(200, sizeof(char));
-    snprintf(pathusers, sizeof(pathusers), "%s/com_erros/artists.csv", argv[2]);
+    char *pathusers = strcat(path,"/com_erros/users.csv");
+
     FILE *fileusers = fopen(pathusers, "r");
     // dar parse aos users
     parser_principal(fileusers, gestor, 'u');
-    fclose(users);
+    fclose(fileusers);
     free(pathusers);
 
-    char *pathmusicas = calloc(200, sizeof(char));
-    snprintf(pathmusicas, sizeof(pathmusicas), "%s/com_erros/artists.csv", argv[2]);
+    char *pathmusicas = strcat(path,"/com_erros/musics.csv");
     FILE *filemusicas = fopen(pathmusicas, "r");
     // dar parse às musicas
     parser_principal(filemusicas, gestor, 'm');
-    fclose(musicas);
+    fclose(filemusicas);
     free(pathmusicas);
-
-    if(g_strcomp(argv[1],"1")==0){
-
-    }
+    
+    free(path);
+    //if(g_strcomp(argv[1],"1")==0){
+    //
+    //}
     return 0;
 }

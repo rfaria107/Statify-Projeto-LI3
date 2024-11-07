@@ -1,15 +1,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include "../../include/entidades/musica.h"
-#include "../../include/gestores/gestor_musicas.h"
-#include "../../include/gestores/gestor_usuarios.h"
-#include "../../include/gestores/gestor_artistas.h"
-#include "../../include/entidades/usuario.h"
-#include "../../include/entidades/artists.h"
-#include "../../include/parsing/rowreader.h"
+
 
 struct Musica
 {
@@ -24,24 +18,20 @@ struct Musica
 
 // Função para criar músicas
 
-gint get_music_id(Musica *musica) { return musica->id; }
+gint get_music_id(Musica *musica) {return musica->id;}
 
-gchar *get_music_title(Musica *musica) { return g_strdup(musica->title); }
+gchar *get_music_title(Musica *musica) {return g_strdup(musica->title);}
 
-gchar **get_music_artist_ids(Musica *musica)
-{
-    if (!musica->artist_ids)
-        return NULL;
+gchar **get_music_artist_ids(Musica *musica) {
+    if (!musica->artist_ids) return NULL;
 
     int count = 0;
-    while (musica->artist_ids[count] != NULL)
-    {
+    while (musica->artist_ids[count] != NULL) {
         count++;
     }
 
     gchar **artist_ids_copy = malloc((count + 1) * sizeof(gchar *));
-    for (int i = 0; i < count; i++)
-    {
+    for (int i = 0; i < count; i++) {
         artist_ids_copy[i] = g_strdup(musica->artist_ids[i]);
     }
     artist_ids_copy[count] = NULL;
@@ -49,18 +39,20 @@ gchar **get_music_artist_ids(Musica *musica)
     return artist_ids_copy;
 }
 
-gchar *get_music_duration(Musica *musica) { return g_strdup(musica->duration); }
+gchar *get_music_duration(Musica *musica) {return g_strdup(musica->duration);}
 
-gchar *get_music_genre(Musica *musica) { return g_strdup(musica->genre); }
+gchar *get_music_genre(Musica *musica) {return g_strdup(musica->genre);}
 
-gint get_music_year(Musica *musica) { return musica->year; }
+gint get_music_year(Musica *musica) {return musica->year;}
 
-gchar *get_music_lyrics(Musica *musica) { return g_strdup(musica->lyrics); }
+gchar *get_music_lyrics(Musica *musica) {return g_strdup(musica->lyrics);}
 
-Musica *create_musica(int id, char *title, char **artist_ids,
+
+Musica* create_musica(int id, char *title, char **artist_ids,
                       char *duration, char *genre, int year,
                       char *lyrics)
 {
+    Musica* musica = inicializar_musica();
 
     // Define os atributos da musica;
     musica->id = id;
@@ -93,7 +85,7 @@ Musica *create_musica(int id, char *title, char **artist_ids,
     return musica;
 }
 
-Musica *inicializar_musica()
+Musica* inicializar_musica()
 {
     Musica *musica = malloc(sizeof(Musica));
     if (!musica)
@@ -113,7 +105,7 @@ Musica *inicializar_musica()
     return musica;
 }
 
-void free_musica(Musica *musica)
+void free_musica(Musica* musica)
 {
     if (musica)
     {
@@ -137,48 +129,4 @@ void free_musica(Musica *musica)
         // Finalmente, libera a estrutura Musica
         g_free(musica);
     }
-}
-
-gchar **parse_liked_musics(RowReader *reader)
-{
-    gchar *liked_musics_id = reader_next_cell(reader);
-
-    if (liked_musics_id == NULL || strlen(liked_musics_id) <= 2)
-        return NULL;
-
-    // Remove os parênteses
-    gchar *liked_musics_copy = g_strdup(liked_musics_id + 1); // Ignora o primeiro caractere
-    liked_musics_copy[strlen(liked_musics_copy) - 1] = '\0';  // Remove o último caractere
-
-    // Conta quantos IDs existem
-    int count = 0;
-    gchar *temp = liked_musics_copy;
-    while (strchr(temp, ','))
-    {
-        count++;
-        temp = strchr(temp, ',') + 1; // Move para o próximo caractere após a vírgula
-    }
-    count++; // Conta também o último ID
-
-    // Aloca memória para o array de strings
-    gchar **liked_musics = malloc((count + 1) * sizeof(char *));
-    if (!liked_musics)
-    {
-        g_free(liked_musics_copy);
-        return NULL;
-    }
-
-    // Tokeniza a string e armazena os IDs no array
-    int i = 0;
-    gchar *token = strtok(liked_musics_copy, ", ");
-    while (token != NULL)
-    {
-        liked_musics[i++] = g_strdup(token); // Duplica o token para o array
-        token = strtok(NULL, ", ");
-    }
-    liked_musics[i] = NULL;
-
-    // Libera a memória
-    g_free(liked_musics_copy);
-    return liked_musics;
 }

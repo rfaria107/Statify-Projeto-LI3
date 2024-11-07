@@ -2,16 +2,11 @@
 #define MUSICA_H
 
 #include <glib.h>
-#include "../../include/gestores/gestor_sistemas.h"
-#include "../../include/parsing/rowreader.h"
-#include "../../include/gestores/gestor_musicas.h"
 
 typedef struct Musica Musica;
-typedef struct GestorMusicas GestorMusicas;
 
 // Funções para manipulação de usuários
 Musica *create_musica(int id, char *title, char **artist_ids, char *duration, char *genre, int year, char *lyrics);
-char **parse_liked_musics(RowReader *reader);
 Musica *inicializar_musica();
 void free_musica(Musica* musica);
 

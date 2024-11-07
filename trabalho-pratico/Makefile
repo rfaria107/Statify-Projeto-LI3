@@ -18,7 +18,7 @@ OBJ = $(SRC_DIR)/main.o \
       $(SRC_DIR)/parsing/string_utils.o \
 	  $(SRC_DIR)/validacao/valida.o \
 
-TARGET = main
+TARGET = programa-principal
 
 # Regra padrão
 all: $(TARGET)
