@@ -9,11 +9,12 @@
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_usuarios.h"
+#include "../include/parsing/writer.h"
 
-gint calcularIdade(const Usuario *usuario)
-{
+gint calcularIdade(const Usuario *usuario) {
     int ano, mes, dia;
-    sscanf(usuario->birth_date, "%4d/%2d/%2d", &ano, &mes, &dia);
+    int birth_date = user_get_birth_date (usuario);
+    sscanf(birth_date, "%4d/%2d/%2d", &ano, &mes, &dia);
     const int anoAtual = 2024, mesAtual = 9, diaAtual = 9;
     int idade = anoAtual - ano;
     if (mes > mesAtual || (mes == mesAtual && dia > diaAtual))
@@ -21,23 +22,42 @@ gint calcularIdade(const Usuario *usuario)
     return idade;
 }
 
-void querie_1(GestorUsuarios *gestor, const char *username)
-{
-    Usuario *usuario = (Usuario *)g_hash_table_lookup(gestor->usuarios, username);
+void querie_1(GestorUsuarios* gestor, const char* username) {
+   
+   GHashTable *usuarios = get_hash_usuarios (gestor);
+   Usuario *usuario = (Usuario *) g_hash_table_lookup(usuarios, username);
 
-    gint idade = calcularIdade(usuario);
+    if (usuario) {
+        // Cria um nome de arquivo único baseado no username
+        char output_file_name[100];
+        snprintf(output_file_name, sizeof(output_file_name), "%s_output.csv", username);
 
-    printf("%s;%s;%s;%d;%s\n",
-           usuario->email,
-           usuario->first_name,
-           usuario->last_name,
-           idade,
-           usuario->country);
+        RowWriter* writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+
+        // Define nomes e formatos dos campos para o RowWriter
+        char* field_names[] = {"Email", "First Name", "Last Name", "Age", "Country"};
+        char* formatting[] = {"%s","%s", "%s", "%d", "%s"};
+        row_writer_set_field_names(writer, field_names, 5);
+        row_writer_set_formatting(writer, formatting);
+
+        gint idade = calcularIdade(usuario);
+     
+    char *mail = user_get_email (usuario);
+    char *first_name = user_get_first_name(usuario);
+    char *last_name = user_get_last_name (usuario);
+    char *country= user_get_country (usuario);
+
+        // Escreve a linha com os dados do usuário no arquivo de saída
+        write_row(writer, 5, mail, first_name, last_name, idade, country);
+
+        free_and_finish_writing(writer);
+    } else {
+        printf("Usuário %s não encontrado.\n", username);
+    }
 }
+ 
 
 /*
-
-REVER PARTE DA QUERIE 2 E 3
 
 // Função para converter "HH:MM:SS" para segundos
 gint duracao_para_segundos(const gchar *duracao)
@@ -62,7 +82,7 @@ gchar *calcular_discografia(GestorArtistas *gestorartistas, const Artista *artis
 {
     GHashTable *hash_musicas = get_hash_table(gestorartistas);
     gint duracao_total_segundos = 0;
-
+    
     for (int i = 0; get_ar != NULL && artista->id_constituent[i] != NULL; i++)
     {
         gchar *id_musica = artista->id_constituent[i];
@@ -70,12 +90,15 @@ gchar *calcular_discografia(GestorArtistas *gestorartistas, const Artista *artis
 
         if (musica != NULL)
         {
-            duracao_total_segundos += duracao_para_segundos(musica->duration);
+            duracao_total_segundos += duracao_para_segundos(musica ->duration);
         }
     }
 
     return segundos_para_duracao(duracao_total_segundos);
 }
+
+
+Querie 3 
 
 void querie_3(int idade_min, int idade_max, GHashTable *gestor_usuarios, GHashTable *gestor_musicas) {
     GHashTableIter iter;
