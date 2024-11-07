@@ -10,7 +10,7 @@
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/parsing/rowreader.h"
-
+#include "../include/validacao/valida.h"
 
 void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 {
@@ -33,67 +33,34 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 
         if (tipo == 'a') // se o parser estiver a ser usado para processar um artista deve dar malloc a um novo artista e processar a linha atualmente contida no buffer
         {
-            Artista *artista = inicializar_artista();
-            parse_csv_line_artista(reader, artista);
-            inserir_artista(gestorartistas, artista);
+            Artista *artista = NULL;
+            // Artista *artista = inicializar_artista();
+            if ((parse_csv_line_artista(reader, artista)) == 0)
+            {
+                // escreve erro
+                free_artista(artista);
+            }
+            else
+                inserir_artista(gestorartistas, artista);
         }
 
         if (tipo == 'u') // mesma coisa mas para um user
         {
-            Usuario *usuario = inicializar_usuario();
-            parse_csv_line_usuario(reader, usuario);
+            Usuario *usuario = NULL;
+            // Usuario *usuario = inicializar_usuario();
+            parse_csv_line_usuario(reader, usuario, gestormusicas);
             inserir_usuario(gestorusuarios, usuario);
         }
 
         if (tipo == 'm') // mesma coisa para uma musica
         {
-            Musica *musica = inicializar_musica();
+            Musica *musica = NULL;
+            // Musica *musica = inicializar_musica();
             parse_csv_line_musica(reader, musica);
             inserir_musica(gestormusicas, musica);
         }
     }
     free_row_reader(reader);
-}
-
-// Parser para usuarios
-int parse_csv_line_usuario(RowReader *reader, Usuario *usuario)
-{
-    int numcampos = 8;
-    char *cell;
-
-    GPtrArray *campostemp = g_ptr_array_new_with_free_func(g_free); // Array temporario
-
-    for (int i = 0; i < numcampos; i++)
-    {
-        cell = reader_next_cell(reader);
-        if (cell == NULL || *cell == '\0')
-        {
-            g_ptr_array_free(campostemp, TRUE);
-            return 0; // Falha no parsing se alguma celula estiver vazia
-        }
-        GString *campo = g_string_new(cell);
-        trim_quotes(campo); // Remove aspas ao redor dos valores
-        g_ptr_array_add(campostemp, g_string_free(campo, FALSE));
-    }
-
-    // Verifica se o número de campos é o esperado
-    if (campostemp->len != numcampos)
-    {
-        g_ptr_array_free(campostemp, TRUE);
-        return 0;
-    }
-
-        // Funcao auxiliar que Preenche o artista
-    usuario = preenche_usuario(campostemp);
-
-    // Insere o artista no gestor de artistas
-    // TODO: FIX THIS SHIT
-    // inserir_usuario(gestorusuarios, usuario);
-
-
-    g_ptr_array_free(campostemp, TRUE);
-
-    return 1; // Retorna 1 se o parsing foi bem-sucedido
 }
 
 int parse_csv_line_artista(RowReader *reader, Artista *artista)
@@ -109,7 +76,7 @@ int parse_csv_line_artista(RowReader *reader, Artista *artista)
         if (cell == NULL || *cell == '\0')
         {
             g_ptr_array_free(campostemp, TRUE);
-            //NOTA adicionar writer aqui
+            // NOTA adicionar writer aqui
             return 0; // Falha no parsing se alguma celula estiver vazia
         }
         GString *campo = g_string_new(cell);
@@ -124,16 +91,38 @@ int parse_csv_line_artista(RowReader *reader, Artista *artista)
     }
 
     // Funcao auxiliar que Preenche o artista
-    artista = preenche_artista(campostemp);
+    artista = preenche_artista(campostemp, artista);
 
-    // Insere o artista no gestor de artistas
-    // TODO: FIX THIS SHIT
-    //inserir_artista(gestorartistas, artista);
+    if (!artista)
+        return 0;
 
     // Libera memória usada
     g_ptr_array_free(campostemp, TRUE);
 
     return 1;
+}
+
+Artista *preenche_artista(GPtrArray *campostemp, Artista *artista)
+{
+
+    gchar *id_str = g_ptr_array_index(campostemp, 0);
+    gchar *name = g_ptr_array_index(campostemp, 1);
+    gchar *description = g_ptr_array_index(campostemp, 2);
+    gchar *recipe_str = g_ptr_array_index(campostemp, 3);
+    gchar *artist_ids_str = g_ptr_array_index(campostemp, 4);
+    gchar *country = g_ptr_array_index(campostemp, 5);
+    gchar *type = g_ptr_array_index(campostemp, 6);
+
+    gdouble recipe_per_stream = atof(recipe_str);
+
+    gchar **id_constituent = g_strsplit(artist_ids_str, ",", -1);
+
+    artista = create_artista(id_str, name, description, recipe_per_stream, id_constituent, country, type);
+
+    if (!artista)
+        return NULL;
+
+    return artista;
 }
 
 int parse_csv_line_musica(RowReader *reader, Musica *musica)
@@ -163,34 +152,30 @@ int parse_csv_line_musica(RowReader *reader, Musica *musica)
         return 0;
     }
 
-    musica = preenche_musica(campostemp);
+    musica = preenche_musica(campostemp, musica);
 
-    // TODO: FIX THIS SHIT
-    //inserir_musica(gestormusicas, musica);
-
+    if (!musica)
+        return 0;
 
     g_ptr_array_free(campostemp, TRUE);
 
     return 1; // Retorna 1 se o parsing foi bem-sucedido
 }
 
-Musica *preenche_musica(GPtrArray *campostemp)
+int preenche_musica(GPtrArray *campostemp, Musica *musica)
 {
 
     gchar *id_str = g_ptr_array_index(campostemp, 0);
 
     int id = atoi(id_str);
 
-    gchar *title = g_ptr_array_index(campostemp, 1);;
+    gchar *title = g_ptr_array_index(campostemp, 1);
 
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
-    // if (is_empty_value(artist_ids_str))
-    //     return NULL;
+
     gchar **artist_ids = g_strsplit(artist_ids_str, ",", -1);
 
     gchar *duration = g_ptr_array_index(campostemp, 3);
-    // if (is_empty_value(duration))
-    //     return NULL;
 
     gchar *genre = g_ptr_array_index(campostemp, 4);
 
@@ -200,48 +185,56 @@ Musica *preenche_musica(GPtrArray *campostemp)
 
     gchar *lyrics = g_ptr_array_index(campostemp, 6);
 
-    Musica *musica = create_musica(id, title, artist_ids, duration, genre, year, lyrics);
+    if (validaDuracao(duration) == FALSE)
+        return NULL;
+
+    musica = create_musica(id, title, artist_ids, duration, genre, year, lyrics);
 
     if (!musica)
         return NULL;
 
-    // TODO: FIX THIS SHIT
-    //inicializar_musica(gestorMusic, musica);
-
-    free_musica(musica);
-
     return musica;
 }
 
-Artista *preenche_artista(GPtrArray *campostemp)
+// Parser para usuarios
+int parse_csv_line_usuario(RowReader *reader, Usuario *usuario, GestorMusicas *gestormusicas)
 {
+    int numcampos = 8;
+    char *cell;
 
-    gchar *id_str = g_ptr_array_index(campostemp, 0);
-    gchar *name = g_ptr_array_index(campostemp, 1);
-    gchar *description = g_ptr_array_index(campostemp, 2);
-    gchar *recipe_str = g_ptr_array_index(campostemp, 3);
-    gchar *artist_ids_str = g_ptr_array_index(campostemp, 4);
-    gchar *country = g_ptr_array_index(campostemp, 5);
-    gchar *type = g_ptr_array_index(campostemp, 6);
+    GPtrArray *campostemp = g_ptr_array_new_with_free_func(g_free); // Array temporario
 
-    gdouble recipe_per_stream = atof(recipe_str);
+    for (int i = 0; i < numcampos; i++)
+    {
+        cell = reader_next_cell(reader);
+        if (cell == NULL || *cell == '\0')
+        {
+            g_ptr_array_free(campostemp, TRUE);
+            return 0; // Falha no parsing se alguma celula estiver vazia
+        }
+        GString *campo = g_string_new(cell);
+        trim_quotes(campo); // Remove aspas ao redor dos valores
+        g_ptr_array_add(campostemp, g_string_free(campo, FALSE));
+    }
 
-    gchar **id_constituent = g_strsplit(artist_ids_str, ",", -1);
+    // Verifica se o número de campos é o esperado
+    if (campostemp->len != numcampos)
+    {
+        g_ptr_array_free(campostemp, TRUE);
+        return 0;
+    }
 
-    Artista *artista = create_artista(id_str, name, description, recipe_per_stream, id_constituent, country, type);
+    // Funcao auxiliar que Preenche o artista
+    usuario = preenche_usuario(campostemp, gestormusicas);
 
-    if (!artista)
-        return NULL;
+    if (preenche_usuario == NULL)
+        return 0;
+    g_ptr_array_free(campostemp, TRUE);
 
-    // TODO: FIX THIS SHIT
-    //inicializar_artista(gestorArtista,artista);
-
-    free_artista(artista);
-
-    return artista;
+    return 1; // Retorna 1 se o parsing foi bem-sucedido
 }
 
-Usuario *preenche_usuario(GPtrArray *campostemp)
+Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
 {
     // Recupera os valores de cada campo do GPtrArray
     gchar *username = g_ptr_array_index(campostemp, 0);
@@ -257,13 +250,11 @@ Usuario *preenche_usuario(GPtrArray *campostemp)
 
     Usuario *usuario = create_usuario(username, email, first_name, last_name, birth_date, country, subscription_type, liked_musics_id);
 
-    if (!usuario)
+    if (valida_user(usuario, gestormusicas) == FALSE)
         return NULL;
 
-    // TODO: FIX THIS SHIT
-    //inicializar_usuario(gestorUsuario,usuario);
-
-    free_usuario(usuario);
+    if (!usuario)
+        return NULL;
 
     return usuario;
 }

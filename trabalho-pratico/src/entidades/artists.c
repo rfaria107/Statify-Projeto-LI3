@@ -19,30 +19,34 @@ struct Artista
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
 };
 
-gchar *get_artist_id(Artista *artista){return(g_strdup(artista->id));}
+gchar *get_artist_id(Artista *artista) { return (g_strdup(artista->id)); }
 
-gchar *get_artist_name(Artista *artista){return(g_strdup(artista->name));}
+gchar *get_artist_name(Artista *artista) { return (g_strdup(artista->name)); }
 
-gchar *get_artist_description(Artista *artista){return(g_strdup(artista->description));}
+gchar *get_artist_description(Artista *artista) { return (g_strdup(artista->description)); }
 
-gdouble get_artist_recipe_per_stream(Artista *artista) {return artista->recipe_per_stream;}
+gdouble get_artist_recipe_per_stream(Artista *artista) { return artista->recipe_per_stream; }
 
-gchar **get_artist_id_constituent(Artista *artista) {
-    if (artista->id_constituent == NULL) return NULL;
-    
+gchar **get_artist_id_constituent(Artista *artista)
+{
+    if (artista->id_constituent == NULL)
+        return NULL;
+
     int count = 0;
-    while (artista->id_constituent[count] != NULL) count++;
+    while (artista->id_constituent[count] != NULL)
+        count++;
 
     gchar **copy = g_malloc0((count + 1) * sizeof(gchar *));
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++)
+    {
         copy[i] = g_strdup(artista->id_constituent[i]);
     }
     return copy;
 }
 
-gchar *get_artist_country(Artista *artista) {return g_strdup(artista->country);}
+gchar *get_artist_country(Artista *artista) { return g_strdup(artista->country); }
 
-gchar *get_artist_type(Artista *artista) {return g_strdup(artista->type);}
+gchar *get_artist_type(Artista *artista) { return g_strdup(artista->type); }
 
 Artista *inicializar_artista()
 {
@@ -125,4 +129,3 @@ Artista *create_artista(gchar *id, gchar *name, gchar *description, gdouble reci
 
     return artista; // Retorna o artista criado
 }
-

@@ -15,49 +15,37 @@
 #include "../include/parsing/string_utils.h"
 #include "../include/validacao/valida.h"
 
+int main(int argc, char *argv[])
+{
 
-int main(int argc, char* argv[]) {
-
-    GestorSistema *gestor = criar_gestor_sistema();// Inicializa o gestor
-    char path[1024];
-
-    snprintf(path, sizeof(path), "%s/com_erros/artists.csv", argv[1]);
-    printf("Attempting to open: %s\n", path); 
-
-    FILE *artistas = fopen(path, "r");
+    GestorSistema *gestor = criar_gestor_sistema(); // Inicializa o gestor
+    
+    char *pathartistas = calloc(200, sizeof(char));
+    snprintf(pathartistas, sizeof(pathartistas), "%s/com_erros/artists.csv", argv[2]);
+    FILE *fileartistas = fopen(pathartistas, "r");
     // dar parse aos artistas
-    parser_principal(artistas, gestor, 'a');
-    fclose(artistas);
-    //FILE *users = fopen(strcat(argv[1], "/com_erros/users.csv"), "r");
+    parser_principal(fileartistas, gestor, 'a');
+    fclose(fileartistas);
+    free(pathartistas);
+
+    char *pathusers = calloc(200, sizeof(char));
+    snprintf(pathusers, sizeof(pathusers), "%s/com_erros/artists.csv", argv[2]);
+    FILE *fileusers = fopen(pathusers, "r");
     // dar parse aos users
-    //parser_principal(users, gestor, 'u');
-    //fclose(users);
-    //FILE *musicas = fopen(strcat(argv[1], "/com_erros/musics.csv"), "r");
+    parser_principal(fileusers, gestor, 'u');
+    fclose(users);
+    free(pathusers);
+
+    char *pathmusicas = calloc(200, sizeof(char));
+    snprintf(pathmusicas, sizeof(pathmusicas), "%s/com_erros/artists.csv", argv[2]);
+    FILE *filemusicas = fopen(pathmusicas, "r");
     // dar parse às musicas
-    //parser_principal(musicas, gestor, 'm');
-    //fclose(musicas);
-/*
-    FILE *input_file = fopen("input_exemplo.txt", "r");
-    char command[100]; // Ajuste o tamanho conforme necessário
+    parser_principal(filemusicas, gestor, 'm');
+    fclose(musicas);
+    free(pathmusicas);
 
-    while (fgets(command, sizeof(command), input_file)) {
-        char *token = strtok(command, " ");
-        if (strcmp(token, "1") == 0) {
-            char *user_id = strtok(NULL, " ");
-            query_user_summary(gestor, user_id);
-        } else if (strcmp(token, "2") == 0) {
-            int N = atoi(strtok(NULL, " "));
-            char *country = strtok(NULL, " ");
-            query_top_artists(gestor, N, country);
-        } else if (strcmp(token, "3") == 0) {
-            int min_age = atoi(strtok(NULL, " "));
-            int max_age = atoi(strtok(NULL, " "));
-            query_popular_genres(gestor, min_age, max_age);
-        }
+    if(g_strcomp(argv[1],"1")==0){
+
     }
-
-    fclose(input_file);
-    free_gestor_sistemas(gestor); // Libera a memória do gestor
-    */
     return 0;
 }

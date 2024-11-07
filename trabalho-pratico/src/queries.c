@@ -10,27 +10,29 @@
 #include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_usuarios.h"
 
-
-gint calcularIdade(const Usuario *usuario) {
+gint calcularIdade(const Usuario *usuario)
+{
     int ano, mes, dia;
     sscanf(usuario->birth_date, "%4d/%2d/%2d", &ano, &mes, &dia);
     const int anoAtual = 2024, mesAtual = 9, diaAtual = 9;
     int idade = anoAtual - ano;
-    if (mes > mesAtual || (mes == mesAtual && dia > diaAtual)) idade--;
+    if (mes > mesAtual || (mes == mesAtual && dia > diaAtual))
+        idade--;
     return idade;
 }
 
-void querie_1(GestorUsuarios* gestor, const char* username) {
-    Usuario* usuario = (Usuario*) g_hash_table_lookup(gestor->usuarios, username);
+void querie_1(GestorUsuarios *gestor, const char *username)
+{
+    Usuario *usuario = (Usuario *)g_hash_table_lookup(gestor->usuarios, username);
 
     gint idade = calcularIdade(usuario);
 
-        printf("%s;%s;%s;%d;%s\n", 
-               usuario->email,
-               usuario->first_name,
-               usuario->last_name,
-               idade,
-               usuario->country);
+    printf("%s;%s;%s;%d;%s\n",
+           usuario->email,
+           usuario->first_name,
+           usuario->last_name,
+           idade,
+           usuario->country);
 }
 
 /*

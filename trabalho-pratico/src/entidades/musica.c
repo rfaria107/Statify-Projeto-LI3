@@ -24,20 +24,24 @@ struct Musica
 
 // Função para criar músicas
 
-gint get_music_id(Musica *musica) {return musica->id;}
+gint get_music_id(Musica *musica) { return musica->id; }
 
-gchar *get_music_title(Musica *musica) {return g_strdup(musica->title);}
+gchar *get_music_title(Musica *musica) { return g_strdup(musica->title); }
 
-gchar **get_music_artist_ids(Musica *musica) {
-    if (!musica->artist_ids) return NULL;
+gchar **get_music_artist_ids(Musica *musica)
+{
+    if (!musica->artist_ids)
+        return NULL;
 
     int count = 0;
-    while (musica->artist_ids[count] != NULL) {
+    while (musica->artist_ids[count] != NULL)
+    {
         count++;
     }
 
     gchar **artist_ids_copy = malloc((count + 1) * sizeof(gchar *));
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++)
+    {
         artist_ids_copy[i] = g_strdup(musica->artist_ids[i]);
     }
     artist_ids_copy[count] = NULL;
@@ -45,20 +49,18 @@ gchar **get_music_artist_ids(Musica *musica) {
     return artist_ids_copy;
 }
 
-gchar *get_music_duration(Musica *musica) {return g_strdup(musica->duration);}
+gchar *get_music_duration(Musica *musica) { return g_strdup(musica->duration); }
 
-gchar *get_music_genre(Musica *musica) {return g_strdup(musica->genre);}
+gchar *get_music_genre(Musica *musica) { return g_strdup(musica->genre); }
 
-gint get_music_year(Musica *musica) {return musica->year;}
+gint get_music_year(Musica *musica) { return musica->year; }
 
-gchar *get_music_lyrics(Musica *musica) {return g_strdup(musica->lyrics);}
+gchar *get_music_lyrics(Musica *musica) { return g_strdup(musica->lyrics); }
 
-
-Musica* create_musica(int id, char *title, char **artist_ids,
+Musica *create_musica(int id, char *title, char **artist_ids,
                       char *duration, char *genre, int year,
                       char *lyrics)
 {
-    Musica* musica = inicializar_musica();
 
     // Define os atributos da musica;
     musica->id = id;
@@ -91,7 +93,7 @@ Musica* create_musica(int id, char *title, char **artist_ids,
     return musica;
 }
 
-Musica* inicializar_musica()
+Musica *inicializar_musica()
 {
     Musica *musica = malloc(sizeof(Musica));
     if (!musica)
@@ -111,7 +113,7 @@ Musica* inicializar_musica()
     return musica;
 }
 
-void free_musica(Musica* musica)
+void free_musica(Musica *musica)
 {
     if (musica)
     {
@@ -137,7 +139,7 @@ void free_musica(Musica* musica)
     }
 }
 
-gchar **parse_liked_musics(RowReader* reader)
+gchar **parse_liked_musics(RowReader *reader)
 {
     gchar *liked_musics_id = reader_next_cell(reader);
 
@@ -146,7 +148,7 @@ gchar **parse_liked_musics(RowReader* reader)
 
     // Remove os parênteses
     gchar *liked_musics_copy = g_strdup(liked_musics_id + 1); // Ignora o primeiro caractere
-    liked_musics_copy[strlen(liked_musics_copy) - 1] = '\0'; // Remove o último caractere
+    liked_musics_copy[strlen(liked_musics_copy) - 1] = '\0';  // Remove o último caractere
 
     // Conta quantos IDs existem
     int count = 0;

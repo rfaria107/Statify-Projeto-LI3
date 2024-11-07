@@ -6,7 +6,6 @@
 #include "../../include/parsing/rowreader.h"
 #include "../../include/gestores/gestor_usuarios.h"
 
-
 struct Usuario
 {
     gchar *username;
@@ -144,7 +143,6 @@ int parse_usuario_and_add_him(RowReader *reader, GestorUsuarios *gestorUser)
 }
 */
 
-
 gchar *user_get_id(Usuario *user) { return g_strdup(user->username); }
 
 gchar *user_get_email(Usuario *user) { return g_strdup(user->email); }
@@ -153,7 +151,7 @@ gchar *user_get_first_name(Usuario *user) { return g_strdup(user->first_name); }
 
 gchar *user_get_last_name(Usuario *user) { return g_strdup(user->last_name); }
 
-gchar *user_get_birth_date(Usuario *user) {return g_strdup(user->birth_date);}
+gchar *user_get_birth_date(Usuario *user) { return g_strdup(user->birth_date); }
 
 gchar *user_get_country(Usuario *user) { return g_strdup(user->country); }
 
@@ -184,7 +182,8 @@ gchar **user_get_liked_musics_id(Usuario *user)
 }
 
 // Calcula a idade do usuário com base na data de nascimento
-gint calcularIdade(const Usuario *usuario) {
+gint calcularIdade(const Usuario *usuario)
+{
 
     gint ano, mes, dia;
     sscanf(usuario->birth_date, "%4d/%2d/%2d", &ano, &mes, &dia);
@@ -193,10 +192,10 @@ gint calcularIdade(const Usuario *usuario) {
     gint idade = anoAtual - ano;
 
     // Ajusta a idade se o aniversário ainda não foi completado (no ano atual)
-    if (mes > mesAtual || (mes == mesAtual && dia > diaAtual)) {
+    if (mes > mesAtual || (mes == mesAtual && dia > diaAtual))
+    {
         idade--;
     }
 
     return idade;
 }
-
