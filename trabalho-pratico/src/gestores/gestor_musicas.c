@@ -22,13 +22,13 @@ void inicializar_gestor_musicas(GestorMusicas *gestor)
 void liberar_gestor_musicas(GestorMusicas *gestor)
 {
     g_hash_table_destroy(gestor->musicas);
+    free(gestor);
 }
 
 void inserir_musica(GestorMusicas *gestor, Musica *musica) {
+    
     g_hash_table_insert(gestor->musicas, GINT_TO_POINTER(get_music_id(musica)), musica);
 }
-
-
 
 GHashTable *get_hash_musicas(GestorMusicas *gestor){
     return (gestor->musicas);

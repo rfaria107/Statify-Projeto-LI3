@@ -27,9 +27,11 @@ void inicializar_gestor_artistas(GestorArtistas *gestor)
 void liberar_gestor_artistas(GestorArtistas *gestor)
 {
     g_hash_table_destroy(gestor->artistas);
+    free(gestor);
 }
 
 void inserir_artista(GestorArtistas *gestor, Artista *artista)
 {
-    g_hash_table_insert(gestor->artistas, g_strdup(get_artist_id(artista)), artista);
+    gchar *id = get_artist_id(artista);
+    g_hash_table_insert(gestor->artistas, id, artista);
 }

@@ -5,7 +5,6 @@
 #include "../include/entidades/usuario.h"
 
 typedef struct GestorUsuarios GestorUsuarios;
-typedef struct Usuario Usuario;
 
 GestorUsuarios* criar_gestor_usuarios();
 void inicializar_gestor_usuarios(GestorUsuarios *gestor);

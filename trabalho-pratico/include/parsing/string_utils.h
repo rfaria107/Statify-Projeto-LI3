@@ -7,5 +7,7 @@
 
 void trim_quotes(GString *string);
 void trim_singlequotes(GString *string);
-
+void trim_parenteses(GString *string);
+void trim_parenteses_gchar(gchar *string);
+void trim_single_quotes_gchar(gchar *string);
 #endif

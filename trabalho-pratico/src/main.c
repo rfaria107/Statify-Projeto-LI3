@@ -20,33 +20,43 @@ int main(int argc, char *argv[])
 
     GestorSistema *gestor = criar_gestor_sistema(); // Inicializa o gestor
 
-    char *path = g_strdup(argv[2]);    
-    char *pathartistas = strcat(path,"/com_erros/artists.csv");
-
+    char *path = g_strdup(argv[2]);
+    printf("%s\n", path);
+    char *pathartistas = g_strconcat(path, "/com_erros/artists.csv", NULL);
+    printf("%s\n", pathartistas);
     FILE *fileartistas = fopen(pathartistas, "r");
+
     // dar parse aos artistas
-    parser_principal(fileartistas, gestor, 'a');
-    fclose(fileartistas);
-    free(pathartistas);
+    if (fileartistas)
+    {
+        parser_principal(fileartistas, gestor, 'a');
+        fclose(fileartistas);
+    }
+    g_free(pathartistas);
 
-    char *pathusers = strcat(path,"/com_erros/users.csv");
-
-    FILE *fileusers = fopen(pathusers, "r");
-    // dar parse aos users
-    parser_principal(fileusers, gestor, 'u');
-    fclose(fileusers);
-    free(pathusers);
-
-    char *pathmusicas = strcat(path,"/com_erros/musics.csv");
+    char *pathmusicas = g_strconcat(path, "/com_erros/musics.csv",NULL);
     FILE *filemusicas = fopen(pathmusicas, "r");
     // dar parse às musicas
+    if(filemusicas){
     parser_principal(filemusicas, gestor, 'm');
     fclose(filemusicas);
-    free(pathmusicas);
-    
-    free(path);
-    //if(g_strcomp(argv[1],"1")==0){
-    //
+    }
+    g_free(pathmusicas);
+
+    //char *pathusers = g_strconcat(path, "/com_erros/users.csv",NULL);
+
+    //FILE *fileusers = fopen(pathusers, "r");
+    // dar parse aos users
+    //if(fileusers){
+    //parser_principal(fileusers, gestor, 'u');
+    //fclose(fileusers);
     //}
+    //g_free(pathusers);
+
+    free(path);
+    liberar_gestor_sistema(gestor);
+    // if(g_strcomp(argv[1],"1")==0){
+    //
+    // }
     return 0;
 }

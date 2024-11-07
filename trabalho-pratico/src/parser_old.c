@@ -8,7 +8,7 @@
 #include "../include/gestores/gestor_usuarios.h"
 #include "..include/parsing/parser.h"
 
-void parser_principal(FILE *file, GestorSistema *gestorsis, char tipo)
+void parser_principal_old(FILE *file, GestorSistema *gestorsis, char tipo)
 {
     char buffer[BUFSIZ]; // buffer vai receber uma linha
     gboolean first_line = TRUE;

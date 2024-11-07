@@ -60,7 +60,6 @@ gboolean validarDataUsuario(Usuario *usuario)
 
     if (!validarFormatoData(birth_date))
     {
-        printf("Formato inválido para a data de nascimento!\n");
         return FALSE;
     }
 
@@ -69,7 +68,6 @@ gboolean validarDataUsuario(Usuario *usuario)
 
     if (!validarMesEDia(mes, dia) || !validarDataFutura(ano, mes, dia))
     {
-        printf("Data de nascimento inválida!\n");
         return FALSE;
     }
 
@@ -216,6 +214,18 @@ gboolean validaDuracao(Musica *musica)
     }
 
     return TRUE;
+}
+//valida se a lista de artistas duma música começa e acaba em ['']
+int valida_parenteses_lista_artistas(gchar *lista_artistas){
+    int len = strlen(lista_artistas);
+    if(lista_artistas[0] != '[' || lista_artistas[len-1] != ']') return 0;
+    return 1;
+}
+//valida se o artista tem ''
+int valida_single_quotes_lista_artistas(gchar *artista){
+    int len = strlen(artista);
+    if(artista[0] != '\'' || artista[len-1] != '\'') return 0;
+    return 1;
 }
 
 gboolean valida_artista_individual(Artista *artista)

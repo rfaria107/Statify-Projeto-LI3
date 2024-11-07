@@ -34,15 +34,15 @@ GestorMusicas* get_gestor_musicas(GestorSistema* gestor){
 
 void inicializar_gestor_sistema(GestorSistema *gestor)
 {
-    criar_gestor_usuarios(gestor->gestor_usuarios);
-    criar_gestor_artistas(gestor->gestor_artistas);
-    criar_gestor_musicas(gestor->gestor_musicas);
+    gestor->gestor_artistas = criar_gestor_artistas();
+    gestor->gestor_musicas = criar_gestor_musicas();
+    gestor->gestor_usuarios = criar_gestor_usuarios();
 }
 
 void liberar_gestor_sistema(GestorSistema *gestor)
 {
-    liberar_gestor_usuarios(gestor->gestor_usuarios);
     liberar_gestor_artistas(gestor->gestor_artistas);
     liberar_gestor_musicas(gestor->gestor_musicas);
+    liberar_gestor_usuarios(gestor->gestor_usuarios);
     free(gestor);
 }

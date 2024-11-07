@@ -41,6 +41,7 @@ void inicializar_gestor_usuarios(GestorUsuarios *gestor)
 void liberar_gestor_usuarios(GestorUsuarios *gestor)
 {
     g_hash_table_destroy(gestor->usuarios);
+    free(gestor);
 }
 
 // Busca um usuário no Gestor de Usuarios

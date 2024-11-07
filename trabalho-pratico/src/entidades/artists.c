@@ -14,7 +14,10 @@ struct Artista
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
 };
 
-gchar *get_artist_id(Artista *artista) { return (g_strdup(artista->id)); }
+gchar *get_artist_id(Artista *artista)
+{
+    return (g_strdup(artista->id));
+}
 
 gchar *get_artist_name(Artista *artista) { return (g_strdup(artista->name)); }
 
