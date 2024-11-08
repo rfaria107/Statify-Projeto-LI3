@@ -97,3 +97,43 @@ void free_and_finish_writing(RowWriter *writer) {
     free(writer);
 }
 
+
+void escrever_cabecalho_users_erro(RowWriter *error_writer) {
+// "username";"email";"first_name";"last_name";"birth_date";"country";"subscription_type";"liked_songs_id"
+    char *field_names[] = {"username", "email", "first_name", "last_name", "birth_date", "country","subscription_type", "liked_songs_id"};
+    char *formatting[] = {"%s", "%s", "%s", "%s", "%s", "%s","%s", "%s"}; // Formatação como strings para o cabeçalho
+    
+    // Define os campos e formatação do RowWriter de erro
+    row_writer_set_field_names(error_writer, field_names, 8);
+    row_writer_set_formatting(error_writer, formatting);
+
+    // Escreve o cabeçalho no arquivo de erros
+    write_row(error_writer, 8, "username", "email", "first_name", "last_name", "birth_date", "country","subscription_type", "liked_songs_id");
+}
+
+void escrever_cabecalho_musics_erro(RowWriter *error_writer) {
+    // "id";"title";"artist_id";"duration";"genre";"year";"lyrics"
+
+    char *field_names [] = {"id","title", "artist_id", "duration", "genre", "year", "lyrics"};
+    char *formatting[]= {"%s", "%s", "%s", "%s", "%s", "%s", "%s"};
+
+    row_writer_set_field_names(error_writer, field_names, 7);
+    row_writer_set_formatting(error_writer, formatting);
+    
+    write_row (error_writer,7,"id","title", "artist_id", "duration", "genre", "year", "lyrics");
+
+}
+
+
+void  escrever_cabecalho_artists_erro(RowWriter *error_writer) {
+    // "id";"name";"description";"recipe_per_stream";"id_constituent";"country";"type"
+    
+    char *field_names [] = {"id","name","description","recipe_per_stream","id_constituent","country","type"};
+    char *formatting[]= {"%s", "%s", "%s", "%s", "%s", "%s", "%s"};
+
+    row_writer_set_field_names(error_writer, field_names, 7);
+    row_writer_set_formatting(error_writer, formatting);
+    
+    write_row (error_writer,7,"id","name","description","recipe_per_stream","id_constituent","country","type");
+
+}

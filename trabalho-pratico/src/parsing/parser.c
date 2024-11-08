@@ -11,6 +11,7 @@
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/parsing/rowreader.h"
 #include "../include/validacao/valida.h"
+#include "../include/parsing/writer.h"
 
 void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 {
@@ -18,6 +19,20 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
     size_t buffer_size = 0;
     gboolean first_line = TRUE;
     RowReader *reader = initialize_row_reader(buffer, ';');
+    const char *error_file_artists = "artists_errors.csv";
+    const char *error_file_musics = "musics_errors.csv";
+    const char *error_file_users = "users_errors.csv";
+
+    // Inicializa os writers de erro apenas uma vez no início
+    RowWriter *writer_error_artists = initialize_error_writer(error_file_artists);
+    RowWriter *writer_error_musics = initialize_error_writer(error_file_musics);
+    RowWriter *writer_error_users = initialize_error_writer(error_file_users);
+
+    // Escreve os cabeçalhos uma vez para cada tipo de erro (Diz no enunciado que é necessário)
+    escrever_cabecalho_artists_erro(writer_error_artists);
+    escrever_cabecalho_musics_erro(writer_error_musics);
+    escrever_cabecalho_users_erro(writer_error_users);
+
     while (getline(&buffer, &buffer_size, file) != -1) // receber uma linha do ficheiro de cada vez, processando-a corretamente e evitando processar a primeira linha
     {
 
@@ -40,8 +55,9 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             }
             else
             {
-                // escrever erro
-                free_artista(artista);
+            
+                log_error (writer_error_artists, buffer);
+                free_artista(artista);    
             }
         }
 
@@ -56,8 +72,10 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             }
             else
             {
-                // escrever erro
+                
+                log_error (writer_error_musics, buffer);                
                 free_musica(musica);
+                
             }
         }
 
@@ -72,13 +90,18 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             }
             else
             {
-                // escrever erro
+               
+                log_error (writer_error_users, buffer);                
                 free_usuario(usuario);
+                
             }
         }
     }
     free(buffer);
     free_row_reader(reader);
+    free_and_finish_writing(writer_error_artists);
+    free_and_finish_writing(writer_error_musics);
+    free_and_finish_writing(writer_error_users);
 }
 
 Artista *parse_csv_line_artista(RowReader *reader)
