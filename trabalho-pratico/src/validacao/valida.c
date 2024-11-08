@@ -178,6 +178,7 @@ gboolean valida_user(Usuario *user, GestorMusicas *musics)
 
 gboolean tudoNum(gchar *str)
 {
+    if (str==NULL || str[0] == '\0') return FALSE;
     for (gint i = 0; str[i] != '\0'; i++)
     {
         if (!isdigit(str[i]))
@@ -191,7 +192,7 @@ gboolean tudoNum(gchar *str)
 gboolean validaDuracao(Musica *musica)
 {
     gchar *duracao = get_music_duration(musica);
-
+    if (duracao == NULL) return FALSE;
     if (strlen(duracao) != 8 || duracao[2] != ':' || duracao[5] != ':')
         return FALSE;
 
@@ -219,15 +220,16 @@ gboolean validaDuracao(Musica *musica)
 int valida_parenteses_lista_artistas(gchar *lista_artistas)
 {
     int len = strlen(lista_artistas);
-    if (lista_artistas[0] != '[' || lista_artistas[len - 1] != ']')
+    if (lista_artistas == NULL || len == 0 || lista_artistas[0] != '[' || lista_artistas[len - 1] != ']')
         return 0;
     return 1;
 }
 // valida se o artista tem ''
 int valida_single_quotes_lista_artistas(gchar *artista)
 {
+    g_strstrip(artista);
     int len = strlen(artista);
-    if (artista[0] != '\'' || artista[len - 1] != '\'')
+    if (artista == NULL || len == 0 || artista[0] != '\'' || artista[len - 1] != '\'')
         return 0;
     return 1;
 }

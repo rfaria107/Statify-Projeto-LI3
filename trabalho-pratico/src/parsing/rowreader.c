@@ -13,7 +13,7 @@ RowReader *initialize_row_reader(char *line, char delimiter)
 {
 
   RowReader *rowReader = malloc(sizeof(struct rowReader));
-  rowReader->row = line;
+  rowReader->row = g_strdup(line);
   rowReader->delimiter = delimiter;
 
   return rowReader;
@@ -21,7 +21,7 @@ RowReader *initialize_row_reader(char *line, char delimiter)
 
 void reader_set_row(RowReader *reader, char *line)
 {
-  reader->row = line;
+  reader->row = g_strdup(line);
 }
 
 char *reader_current_cell(RowReader *reader) { return g_strdup(reader->row); }

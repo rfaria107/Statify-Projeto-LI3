@@ -4,10 +4,9 @@
 #include <stdlib.h>
 #include "../../include/entidades/musica.h"
 
-
 struct Musica
 {
-    gint id;            // ID único da música
+    gchar *id;          // ID único da música
     gchar *title;       // Título da música (string dinâmica)
     gchar **artist_ids; // Lista de IDs dos artistas (array dinâmico de strings)
     gchar *duration;    // Duração da música em segundos
@@ -18,20 +17,24 @@ struct Musica
 
 // Função para criar músicas
 
-gint get_music_id(Musica *musica) {return musica->id;}
+gchar *get_music_id(Musica *musica) { return g_strdup(musica->id); }
 
-gchar *get_music_title(Musica *musica) {return g_strdup(musica->title);}
+gchar *get_music_title(Musica *musica) { return g_strdup(musica->title); }
 
-gchar **get_music_artist_ids(Musica *musica) {
-    if (!musica->artist_ids) return NULL;
+gchar **get_music_artist_ids(Musica *musica)
+{
+    if (!musica->artist_ids)
+        return NULL;
 
     int count = 0;
-    while (musica->artist_ids[count] != NULL) {
+    while (musica->artist_ids[count] != NULL)
+    {
         count++;
     }
 
     gchar **artist_ids_copy = malloc((count + 1) * sizeof(gchar *));
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++)
+    {
         artist_ids_copy[i] = g_strdup(musica->artist_ids[i]);
     }
     artist_ids_copy[count] = NULL;
@@ -39,23 +42,22 @@ gchar **get_music_artist_ids(Musica *musica) {
     return artist_ids_copy;
 }
 
-gchar *get_music_duration(Musica *musica) {return g_strdup(musica->duration);}
+gchar *get_music_duration(Musica *musica) { return g_strdup(musica->duration); }
 
-gchar *get_music_genre(Musica *musica) {return g_strdup(musica->genre);}
+gchar *get_music_genre(Musica *musica) { return g_strdup(musica->genre); }
 
-gint get_music_year(Musica *musica) {return musica->year;}
+gint get_music_year(Musica *musica) { return musica->year; }
 
-gchar *get_music_lyrics(Musica *musica) {return g_strdup(musica->lyrics);}
+gchar *get_music_lyrics(Musica *musica) { return g_strdup(musica->lyrics); }
 
-
-Musica* create_musica(int id, char *title, char **artist_ids,
+Musica *create_musica(char *id, char *title, char **artist_ids,
                       char *duration, char *genre, int year,
                       char *lyrics)
 {
-    Musica* musica = inicializar_musica();
+    Musica *musica = inicializar_musica();
 
     // Define os atributos da musica;
-    musica->id = id;
+    musica->id = g_strdup(id);
     musica->year = year;
     musica->title = g_strdup(title);
     musica->duration = g_strdup(duration);
@@ -85,7 +87,7 @@ Musica* create_musica(int id, char *title, char **artist_ids,
     return musica;
 }
 
-Musica* inicializar_musica()
+Musica *inicializar_musica()
 {
     Musica *musica = malloc(sizeof(Musica));
     if (!musica)
@@ -93,7 +95,7 @@ Musica* inicializar_musica()
         return NULL;
     }
 
-    musica->id = 0;
+    musica->id = NULL;
     musica->title = NULL;
     musica->artist_ids = NULL;
     ;
@@ -105,11 +107,12 @@ Musica* inicializar_musica()
     return musica;
 }
 
-void free_musica(Musica* musica)
+void free_musica(Musica *musica)
 {
     if (musica)
     {
         // Libera os campos dinâmicos da estrutura
+        g_free(musica->id);
         g_free(musica->title);
 
         // Libera cada string no array artist_ids

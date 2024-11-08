@@ -55,7 +55,7 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             }
             else
             {
-
+                printf("erro no artista\n");
                 log_error(writer_error_artists, buffer);
                 free_artista(artista);
             }
@@ -72,7 +72,6 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             }
             else
             {
-
                 log_error(writer_error_musics, buffer);
                 free_musica(musica);
             }
@@ -95,6 +94,7 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             }
         }
     }
+
     free(buffer);
     free_row_reader(reader);
     free_and_finish_writing(writer_error_artists);
@@ -145,9 +145,7 @@ Artista *preenche_artista(GPtrArray *campostemp)
     gchar *description = g_ptr_array_index(campostemp, 2);
     gchar *recipe_str = g_ptr_array_index(campostemp, 3);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 4);
-    if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
-        return NULL;
-    trim_parenteses_gchar(artist_ids_str);
+
     gchar *country = g_ptr_array_index(campostemp, 5);
     gchar *type = g_ptr_array_index(campostemp, 6);
 
@@ -156,11 +154,18 @@ Artista *preenche_artista(GPtrArray *campostemp)
 
     if (strcmp(type, "individual") != 0)
     {
+        if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
+        {
+            return NULL;
+        }
+        trim_parenteses_gchar(artist_ids_str);
         id_constituent = g_strsplit(artist_ids_str, ",", -1);
         for (int i = 0; id_constituent[i] != NULL; i++)
         {
             if (valida_single_quotes_lista_artistas(id_constituent[i]) == 0)
             {
+
+                printf("erro artista ''");
                 g_strfreev(id_constituent);
                 return NULL;
             }
@@ -218,9 +223,7 @@ Musica *parse_csv_line_musica(RowReader *reader, GestorArtistas *gestorartistas)
 Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas)
 {
 
-    gchar *id_str = g_ptr_array_index(campostemp, 0);
-
-    int id = atoi(id_str);
+    gchar *id = g_ptr_array_index(campostemp, 0);
 
     gchar *title = g_ptr_array_index(campostemp, 1);
 
@@ -303,7 +306,11 @@ Usuario *parse_csv_line_usuario(RowReader *reader, GestorMusicas *gestormusicas)
     Usuario *usuario = preenche_usuario(campostemp, gestormusicas);
 
     if (!usuario)
+    {
+        g_ptr_array_free(campostemp, TRUE);
         return NULL;
+    }
+
     g_ptr_array_free(campostemp, TRUE);
 
     return usuario; // Retorna 1 se o parsing foi bem-sucedido
@@ -321,13 +328,17 @@ Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
     gchar *subscription_type = g_ptr_array_index(campostemp, 6);
     gchar *liked_musics_str = g_ptr_array_index(campostemp, 7);
     if (valida_parenteses_lista_artistas(liked_musics_str) == 0)
+    {
+        printf("erro nos []\n");
         return NULL;
+    }
     trim_parenteses_gchar(liked_musics_str);
     gchar **liked_musics_id = g_strsplit(liked_musics_str, ",", -1);
     for (int i = 0; liked_musics_id[i] != NULL; i++)
     {
         if (valida_single_quotes_lista_artistas(liked_musics_id[i]) == 0)
         {
+            printf("erro nos ''\n");
             g_strfreev(liked_musics_id);
             return NULL;
         }
@@ -336,11 +347,13 @@ Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
 
     Usuario *usuario = create_usuario(username, email, first_name, last_name, birth_date, country, subscription_type, liked_musics_id);
 
-    if (valida_user(usuario, gestormusicas) == FALSE)
-        return NULL;
+    g_strfreev(liked_musics_id);
 
-    if (!usuario)
+    if (valida_user(usuario, gestormusicas) == FALSE)
+    {
+        free_usuario(usuario);
         return NULL;
+    }
 
     return usuario;
 }
