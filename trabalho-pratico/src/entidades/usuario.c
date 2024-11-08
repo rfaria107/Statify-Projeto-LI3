@@ -18,43 +18,43 @@ struct Usuario
     gchar **liked_musics_id; // Array de IDs de músicas curtidas
 };
 
-Usuario *create_usuario(char *username, char *email, char *first_name, char *last_name, char *birth_date, char *country, char *subscription_type, char **liked_musics_id)
-{
-    Usuario *usuario = inicializar_usuario(); // Aloca memória para o usuário
-
-    // Define os atributos do usuário
-    usuario->username = g_strdup(username);
-    usuario->email = g_strdup(email);
-    usuario->first_name = g_strdup(first_name);
-    usuario->last_name = g_strdup(last_name);
-    usuario->birth_date = g_strdup(birth_date);
-    usuario->country = g_strdup(country);
-    usuario->subscription_type = g_strdup(subscription_type);
-
-    // Inicializa a lista de músicas curtidas
-    if (liked_musics_id)
-    {
-        int count = 0;
-        while (liked_musics_id[count] != NULL)
-        {
-            count++;
-        }
-
-        usuario->liked_musics_id = g_malloc((count + 1) * sizeof(char *));
-        for (int i = 0; i < count; i++)
-        {
-            usuario->liked_musics_id[i] = g_strdup(liked_musics_id[i]);
-        }
-        usuario->liked_musics_id[count] = NULL; // Termina a lista
-    }
-    else
-    {
-        usuario->liked_musics_id = NULL; // Se não houver músicas curtidas
+// Função para criar um usuário
+Usuario* create_usuario(char* username, char* email, char* first_name, char* last_name, char* birth_date, 
+                        char* country, char* subscription_type, char** liked_musics) {
+    Usuario* usuario = (Usuario*)malloc(sizeof(Usuario));
+    if (!usuario) {
+        fprintf(stderr, "Erro ao alocar memória para Usuario.\n");
+        return NULL;
     }
 
-    return usuario; // Retorna o usuário criado
+    usuario->username = strdup(username);
+    usuario->email = strdup(email);
+    usuario->first_name = strdup(first_name);
+    usuario->last_name = strdup(last_name);
+    usuario->birth_date = strdup(birth_date);
+    usuario->country = strdup(country);
+    usuario->subscription_type = strdup(subscription_type);
+
+    // Alocar memória para liked_musics
+    int num_musicas = 0;
+    while (liked_musics[num_musicas] != NULL) {
+        num_musicas++;
+    }
+    
+    usuario->liked_musics_id = (char**)malloc((num_musicas + 1) * sizeof(char*));
+    if (!usuario->liked_musics_id) {
+        fprintf(stderr, "Erro ao alocar memória para liked_musics.\n");
+        free(usuario); // Liberar memória do usuário caso falhe
+        return NULL;
+    }
+
+    for (int i = 0; i < num_musicas; i++) {
+        usuario->liked_musics_id[i] = strdup(liked_musics[i]);
+    }
+    usuario->liked_musics_id[num_musicas] = NULL; // Terminar com NULL
+
+    return usuario;
 }
-
 Usuario *inicializar_usuario()
 {
     Usuario *usuario = malloc(sizeof(Usuario)); // Aloca memória para o usuário

@@ -6,6 +6,6 @@
 #include "../include/gestores/gestor_sistemas.h"
 
 void interpreter_inputs(FILE *reader, GestorSistema *gestorsis);
-void querie_1(GestorUsuarios *gestor, const char *username);
+void querie_1(GestorUsuarios *gestor, const char *username, int line);
 
 #endif

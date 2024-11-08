@@ -16,6 +16,7 @@
 #include "../include/validacao/valida.h"
 #include "../include/parsing/queries.h"
 
+
 int main(int argc, char *argv[])
 {
 

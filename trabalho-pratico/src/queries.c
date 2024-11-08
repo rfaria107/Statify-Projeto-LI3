@@ -60,7 +60,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
 }
 
 
-void querie_1(GestorUsuarios *gestor, const char *username)
+void querie_1(GestorUsuarios *gestor, const char *username,int line_number)
 {
 
     GHashTable *usuarios = get_hash_usuarios(gestor);
@@ -68,9 +68,11 @@ void querie_1(GestorUsuarios *gestor, const char *username)
 
     if (usuario)
     {
-        // Cria um nome de arquivo único baseado no username
-        char output_file_name[100];
-        snprintf(output_file_name, sizeof(output_file_name), "%s_output.csv", username);
+        // Aloca dinamicamente o nome do arquivo baseado no número da linha
+        int size = snprintf(NULL, 0, "command%d_output.txt", line_number) + 1;
+        char *output_file_name = malloc(size);
+        snprintf(output_file_name, size, "command%d_output.txt", line_number);
+
 
         RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
@@ -91,6 +93,7 @@ void querie_1(GestorUsuarios *gestor, const char *username)
         write_row(writer, 5, mail, first_name, last_name, idade, country);
 
         free_and_finish_writing(writer);
+        free (output_file_name);
     }
     else
     {
