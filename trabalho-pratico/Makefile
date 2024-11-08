@@ -16,7 +16,10 @@ OBJ = $(SRC_DIR)/main.o \
       $(SRC_DIR)/parsing/parser.o \
 	  $(SRC_DIR)/parsing/rowreader.o \
       $(SRC_DIR)/parsing/string_utils.o \
+	  $(SRC_DIR)/parsing/writer.o \
+	  $(SRC_DIR)/parsing/file.o \
 	  $(SRC_DIR)/validacao/valida.o \
+	  $(SRC_DIR)/queries.o \
 
 TARGET = programa-principal
 
@@ -58,11 +61,21 @@ $(SRC_DIR)/parsing/parser.o: $(SRC_DIR)/parsing/parser.c
 $(SRC_DIR)/parsing/rowreader.o: $(SRC_DIR)/parsing/rowreader.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/parsing/string_utils.o: $(SRC_DIR)/parsing/string_utils.c  # Certifique-se de que 
+$(SRC_DIR)/parsing/string_utils.o: $(SRC_DIR)/parsing/string_utils.c   
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/validacao/valida.o: $(SRC_DIR)/validacao/valida.c  # Certifique-se de que 
+$(SRC_DIR)/parsing/writer.o: $(SRC_DIR)/parsing/writer.c   
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/parsing/file.o: $(SRC_DIR)/parsing/file.c   
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/validacao/valida.o: $(SRC_DIR)/validacao/valida.c  
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/queries.o: $(SRC_DIR)/queries.c  
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # Limpar arquivos gerados
 clean:
 	rm -f $(OBJ) $(TARGET)

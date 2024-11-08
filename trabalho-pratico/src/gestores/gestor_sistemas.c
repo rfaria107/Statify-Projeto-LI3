@@ -1,9 +1,6 @@
 #include <glib.h>
 #include <stdlib.h>
 #include "../include/gestores/gestor_sistemas.h"
-#include "../include/gestores/gestor_musicas.h"
-#include "../include/gestores/gestor_usuarios.h"
-#include "../include/gestores/gestor_artistas.h"
 
 struct GestorSistema
 {
@@ -43,6 +40,6 @@ void liberar_gestor_sistema(GestorSistema *gestor)
 {
     liberar_gestor_artistas(gestor->gestor_artistas);
     liberar_gestor_musicas(gestor->gestor_musicas);
-    liberar_gestor_usuarios(gestor->gestor_usuarios);
+    
     free(gestor);
 }

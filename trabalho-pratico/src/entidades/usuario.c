@@ -182,20 +182,14 @@ gchar **user_get_liked_musics_id(Usuario *user)
 }
 
 // Calcula a idade do usuário com base na data de nascimento
-gint calcularIdade(const Usuario *usuario)
+int calcularIdade(Usuario *usuario)
 {
-
-    gint ano, mes, dia;
-    sscanf(usuario->birth_date, "%4d/%2d/%2d", &ano, &mes, &dia);
-
+    int ano, mes, dia;
+    gchar *birth_date = user_get_birth_date(usuario);
+    sscanf(birth_date, "%4d/%2d/%2d", &ano, &mes, &dia);
     const int anoAtual = 2024, mesAtual = 9, diaAtual = 9;
-    gint idade = anoAtual - ano;
-
-    // Ajusta a idade se o aniversário ainda não foi completado (no ano atual)
+    int idade = anoAtual - ano;
     if (mes > mesAtual || (mes == mesAtual && dia > diaAtual))
-    {
         idade--;
-    }
-
     return idade;
 }

@@ -10,52 +10,93 @@
 #include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/parsing/writer.h"
+#include "../include/parsing/rowreader.h"
+#include "../include/gestores/gestor_sistemas.h"
 
-gint calcularIdade(const Usuario *usuario) {
-    int ano, mes, dia;
-    int birth_date = user_get_birth_date (usuario);
-    sscanf(birth_date, "%4d/%2d/%2d", &ano, &mes, &dia);
-    const int anoAtual = 2024, mesAtual = 9, diaAtual = 9;
-    int idade = anoAtual - ano;
-    if (mes > mesAtual || (mes == mesAtual && dia > diaAtual))
-        idade--;
-    return idade;
+void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
+{
+    char *buffer = NULL;
+    size_t buffer_size = 0;
+    RowReader *reader = initialize_row_reader(buffer, ' ');
+    while (getline(&buffer, &buffer_size, file) != -1)
+    {
+        buffer = g_strstrip(buffer);
+        reader_set_row(reader, buffer);
+        char *token = reader_next_cell(reader);
+        // querie 1
+        if (strcmp(token, "1") == 0)
+        {
+            token = reader_next_cell(reader);
+            GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
+            // querie_1(gestor_users, token);
+        }
+        else if (strcmp(token, "2") == 0)
+        {
+            token = reader_next_cell(reader);
+            int num = atoi(token);
+            token = reader_next_cell(reader);
+            if (token != NULL)
+            {
+                char *country = g_strdup(token);
+            }
+            // querie2(gestorsis,num,country);
+        }
+        else if (strcmp(token, "3") == 0)
+        {
+            token = reader_next_cell(reader);
+            int min_age = atoi(token);
+            token = reader_next_cell(reader);
+            if (token != NULL)
+            {
+                int max_age = atoi(token);
+            }
+            else
+            {
+                int max_age = 200;
+            }
+            // querie3(min_age,max_age,gestorsis);
+        }
+    }
 }
 
-void querie_1(GestorUsuarios* gestor, const char* username) {
-   
-   GHashTable *usuarios = get_hash_usuarios (gestor);
-   Usuario *usuario = (Usuario *) g_hash_table_lookup(usuarios, username);
 
-    if (usuario) {
+void querie_1(GestorUsuarios *gestor, const char *username)
+{
+
+    GHashTable *usuarios = get_hash_usuarios(gestor);
+    Usuario *usuario = (Usuario *)g_hash_table_lookup(usuarios, username);
+
+    if (usuario)
+    {
         // Cria um nome de arquivo único baseado no username
         char output_file_name[100];
         snprintf(output_file_name, sizeof(output_file_name), "%s_output.csv", username);
 
-        RowWriter* writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+        RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
         // Define nomes e formatos dos campos para o RowWriter
-        char* field_names[] = {"Email", "First Name", "Last Name", "Age", "Country"};
-        char* formatting[] = {"%s","%s", "%s", "%d", "%s"};
+        char *field_names[] = {"Email", "First Name", "Last Name", "Age", "Country"};
+        char *formatting[] = {"%s", "%s", "%s", "%d", "%s"};
         row_writer_set_field_names(writer, field_names, 5);
         row_writer_set_formatting(writer, formatting);
 
         gint idade = calcularIdade(usuario);
-     
-    char *mail = user_get_email (usuario);
-    char *first_name = user_get_first_name(usuario);
-    char *last_name = user_get_last_name (usuario);
-    char *country= user_get_country (usuario);
+
+        char *mail = user_get_email(usuario);
+        char *first_name = user_get_first_name(usuario);
+        char *last_name = user_get_last_name(usuario);
+        char *country = user_get_country(usuario);
 
         // Escreve a linha com os dados do usuário no arquivo de saída
         write_row(writer, 5, mail, first_name, last_name, idade, country);
 
         free_and_finish_writing(writer);
-    } else {
+    }
+    else
+    {
         printf("Usuário %s não encontrado.\n", username);
     }
 }
- 
 
 /*
 
@@ -82,7 +123,7 @@ gchar *calcular_discografia(GestorArtistas *gestorartistas, const Artista *artis
 {
     GHashTable *hash_musicas = get_hash_table(gestorartistas);
     gint duracao_total_segundos = 0;
-    
+
     for (int i = 0; get_ar != NULL && artista->id_constituent[i] != NULL; i++)
     {
         gchar *id_musica = artista->id_constituent[i];
@@ -98,7 +139,7 @@ gchar *calcular_discografia(GestorArtistas *gestorartistas, const Artista *artis
 }
 
 
-Querie 3 
+Querie 3
 
 void querie_3(int idade_min, int idade_max, GHashTable *gestor_usuarios, GHashTable *gestor_musicas) {
     GHashTableIter iter;

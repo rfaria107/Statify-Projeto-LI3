@@ -196,9 +196,12 @@ Musica *preenche_musica(GPtrArray *campostemp)
     for (int i = 0; artist_ids[i] != NULL; i++)
     {
         if (valida_single_quotes_lista_artistas(artist_ids[i]))
+        {
+
+            g_strfreev(artist_ids);
             return NULL;
+        }
         trim_single_quotes_gchar(artist_ids[i]);
-        printf("%s\n",artist_ids[i]);
     }
     gchar *duration = g_ptr_array_index(campostemp, 3);
 
@@ -212,11 +215,20 @@ Musica *preenche_musica(GPtrArray *campostemp)
 
     Musica *musica = create_musica(id, title, artist_ids, duration, genre, year, lyrics);
 
-    if (validaDuracao(musica) == FALSE)
-        return NULL;
-
     if (!musica)
+    {
+        g_strfreev(artist_ids);
         return NULL;
+    }
+
+    if (validaDuracao(musica) == FALSE)
+    {
+        free_musica(musica);
+        g_strfreev(artist_ids);
+        return NULL;
+    }
+
+    g_strfreev(artist_ids);
 
     return musica;
 }
@@ -252,8 +264,9 @@ Usuario *parse_csv_line_usuario(RowReader *reader, GestorMusicas *gestormusicas)
     // Funcao auxiliar que Preenche o artista
 
     Usuario *usuario = preenche_usuario(campostemp, gestormusicas);
-    
-    if (!usuario) return NULL;
+
+    if (!usuario)
+        return NULL;
     g_ptr_array_free(campostemp, TRUE);
 
     return usuario; // Retorna 1 se o parsing foi bem-sucedido

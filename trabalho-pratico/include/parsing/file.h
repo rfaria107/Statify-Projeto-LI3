@@ -15,4 +15,6 @@ void append_to_file_buffer(FileBuffer *buffer, const char *line);
 void append_to_file_buffer(FileBuffer *buffer, const char *line);
 
 void write_file_buffer(FileBuffer *buffer);
+
+void free_file_buffer(FileBuffer *buffer);
 #endif

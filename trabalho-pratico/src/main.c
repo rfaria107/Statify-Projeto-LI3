@@ -14,16 +14,17 @@
 #include "../include/parsing/rowreader.h"
 #include "../include/parsing/string_utils.h"
 #include "../include/validacao/valida.h"
+#include "../include/parsing/queries.h"
 
 int main(int argc, char *argv[])
 {
 
     GestorSistema *gestor = criar_gestor_sistema(); // Inicializa o gestor
 
-    char *path = g_strdup(argv[2]);
-    printf("%s\n", path);
+    char *path = g_strdup(argv[1]);
+
     char *pathartistas = g_strconcat(path, "/com_erros/artists.csv", NULL);
-    printf("%s\n", pathartistas);
+
     FILE *fileartistas = fopen(pathartistas, "r");
 
     // dar parse aos artistas
@@ -43,20 +44,24 @@ int main(int argc, char *argv[])
     }
     g_free(pathmusicas);
 
-    //char *pathusers = g_strconcat(path, "/com_erros/users.csv",NULL);
+    char *pathusers = g_strconcat(path, "/com_erros/users.csv",NULL);
 
-    //FILE *fileusers = fopen(pathusers, "r");
+    FILE *fileusers = fopen(pathusers, "r");
     // dar parse aos users
-    //if(fileusers){
-    //parser_principal(fileusers, gestor, 'u');
-    //fclose(fileusers);
-    //}
-    //g_free(pathusers);
+    if(fileusers){
+    parser_principal(fileusers, gestor, 'u');
+    fclose(fileusers);
+    }
+    g_free(pathusers);
 
-    free(path);
+    g_free(path);
+    
+    char *pathinputs = g_strdup(argv[2]);
+    FILE *fileinputs = fopen(pathinputs, "r");
+    interpreter_inputs(fileinputs,gestor);
+    fclose(fileinputs);
+    
     liberar_gestor_sistema(gestor);
-    // if(g_strcomp(argv[1],"1")==0){
-    //
-    // }
+
     return 0;
 }

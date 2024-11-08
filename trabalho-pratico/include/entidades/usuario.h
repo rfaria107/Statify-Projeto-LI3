@@ -13,7 +13,7 @@ Usuario* create_usuario(char* username, char* email, char* first_name,
                         char** liked_musics_id);
 void free_usuario(Usuario* usuario);
 //int parse_usuario_and_add_him(RowReader* reader, GestorUsuarios* gestorUser);
-gint calcularIdade(const Usuario *usuario);
+int calcularIdade(Usuario *usuario);
 
 // Funções de acesso aos atributos do usuário
 gchar* user_get_id(Usuario* user);

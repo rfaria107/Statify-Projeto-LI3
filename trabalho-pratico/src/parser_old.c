@@ -1,3 +1,4 @@
+/*
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
@@ -168,3 +169,4 @@ void parse_csv_line_artista(GestorArtistas *gestorartistas, gchar *linha, Artist
     g_ptr_array_free(campostemp, TRUE);
     g_strfreev(tokens);
 }
+*/
