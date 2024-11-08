@@ -22,6 +22,10 @@ void write_row(RowWriter *writer, int fields, ...);
 void row_writer_set_field_names(RowWriter *writer, char **field_names, int fields);
 void row_writer_set_formatting(RowWriter *writer, char **formatting);
 
+
+void  escrever_cabecalho_artists_erro(RowWriter *error_writer) ;
+void  escrever_cabecalho_musics_erro(RowWriter *error_writer);
+void  escrever_cabecalho_users_erro(RowWriter *error_writer);
 // Escreve o conteúdo do buffer no arquivo e libera o RowWriter
 void free_and_finish_writing(RowWriter *writer);
 
