@@ -215,16 +215,20 @@ gboolean validaDuracao(Musica *musica)
 
     return TRUE;
 }
-//valida se a lista de artistas duma música começa e acaba em ['']
-int valida_parenteses_lista_artistas(gchar *lista_artistas){
+// valida se a lista de artistas duma música ou banda começa e acaba em []
+int valida_parenteses_lista_artistas(gchar *lista_artistas)
+{
     int len = strlen(lista_artistas);
-    if(lista_artistas[0] != '[' || lista_artistas[len-1] != ']') return 0;
+    if (lista_artistas[0] != '[' || lista_artistas[len - 1] != ']')
+        return 0;
     return 1;
 }
-//valida se o artista tem ''
-int valida_single_quotes_lista_artistas(gchar *artista){
+// valida se o artista tem ''
+int valida_single_quotes_lista_artistas(gchar *artista)
+{
     int len = strlen(artista);
-    if(artista[0] != '\'' || artista[len-1] != '\'') return 0;
+    if (artista[0] != '\'' || artista[len - 1] != '\'')
+        return 0;
     return 1;
 }
 
@@ -251,4 +255,26 @@ gboolean valida_artista_individual(Artista *artista)
     }
 
     return TRUE;
+}
+
+int valida_ano_lançamento(Musica *musica)
+{
+    int ano = get_music_year(musica);
+    if (ano > 2024)
+        return 0;
+    else
+        return 1;
+}
+
+// falta validar se artist_ids de uma musica existem
+
+int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas)
+{
+    gchar **artist_ids = get_music_artist_ids(musica);
+    for (int i = 0; artist_ids[i] != NULL; i++)
+    {
+        if (buscar_artista(gestorartistas, artist_ids[i]) == NULL)
+        return 0;
+    }
+    return 1;
 }

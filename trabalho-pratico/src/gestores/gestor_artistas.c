@@ -35,3 +35,7 @@ void inserir_artista(GestorArtistas *gestor, Artista *artista)
     gchar *id = get_artist_id(artista);
     g_hash_table_insert(gestor->artistas, id, artista);
 }
+
+Artista* buscar_artista(GestorArtistas *gestor, const gchar*id) {
+    return (Artista*) g_hash_table_lookup(gestor->artistas, id);
+}
