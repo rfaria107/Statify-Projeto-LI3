@@ -18,6 +18,8 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
     char *buffer = NULL;
     size_t buffer_size = 0;
     RowReader *reader = initialize_row_reader(buffer, ' ');
+    int line_number =1;
+
     while (getline(&buffer, &buffer_size, file) != -1)
     {
         buffer = g_strstrip(buffer);
@@ -28,8 +30,9 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
         {
             token = reader_next_cell(reader);
             GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
-            // querie_1(gestor_users, token);
+            querie_1 (gestor_users,token,line_number);
         }
+
         else if (strcmp(token, "2") == 0)
         {
             token = reader_next_cell(reader);
@@ -56,6 +59,8 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             }
             // querie3(min_age,max_age,gestorsis);
         }
+
+        line_number++;
     }
 }
 
