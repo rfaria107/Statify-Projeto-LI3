@@ -18,20 +18,31 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
     char *buffer = NULL;
     size_t buffer_size = 0;
     gboolean first_line = TRUE;
-    RowReader *reader = initialize_row_reader(buffer, ';');
-    const char *error_file_artists = "artists_errors.csv";
-    const char *error_file_musics = "musics_errors.csv";
-    const char *error_file_users = "users_errors.csv";
-
+    // RowReader *reader = initialize_row_reader(buffer, ';');
+    RowWriter *writer_error_artists;
+    RowWriter *writer_error_musics;
+    RowWriter *writer_error_users;
+    if (tipo == 'a')
+    {
+        const char *error_file_artists = "artists_errors.csv";
+        writer_error_artists = initialize_error_writer(error_file_artists);
+        escrever_cabecalho_artists_erro(writer_error_artists);
+    }
+    if (tipo == 'm')
+    {
+        const char *error_file_musics = "musics_errors.csv";
+        writer_error_musics = initialize_error_writer(error_file_musics);
+        escrever_cabecalho_musics_erro(writer_error_musics);
+    }
+    if (tipo == 'u')
+    {
+        const char *error_file_users = "users_errors.csv";
+        writer_error_users = initialize_error_writer(error_file_users);
+        escrever_cabecalho_users_erro(writer_error_users);
+    }
     // Inicializa os writers de erro apenas uma vez no início
-    RowWriter *writer_error_artists = initialize_error_writer(error_file_artists);
-    RowWriter *writer_error_musics = initialize_error_writer(error_file_musics);
-    RowWriter *writer_error_users = initialize_error_writer(error_file_users);
 
     // Escreve os cabeçalhos uma vez para cada tipo de erro (Diz no enunciado que é necessário)
-    escrever_cabecalho_artists_erro(writer_error_artists);
-    escrever_cabecalho_musics_erro(writer_error_musics);
-    escrever_cabecalho_users_erro(writer_error_users);
 
     while (getline(&buffer, &buffer_size, file) != -1) // receber uma linha do ficheiro de cada vez, processando-a corretamente e evitando processar a primeira linha
     {
@@ -42,12 +53,12 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             continue; // o continue faz com que o resto do loop seja ignorado, deste modo nao processamos a primeira linha e copiamos a segunda para o buffer
         }
         g_strstrip(buffer);
-        reader_set_row(reader, buffer); // colocar o reader na linha atual
+        // reader_set_row(reader, buffer); // colocar o reader na linha atual
 
         if (tipo == 'a') // se o parser estiver a ser usado para processar um artista deve dar malloc a um novo artista e processar a linha atualmente contida no buffer
         {
             GestorArtistas *gestorartistas = get_gestor_artistas(gestor);
-            Artista *artista = parse_csv_line_artista(reader);
+            Artista *artista = parse_csv_line_artista(buffer);
             // Artista *artista = inicializar_artista();
             if (artista)
             {
@@ -65,7 +76,7 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
         {
             GestorArtistas *gestorartistas = get_gestor_artistas(gestor);
             GestorMusicas *gestormusicas = get_gestor_musicas(gestor);
-            Musica *musica = parse_csv_line_musica(reader, gestorartistas);
+            Musica *musica = parse_csv_line_musica(buffer, gestorartistas);
             if (musica)
             {
                 inserir_musica(gestormusicas, musica);
@@ -81,7 +92,7 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
         {
             GestorUsuarios *gestorusuarios = get_gestor_usuarios(gestor);
             GestorMusicas *gestormusicas = get_gestor_musicas(gestor);
-            Usuario *usuario = parse_csv_line_usuario(reader, gestormusicas);
+            Usuario *usuario = parse_csv_line_usuario(buffer, gestormusicas);
             if (usuario)
             {
                 inserir_usuario(gestorusuarios, usuario);
@@ -96,45 +107,50 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
     }
 
     free(buffer);
-    free_row_reader(reader);
-    free_and_finish_writing(writer_error_artists);
-    free_and_finish_writing(writer_error_musics);
-    free_and_finish_writing(writer_error_users);
+    // free_row_reader(reader);
+    if (tipo == 'a')
+        free_and_finish_writing(writer_error_artists);
+    if (tipo == 'm')
+
+        free_and_finish_writing(writer_error_musics);
+    if (tipo == 'u')
+
+        free_and_finish_writing(writer_error_users);
 }
 
-Artista *parse_csv_line_artista(RowReader *reader)
+Artista *parse_csv_line_artista(gchar *line)
 {
     int numcampos = 7; // Número de campos a preencher
-    char *cell;
-
+    gchar **tokens = g_strsplit(line, ";", numcampos);
     GPtrArray *campostemp = g_ptr_array_new_with_free_func(g_free); // Array temporario
 
     for (int i = 0; i < numcampos; i++)
     {
-        cell = reader_next_cell(reader);
-        if (cell == NULL || *cell == '\0')
-        {
-            g_ptr_array_free(campostemp, TRUE);
-            return NULL; // Falha no parsing se alguma celula estiver vazia
-        }
-        GString *campo = g_string_new(cell);
-        trim_quotes(campo); // Remove aspas ao redor dos valores
+
+        GString *campo = g_string_new(tokens[i]); // copiar o primeiro token
+        trim_quotes(campo);                       // retirar as aspas
         g_ptr_array_add(campostemp, g_string_free(campo, FALSE));
     }
 
     if (campostemp->len != numcampos)
     {
         g_ptr_array_free(campostemp, TRUE);
+        g_strfreev(tokens);
+
         return NULL;
     }
 
     // Funcao auxiliar que Preenche o artista
     Artista *artista = preenche_artista(campostemp);
     // Libera memória usada
-    if(!artista){
-            g_ptr_array_free(campostemp, TRUE);
-            return NULL;
+    if (!artista)
+    {
+        g_strfreev(tokens);
+        g_ptr_array_free(campostemp, TRUE);
+        return NULL;
     }
+    g_strfreev(tokens);
+
     g_ptr_array_free(campostemp, TRUE);
 
     return artista;
@@ -183,46 +199,48 @@ Artista *preenche_artista(GPtrArray *campostemp)
         g_strfreev(id_constituent);
         return NULL;
     }
-    
+
     g_strfreev(id_constituent);
 
     return artista;
 }
 
-Musica *parse_csv_line_musica(RowReader *reader, GestorArtistas *gestorartistas)
+Musica *parse_csv_line_musica(gchar *line, GestorArtistas *gestorartistas)
 {
     int numcampos = 7;
-    char *cell;
+    gchar **tokens = g_strsplit(line, ";", numcampos);
 
     GPtrArray *campostemp = g_ptr_array_new_with_free_func(g_free); // Array temporario
 
     for (int i = 0; i < numcampos; i++)
     {
-        cell = reader_next_cell(reader);
-        if (cell == NULL || *cell == '\0')
-        {
-            g_ptr_array_free(campostemp, TRUE);
-            return NULL; // Falha no parsing se alguma celula estiver vazia
-        }
-        GString *campo = g_string_new(cell);
-        trim_quotes(campo); // Remove aspas ao redor dos valores
+
+        GString *campo = g_string_new(tokens[i]); // copiar o primeiro token
+        trim_quotes(campo);                       // retirar as aspas
         g_ptr_array_add(campostemp, g_string_free(campo, FALSE));
     }
 
     if (campostemp->len != numcampos)
     {
         g_ptr_array_free(campostemp, TRUE);
+        g_strfreev(tokens);
+
         return NULL;
     }
 
     Musica *musica = preenche_musica(campostemp, gestorartistas);
 
-    if (!musica){
+    if (!musica)
+    {
         g_ptr_array_free(campostemp, TRUE);
+        g_strfreev(tokens);
+
         return NULL;
     }
 
     g_ptr_array_free(campostemp, TRUE);
+    g_strfreev(tokens);
+
     return musica; // Retorna 1 se o parsing foi bem-sucedido
 }
 
@@ -235,7 +253,9 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas)
 
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
     if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
+    {
         return NULL;
+    }
 
     trim_parenteses_gchar(artist_ids_str);
     gchar **artist_ids = g_strsplit(artist_ids_str, ",", -1);
@@ -280,30 +300,26 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas)
 }
 
 // Parser para usuarios
-Usuario *parse_csv_line_usuario(RowReader *reader, GestorMusicas *gestormusicas)
+Usuario *parse_csv_line_usuario(gchar *line, GestorMusicas *gestormusicas)
 {
     int numcampos = 8;
-    char *cell;
+    gchar **tokens = g_strsplit(line, ";", numcampos);
 
     GPtrArray *campostemp = g_ptr_array_new_with_free_func(g_free); // Array temporario
 
     for (int i = 0; i < numcampos; i++)
     {
-        cell = reader_next_cell(reader);
-        if (cell == NULL || *cell == '\0')
-        {
-            g_ptr_array_free(campostemp, TRUE);
-            return NULL; // Falha no parsing se alguma celula estiver vazia
-        }
-        GString *campo = g_string_new(cell);
-        trim_quotes(campo); // Remove aspas ao redor dos valores
+
+        GString *campo = g_string_new(tokens[i]); // copiar o primeiro token
+        trim_quotes(campo);                       // retirar as aspas
         g_ptr_array_add(campostemp, g_string_free(campo, FALSE));
     }
 
-    // Verifica se o número de campos é o esperado
     if (campostemp->len != numcampos)
     {
         g_ptr_array_free(campostemp, TRUE);
+        g_strfreev(tokens);
+
         return NULL;
     }
 
@@ -314,10 +330,13 @@ Usuario *parse_csv_line_usuario(RowReader *reader, GestorMusicas *gestormusicas)
     if (!usuario)
     {
         g_ptr_array_free(campostemp, TRUE);
+        g_strfreev(tokens);
+
         return NULL;
     }
 
     g_ptr_array_free(campostemp, TRUE);
+    g_strfreev(tokens);
 
     return usuario; // Retorna 1 se o parsing foi bem-sucedido
 }

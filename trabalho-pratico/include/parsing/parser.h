@@ -14,13 +14,13 @@
 #include "../include/parsing/rowreader.h"
 
 void parser_principal(FILE *file, GestorSistema *gestor, char tipo);
-Artista *parse_csv_line_artista(RowReader *reader);
+Artista *parse_csv_line_artista(gchar *line);
 Artista *preenche_artista(GPtrArray *campostemp);
 
-Musica *parse_csv_line_musica(RowReader *reader, GestorArtistas *gestorartistas);
+Musica *parse_csv_line_musica(gchar* line, GestorArtistas *gestorartistas);
 Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas);
 
-Usuario *parse_csv_line_usuario(RowReader *reader, GestorMusicas *gestormusicas);
+Usuario *parse_csv_line_usuario(gchar* line, GestorMusicas *gestormusicas);
 Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas);
 
 #endif

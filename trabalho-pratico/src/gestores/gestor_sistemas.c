@@ -9,24 +9,29 @@ struct GestorSistema
     GestorMusicas *gestor_musicas;   // Gestor de músicas
 };
 
-GestorSistema* criar_gestor_sistema() {
+GestorSistema *criar_gestor_sistema()
+{
     GestorSistema *gestor = malloc(sizeof(GestorSistema));
-    if (gestor) {
+    if (gestor)
+    {
         inicializar_gestor_sistema(gestor);
     }
     return gestor;
 }
 
-GestorUsuarios* get_gestor_usuarios(GestorSistema* gestor){
-    return(gestor->gestor_usuarios);
+GestorUsuarios *get_gestor_usuarios(GestorSistema *gestor)
+{
+    return (gestor->gestor_usuarios);
 }
 
-GestorArtistas* get_gestor_artistas(GestorSistema* gestor){
-    return(gestor->gestor_artistas);
+GestorArtistas *get_gestor_artistas(GestorSistema *gestor)
+{
+    return (gestor->gestor_artistas);
 }
 
-GestorMusicas* get_gestor_musicas(GestorSistema* gestor){
-    return(gestor->gestor_musicas);
+GestorMusicas *get_gestor_musicas(GestorSistema *gestor)
+{
+    return (gestor->gestor_musicas);
 }
 
 void inicializar_gestor_sistema(GestorSistema *gestor)
@@ -40,5 +45,6 @@ void liberar_gestor_sistema(GestorSistema *gestor)
 {
     liberar_gestor_artistas(gestor->gestor_artistas);
     liberar_gestor_musicas(gestor->gestor_musicas);
+    liberar_gestor_usuarios(gestor->gestor_usuarios);
     free(gestor);
 }

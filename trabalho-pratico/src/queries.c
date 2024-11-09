@@ -12,35 +12,50 @@
 #include "../include/parsing/writer.h"
 #include "../include/parsing/rowreader.h"
 #include "../include/gestores/gestor_sistemas.h"
+#include "../include/parsing/string_utils.h"
 
 void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
 {
     char *buffer = "";
     size_t buffer_size = 0;
-    RowReader *reader = initialize_row_reader(buffer, ' ');
+    // RowReader *reader = initialize_row_reader(buffer, ' ');
     int line_number = 1;
 
     while (getline(&buffer, &buffer_size, file) != -1)
     {
         g_strstrip(buffer);
-        reader_set_row(reader, buffer);
-        char *token = reader_next_cell(reader);
+        if (strlen(buffer) == 0)
+            continue; // Skipar linhas vazias
+        // reader_set_row(reader, buffer);
+        char *token = procura_espaço(buffer);
         // querie 1
         if (strcmp(token, "1") == 0)
         {
-            token = reader_next_cell(reader);
-            GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
-            querie_1(gestor_users, token, line_number);
+            g_free(token);
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
+                querie_1(gestor_users, token, line_number);
+                g_free(token);
+            }
         }
 
         else if (strcmp(token, "2") == 0)
         {
-            token = reader_next_cell(reader);
-            int num = atoi(token);
-            token = reader_next_cell(reader);
+            g_free(token);
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                int num = atoi(token);
+                g_free(token);
+
+                token = procura_espaço3(buffer);
+            }
             if (token != NULL)
             {
                 char *country = g_strdup(token);
+                g_free(token);
                 // querie2(gestorsis,num,country)
                 g_free(country);
             }
@@ -48,23 +63,26 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
         }
         else if (strcmp(token, "3") == 0)
         {
-            token = reader_next_cell(reader);
-            int min_age = atoi(token);
-            token = reader_next_cell(reader);
+            g_free(token);
+            token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                int max_age = atoi(token);
-            }
-            else
-            {
+                int min_age = atoi(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
                 int max_age = 200;
+                if (token != NULL)
+                {
+                    max_age = atoi(token);
+                    g_free(token);
+                }
             }
             // querie3(min_age,max_age,gestorsis);
         }
         line_number++;
     }
     g_free(buffer);
-    free_row_reader(reader);
+    // free_row_reader(reader);
 }
 
 void querie_1(GestorUsuarios *gestor, char *username, int line_number)
@@ -103,6 +121,7 @@ void querie_1(GestorUsuarios *gestor, char *username, int line_number)
     }
     else
     {
+
         char *field_names[] = {""};
         char *formatting[] = {"%s"};
         row_writer_set_field_names(writer, field_names, 1);
@@ -110,6 +129,7 @@ void querie_1(GestorUsuarios *gestor, char *username, int line_number)
 
         write_row(writer, 1, "");
         free_and_finish_writing(writer);
+        free(output_file_name);
     }
 }
 

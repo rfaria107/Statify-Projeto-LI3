@@ -6,7 +6,6 @@ typedef struct rowReader
 
   char *row;
   char delimiter;
-  char *row_original;
 } RowReader;
 
 RowReader *initialize_row_reader(char *line, char delimiter)
@@ -17,12 +16,10 @@ RowReader *initialize_row_reader(char *line, char delimiter)
     return NULL;
   if (line != NULL)
   {
-    rowReader->row_original = g_strdup(line);
-    rowReader->row = g_strdup(line);
+    rowReader->row = line;
   }
   else
   {
-    rowReader->row_original = g_strdup("");
     rowReader->row = g_strdup("");
   }
   rowReader->delimiter = delimiter;
@@ -32,11 +29,9 @@ RowReader *initialize_row_reader(char *line, char delimiter)
 
 void reader_set_row(RowReader *reader, char *line)
 {
-  if (reader == NULL)
-    return;
-  free_row(reader);
-  reader->row_original = g_strdup(line);
-  reader->row = g_strdup(line);
+  if (reader != NULL)
+    free_row(reader);
+  reader->row = line;
 }
 
 char *reader_current_cell(RowReader *reader)
@@ -60,13 +55,10 @@ char *reader_next_cell(RowReader *reader)
   return start;
 }
 
-void free_row(RowReader *reader)//a row vai ser alterada, assim quando precisar de dar free coloco-a de volta no inicio para dar free à linha inteira
+void free_row(RowReader *reader) // a row vai ser alterada, assim quando precisar de dar free coloco-a de volta no inicio para dar free à linha inteira
 {
-    if (reader == NULL)
-        return;
-    reader->row = g_strdup(reader->row_original); //colocar a linha de volta no inicio
-    g_free(reader->row);
-    g_free(reader->row_original);          
+  if (reader != NULL)
+  g_free(reader->row);
 }
 
 void free_row_reader(RowReader *reader)
