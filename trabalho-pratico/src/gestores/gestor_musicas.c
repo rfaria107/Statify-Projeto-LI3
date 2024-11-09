@@ -6,6 +6,10 @@ struct GestorMusicas
     GHashTable *musicas; // Tabela hash de músicas
 };
 
+void free_music_value(gpointer value) {
+    free_musica((Musica *)value); // Assuming liberar_musica frees the Musica struct
+}
+
 GestorMusicas* criar_gestor_musicas() {
     GestorMusicas *gestor = malloc(sizeof(GestorMusicas));
     if (gestor) {
@@ -16,7 +20,7 @@ GestorMusicas* criar_gestor_musicas() {
 
 void inicializar_gestor_musicas(GestorMusicas *gestor)
 {
-    gestor->musicas = g_hash_table_new(g_str_hash, g_str_equal);
+    gestor->musicas = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, free_music_value);
 }
 
 void liberar_gestor_musicas(GestorMusicas *gestor)
@@ -26,8 +30,8 @@ void liberar_gestor_musicas(GestorMusicas *gestor)
 }
 
 void inserir_musica(GestorMusicas *gestor, Musica *musica) {
-    
-    g_hash_table_insert(gestor->musicas, (get_music_id(musica)), musica);
+    gchar *id = get_music_id(musica);
+    g_hash_table_insert(gestor->musicas, id, musica);
 }
 
 GHashTable *get_hash_musicas(GestorMusicas *gestor){
@@ -35,6 +39,6 @@ GHashTable *get_hash_musicas(GestorMusicas *gestor){
 }
 
 // Função para buscar uma música pelo ID único de música
-Musica* buscar_musicas(GestorMusicas *gestor, const gint id) {
-    return (Musica*) g_hash_table_lookup(gestor->musicas, GINT_TO_POINTER(id));
+Musica* buscar_musicas(GestorMusicas *gestor, const gchar *id) {
+    return (Musica*) g_hash_table_lookup(gestor->musicas, id);
 }

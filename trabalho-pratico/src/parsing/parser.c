@@ -41,7 +41,7 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             first_line = FALSE;
             continue; // o continue faz com que o resto do loop seja ignorado, deste modo nao processamos a primeira linha e copiamos a segunda para o buffer
         }
-        buffer = g_strstrip(buffer);
+        g_strstrip(buffer);
         reader_set_row(reader, buffer); // colocar o reader na linha atual
 
         if (tipo == 'a') // se o parser estiver a ser usado para processar um artista deve dar malloc a um novo artista e processar a linha atualmente contida no buffer
@@ -115,7 +115,6 @@ Artista *parse_csv_line_artista(RowReader *reader)
         if (cell == NULL || *cell == '\0')
         {
             g_ptr_array_free(campostemp, TRUE);
-            // NOTA adicionar writer aqui
             return NULL; // Falha no parsing se alguma celula estiver vazia
         }
         GString *campo = g_string_new(cell);
@@ -132,6 +131,10 @@ Artista *parse_csv_line_artista(RowReader *reader)
     // Funcao auxiliar que Preenche o artista
     Artista *artista = preenche_artista(campostemp);
     // Libera memória usada
+    if(!artista){
+            g_ptr_array_free(campostemp, TRUE);
+            return NULL;
+    }
     g_ptr_array_free(campostemp, TRUE);
 
     return artista;
@@ -180,6 +183,9 @@ Artista *preenche_artista(GPtrArray *campostemp)
         g_strfreev(id_constituent);
         return NULL;
     }
+    
+    g_strfreev(id_constituent);
+
     return artista;
 }
 
@@ -193,7 +199,7 @@ Musica *parse_csv_line_musica(RowReader *reader, GestorArtistas *gestorartistas)
     for (int i = 0; i < numcampos; i++)
     {
         cell = reader_next_cell(reader);
-        if (cell == NULL)
+        if (cell == NULL || *cell == '\0')
         {
             g_ptr_array_free(campostemp, TRUE);
             return NULL; // Falha no parsing se alguma celula estiver vazia
@@ -203,7 +209,6 @@ Musica *parse_csv_line_musica(RowReader *reader, GestorArtistas *gestorartistas)
         g_ptr_array_add(campostemp, g_string_free(campo, FALSE));
     }
 
-    // Verifica se o número de campos é o esperado
     if (campostemp->len != numcampos)
     {
         g_ptr_array_free(campostemp, TRUE);
@@ -212,11 +217,12 @@ Musica *parse_csv_line_musica(RowReader *reader, GestorArtistas *gestorartistas)
 
     Musica *musica = preenche_musica(campostemp, gestorartistas);
 
-    if (!musica)
+    if (!musica){
+        g_ptr_array_free(campostemp, TRUE);
         return NULL;
+    }
 
     g_ptr_array_free(campostemp, TRUE);
-
     return musica; // Retorna 1 se o parsing foi bem-sucedido
 }
 

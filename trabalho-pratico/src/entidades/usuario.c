@@ -101,47 +101,6 @@ void free_usuario(Usuario *usuario)
         g_free(usuario); // Libera a estrutura do usuário em si
     }
 }
-/*
-int parse_usuario_and_add_him(RowReader *reader, GestorUsuarios *gestorUser)
-{
-
-    char *username = reader_next_cell(reader);
-
-
-    char *email = reader_next_cell(reader);
-
-    char *first_name = reader_next_cell(reader);
-
-    char *last_name = reader_next_cell(reader);
-
-
-    char *birth_date_str = reader_next_cell(reader);
-
-    char *country = reader_next_cell(reader);
-
-
-    char *subscription_type = reader_next_cell(reader);
-
-
-    // Parsing liked music IDs
-    char **liked_musics_id = parse_liked_musics(reader);
-
-    // Cria o usuário com os dados parseados
-    Usuario *usuario = create_usuario(username, email, first_name, last_name,
-                                      birth_date_str, country, subscription_type,
-                                      liked_musics_id);
-
-    if (!usuario)
-        return 1;
-
-    // Insere o usuário no catálogo
-    adicionar_usuario(gestorUser, usuario);
-
-    free_usuario(usuario);
-
-    return 0;
-}
-*/
 
 gchar *user_get_id(Usuario *user) { return g_strdup(user->username); }
 
@@ -191,5 +150,6 @@ int calcularIdade(Usuario *usuario)
     int idade = anoAtual - ano;
     if (mes > mesAtual || (mes == mesAtual && dia > diaAtual))
         idade--;
+    g_free(birth_date);    
     return idade;
 }

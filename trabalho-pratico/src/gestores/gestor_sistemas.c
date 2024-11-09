@@ -40,6 +40,5 @@ void liberar_gestor_sistema(GestorSistema *gestor)
 {
     liberar_gestor_artistas(gestor->gestor_artistas);
     liberar_gestor_musicas(gestor->gestor_musicas);
-    
     free(gestor);
 }

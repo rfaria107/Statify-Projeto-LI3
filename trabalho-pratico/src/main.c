@@ -59,10 +59,13 @@ int main(int argc, char *argv[])
     
     char *pathinputs = g_strdup(argv[2]);
     FILE *fileinputs = fopen(pathinputs, "r");
+    if(fileinputs){
     interpreter_inputs(fileinputs,gestor);
     fclose(fileinputs);
-    
-    liberar_gestor_sistema(gestor);
+    }
+    g_free(pathinputs);
 
+    liberar_gestor_sistema(gestor);
+    
     return 0;
 }

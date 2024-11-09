@@ -60,6 +60,7 @@ gboolean validarDataUsuario(Usuario *usuario)
 
     if (!validarFormatoData(birth_date))
     {
+        free(birth_date);
         return FALSE;
     }
 
@@ -68,8 +69,11 @@ gboolean validarDataUsuario(Usuario *usuario)
 
     if (!validarMesEDia(mes, dia) || !validarDataFutura(ano, mes, dia))
     {
+        free(birth_date);
+
         return FALSE;
     }
+    free(birth_date);
 
     return TRUE;
 }
@@ -102,6 +106,7 @@ gboolean validaEmail(Usuario *usuario)
         {
             if (!g_ascii_islower(email[i]) && !g_ascii_isdigit(email[i]))
             {
+                g_free(email);
                 return FALSE;
             }
         }
@@ -109,30 +114,43 @@ gboolean validaEmail(Usuario *usuario)
         {
             if (!g_ascii_islower(email[i]))
             {
+                g_free(email);
                 return FALSE;
             }
         }
     }
 
     if (arroba_count != 1 || ponto_count != 1)
+    {
+        g_free(email);
         return FALSE;
+    }
     if (a == 0 || p == a + 1 || p == -1 || (p - a <= 1))
+    {
+        g_free(email);
         return FALSE;
-
+    }
     gint tamanho_apos_ponto = strlen(email) - p - 1;
     if (tamanho_apos_ponto < 2 || tamanho_apos_ponto > 3)
+    {
+        g_free(email);
         return FALSE;
+    }
 
+    g_free(email);
     return TRUE;
 }
 
 // Função que valida a subscrição do usuário
 gboolean valida_subscricao(Usuario *usuario)
 {
-    if (g_strcmp0(user_get_subscription_type(usuario), "normal") != 0 && g_strcmp0(user_get_subscription_type(usuario), "premium") != 0)
+    gchar *subscription_type = user_get_subscription_type(usuario);
+    if (g_strcmp0(subscription_type, "normal") != 0 && g_strcmp0(subscription_type, "premium") != 0)
     {
+        g_free(subscription_type);
         return FALSE;
     }
+    g_free(subscription_type);
     return TRUE;
 }
 
@@ -178,7 +196,8 @@ gboolean valida_user(Usuario *user, GestorMusicas *musics)
 
 gboolean tudoNum(gchar *str)
 {
-    if (str==NULL || str[0] == '\0') return FALSE;
+    if (str == NULL || str[0] == '\0')
+        return FALSE;
     for (gint i = 0; str[i] != '\0'; i++)
     {
         if (!isdigit(str[i]))
@@ -192,16 +211,21 @@ gboolean tudoNum(gchar *str)
 gboolean validaDuracao(Musica *musica)
 {
     gchar *duracao = get_music_duration(musica);
-    if (duracao == NULL) return FALSE;
-    if (strlen(duracao) != 8 || duracao[2] != ':' || duracao[5] != ':')
+    if (duracao == NULL)
         return FALSE;
-
+    if (strlen(duracao) != 8 || duracao[2] != ':' || duracao[5] != ':')
+    {
+        g_free(duracao);
+        return FALSE;
+    }
     gchar horasStr[3] = {duracao[0], duracao[1], '\0'};
     gchar minutosStr[3] = {duracao[3], duracao[4], '\0'};
     gchar segundosStr[3] = {duracao[6], duracao[7], '\0'};
 
     if (!tudoNum(horasStr) || !tudoNum(minutosStr) || !tudoNum(segundosStr))
     {
+        g_free(duracao);
+
         return FALSE;
     }
 
@@ -211,8 +235,11 @@ gboolean validaDuracao(Musica *musica)
 
     if (horas < 0 || horas > 99 || minutos < 0 || minutos > 59 || segundos < 0 || segundos > 59)
     {
+        g_free(duracao);
+
         return FALSE;
     }
+    g_free(duracao);
 
     return TRUE;
 }
@@ -240,22 +267,24 @@ gboolean valida_artista_individual(Artista *artista)
     {
         return FALSE;
     }
-
-    if (g_strcmp0(get_artist_type(artista), "individual") == 0)
+    gchar *tipo = get_artist_type(artista);
+    if (g_strcmp0(tipo, "individual") == 0)
     {
-        if (get_artist_id_constituent(artista) != NULL)
+        gchar **id_constituent = get_artist_id_constituent(artista);
+        if (id_constituent != NULL)
         {
+            g_free(tipo);
+            g_strfreev(id_constituent);
             return FALSE;
         }
+        else
+        {
+            g_free(tipo);
+            g_strfreev(id_constituent);
+            return TRUE;
+        }
     }
-
-    if (get_artist_id(artista) == NULL || get_artist_name(artista) == NULL ||
-        get_artist_recipe_per_stream(artista) <= 0 || get_artist_country(artista) == NULL ||
-        get_artist_type(artista) == NULL)
-    {
-        return FALSE;
-    }
-
+    g_free(tipo);
     return TRUE;
 }
 
@@ -276,7 +305,11 @@ int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas)
     for (int i = 0; artist_ids[i] != NULL; i++)
     {
         if (buscar_artista(gestorartistas, artist_ids[i]) == NULL)
-        return 0;
+        {
+            g_strfreev(artist_ids);
+            return 0;
+        }
     }
+    g_strfreev(artist_ids);
     return 1;
 }

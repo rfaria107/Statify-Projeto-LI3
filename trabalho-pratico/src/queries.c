@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <string.h>
-
+#include "../include/parsing/queries.h"
 #include "../include/entidades/artists.h"
 #include "../include/entidades/musica.h"
 #include "../include/entidades/usuario.h"
@@ -15,14 +15,14 @@
 
 void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
 {
-    char *buffer = NULL;
+    char *buffer = "";
     size_t buffer_size = 0;
     RowReader *reader = initialize_row_reader(buffer, ' ');
-    int line_number =1;
+    int line_number = 1;
 
     while (getline(&buffer, &buffer_size, file) != -1)
     {
-        buffer = g_strstrip(buffer);
+        g_strstrip(buffer);
         reader_set_row(reader, buffer);
         char *token = reader_next_cell(reader);
         // querie 1
@@ -30,7 +30,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
         {
             token = reader_next_cell(reader);
             GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
-            querie_1 (gestor_users,token,line_number);
+            querie_1(gestor_users, token, line_number);
         }
 
         else if (strcmp(token, "2") == 0)
@@ -41,6 +41,8 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             if (token != NULL)
             {
                 char *country = g_strdup(token);
+                // querie2(gestorsis,num,country)
+                g_free(country);
             }
             // querie2(gestorsis,num,country);
         }
@@ -59,28 +61,23 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             }
             // querie3(min_age,max_age,gestorsis);
         }
-
         line_number++;
     }
+    g_free(buffer);
+    free_row_reader(reader);
 }
 
-
-void querie_1(GestorUsuarios *gestor, const char *username,int line_number)
+void querie_1(GestorUsuarios *gestor, char *username, int line_number)
 {
-
-    GHashTable *usuarios = get_hash_usuarios(gestor);
-    Usuario *usuario = (Usuario *)g_hash_table_lookup(usuarios, username);
+    Usuario *usuario = buscar_usuario_id(gestor, username);
+    // Aloca dinamicamente o nome do arquivo baseado no número da linha
+    int size = snprintf(NULL, 0, "command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
     if (usuario)
     {
-        // Aloca dinamicamente o nome do arquivo baseado no número da linha
-        int size = snprintf(NULL, 0, "command%d_output.txt", line_number) + 1;
-        char *output_file_name = malloc(size);
-        snprintf(output_file_name, size, "command%d_output.txt", line_number);
-
-
-        RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
-
         // Define nomes e formatos dos campos para o RowWriter
         char *field_names[] = {"Email", "First Name", "Last Name", "Age", "Country"};
         char *formatting[] = {"%s", "%s", "%s", "%d", "%s"};
@@ -98,11 +95,21 @@ void querie_1(GestorUsuarios *gestor, const char *username,int line_number)
         write_row(writer, 5, mail, first_name, last_name, idade, country);
 
         free_and_finish_writing(writer);
-        free (output_file_name);
+        free(mail);
+        free(first_name);
+        free(last_name);
+        free(country);
+        free(output_file_name);
     }
     else
     {
-        printf("Usuário %s não encontrado.\n", username);
+        char *field_names[] = {""};
+        char *formatting[] = {"%s"};
+        row_writer_set_field_names(writer, field_names, 1);
+        row_writer_set_formatting(writer, formatting);
+
+        write_row(writer, 1, "");
+        free_and_finish_writing(writer);
     }
 }
 
