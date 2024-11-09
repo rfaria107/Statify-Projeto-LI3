@@ -66,7 +66,6 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             }
             else
             {
-                printf("erro no artista\n");
                 log_error(writer_error_artists, buffer);
                 free_artista(artista);
             }
@@ -164,27 +163,27 @@ Artista *preenche_artista(GPtrArray *campostemp)
     gchar *description = g_ptr_array_index(campostemp, 2);
     gchar *recipe_str = g_ptr_array_index(campostemp, 3);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 4);
+    if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
+    {
+        return NULL;
+    }
 
     gchar *country = g_ptr_array_index(campostemp, 5);
     gchar *type = g_ptr_array_index(campostemp, 6);
 
     gdouble recipe_per_stream = atof(recipe_str);
+    if ((strcmp(type, "individual") == 0) && strlen(artist_ids_str) != 2)
+        return NULL;
     gchar **id_constituent = NULL;
 
     if (strcmp(type, "individual") != 0)
     {
-        if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
-        {
-            return NULL;
-        }
         trim_parenteses_gchar(artist_ids_str);
         id_constituent = g_strsplit(artist_ids_str, ",", -1);
         for (int i = 0; id_constituent[i] != NULL; i++)
         {
             if (valida_single_quotes_lista_artistas(id_constituent[i]) == 0)
             {
-
-                printf("erro artista ''");
                 g_strfreev(id_constituent);
                 return NULL;
             }
