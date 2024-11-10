@@ -90,10 +90,11 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
 void querie_1(GestorUsuarios *gestor, char *username, int line_number)
 {
     Usuario *usuario = buscar_usuario_id(gestor, username);
-    // Aloca dinamicamente o nome do arquivo baseado no número da linha
-    int size = snprintf(NULL, 0, "command%d_output.txt", line_number) + 1;
-    char *output_file_name = malloc(size);
-    snprintf(output_file_name, size, "command%d_output.txt", line_number);
+// Agora com caminho para a pasta de resultados
+int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
+char *output_file_name = malloc(size);
+snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
+
     RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
     if (usuario)
@@ -261,9 +262,9 @@ void querie_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_
     generos_lista = g_list_sort(generos_lista, (GCompareFunc)compare_genre_popularity);
 
     // Aloca dinamicamente o nome do arquivo baseado no número da linha
-    int size = snprintf(NULL, 0, "command%d_output.txt", line_number) + 1;
+    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
-    snprintf(output_file_name, size, "command%d_output.txt", line_number);
+    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
     RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
     // Define nomes e formatos dos campos para o RowWriter
