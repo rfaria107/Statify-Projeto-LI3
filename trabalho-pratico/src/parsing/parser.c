@@ -24,19 +24,19 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
     RowWriter *writer_error_users;
     if (tipo == 'a')
     {
-        const char *error_file_artists = "artists_errors.csv";
+        const char *error_file_artists = "resultados/artists_errors.csv";
         writer_error_artists = initialize_error_writer(error_file_artists);
         escrever_cabecalho_artists_erro(writer_error_artists);
     }
     if (tipo == 'm')
     {
-        const char *error_file_musics = "musics_errors.csv";
+        const char *error_file_musics = "resultados/musics_errors.csv";
         writer_error_musics = initialize_error_writer(error_file_musics);
         escrever_cabecalho_musics_erro(writer_error_musics);
     }
     if (tipo == 'u')
     {
-        const char *error_file_users = "users_errors.csv";
+        const char *error_file_users = "resultados/users_errors.csv";
         writer_error_users = initialize_error_writer(error_file_users);
         escrever_cabecalho_users_erro(writer_error_users);
     }

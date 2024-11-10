@@ -4,6 +4,8 @@
         "artists.h": "c",
         "valida_user.h": "c",
         "parser.h": "c",
-        "queries.h": "c"
+        "queries.h": "c",
+        "string.h": "c",
+        "gestor_musicas.h": "c"
     }
 }

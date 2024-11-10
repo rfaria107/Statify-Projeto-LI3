@@ -4,31 +4,54 @@ CFLAGS = -Wall -g `pkg-config --cflags glib-2.0` -I$(INC_DIR)
 SRC_DIR = src
 INC_DIR = include
 
-# Adiciona todos os arquivos objeto
-OBJ = $(SRC_DIR)/main.o \
-      $(SRC_DIR)/entidades/usuario.o \
-      $(SRC_DIR)/entidades/musica.o \
-      $(SRC_DIR)/entidades/artists.o \
-      $(SRC_DIR)/gestores/gestor_usuarios.o \
-      $(SRC_DIR)/gestores/gestor_musicas.o \
-      $(SRC_DIR)/gestores/gestor_artistas.o \
-      $(SRC_DIR)/gestores/gestor_sistemas.o \
-      $(SRC_DIR)/parsing/parser.o \
-      $(SRC_DIR)/parsing/rowreader.o \
-      $(SRC_DIR)/parsing/string_utils.o \
-      $(SRC_DIR)/parsing/writer.o \
-      $(SRC_DIR)/parsing/file.o \
-      $(SRC_DIR)/validacao/valida.o \
-      $(SRC_DIR)/queries.o
+# Objetos principais (para o executável principal)
+OBJ_MAIN = $(SRC_DIR)/main.o \
+           $(SRC_DIR)/entidades/usuario.o \
+           $(SRC_DIR)/entidades/musica.o \
+           $(SRC_DIR)/entidades/artists.o \
+           $(SRC_DIR)/gestores/gestor_usuarios.o \
+           $(SRC_DIR)/gestores/gestor_musicas.o \
+           $(SRC_DIR)/gestores/gestor_artistas.o \
+           $(SRC_DIR)/gestores/gestor_sistemas.o \
+           $(SRC_DIR)/parsing/parser.o \
+           $(SRC_DIR)/parsing/rowreader.o \
+           $(SRC_DIR)/parsing/string_utils.o \
+           $(SRC_DIR)/parsing/writer.o \
+           $(SRC_DIR)/parsing/file.o \
+           $(SRC_DIR)/validacao/valida.o \
+           $(SRC_DIR)/queries.o
 
+# Objetos de teste (para o executável de testes)
+OBJ_TEST = $(SRC_DIR)/testes.o \
+           $(SRC_DIR)/entidades/usuario.o \
+           $(SRC_DIR)/entidades/musica.o \
+           $(SRC_DIR)/entidades/artists.o \
+           $(SRC_DIR)/gestores/gestor_usuarios.o \
+           $(SRC_DIR)/gestores/gestor_musicas.o \
+           $(SRC_DIR)/gestores/gestor_artistas.o \
+           $(SRC_DIR)/gestores/gestor_sistemas.o \
+           $(SRC_DIR)/parsing/parser.o \
+           $(SRC_DIR)/parsing/rowreader.o \
+           $(SRC_DIR)/parsing/string_utils.o \
+           $(SRC_DIR)/parsing/writer.o \
+           $(SRC_DIR)/parsing/file.o \
+           $(SRC_DIR)/validacao/valida.o \
+           $(SRC_DIR)/queries.o
+
+# Alvos (executáveis)
 TARGET = programa-principal
+TEST_TARGET = testes
 
 # Regra padrão
-all: $(TARGET)
+all: $(TARGET) $(TEST_TARGET)
 
-# Regra para compilar o executável
-$(TARGET): $(OBJ)
-	$(CC) -o $(TARGET) $(OBJ) `pkg-config --libs glib-2.0`
+# Regra para compilar o executável principal
+$(TARGET): $(OBJ_MAIN)
+	$(CC) -o $(TARGET) $(OBJ_MAIN) `pkg-config --libs glib-2.0`
+
+# Regra para compilar o programa de testes
+$(TEST_TARGET): $(OBJ_TEST)
+	$(CC) -o $(TEST_TARGET) $(OBJ_TEST) `pkg-config --libs glib-2.0`
 
 # Regras para compilar os arquivos .o
 $(SRC_DIR)/main.o: $(SRC_DIR)/main.c
@@ -76,6 +99,9 @@ $(SRC_DIR)/validacao/valida.o: $(SRC_DIR)/validacao/valida.c
 $(SRC_DIR)/queries.o: $(SRC_DIR)/queries.c  
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(SRC_DIR)/testes.o: $(SRC_DIR)/testes.c  
+	$(CC) $(CFLAGS) -c $< -o $@
+
 # Limpar arquivos gerados
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ_MAIN) $(OBJ_TEST) $(TARGET) $(TEST_TARGET)
