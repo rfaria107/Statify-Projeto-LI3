@@ -12,6 +12,7 @@ struct Artista
     gchar **id_constituent;    // Lista de IDs de membros (para grupos musicais), array dinâmico de strings
     gchar *country;            // País de origem (string dinâmica)
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
+    int duracao_discografia;   // Duração da discografia em segundos
 };
 
 gchar *get_artist_id(Artista *artista)
@@ -42,9 +43,25 @@ gchar **get_artist_id_constituent(Artista *artista)
     return copy;
 }
 
-gchar *get_artist_country(Artista *artista) { return g_strdup(artista->country); }
+gchar *get_artist_country(Artista *artista)
+{
+    return g_strdup(artista->country);
+}
 
-gchar *get_artist_type(Artista *artista) { return g_strdup(artista->type); }
+gchar *get_artist_type(Artista *artista)
+{
+    return g_strdup(artista->type);
+}
+
+int get_artist_duracao_disco(Artista *artista)
+{
+    return (artista->duracao_discografia);
+}
+
+void set_artista_duracao_disco(Artista *artista, gint nova_duração)
+{
+    artista->duracao_discografia = nova_duração;
+}
 
 Artista *inicializar_artista()
 {
@@ -62,7 +79,7 @@ Artista *inicializar_artista()
     artista->id_constituent = NULL;
     artista->country = NULL;
     artista->type = NULL;
-
+    artista->duracao_discografia = 0;
     return artista; // Retorna o ponteiro para o usuário inicializado
 }
 

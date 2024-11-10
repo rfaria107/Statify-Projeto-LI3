@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 
     char *path = g_strdup(argv[1]);
 
-    char *pathartistas = g_strconcat(path, "/com_erros/artists.csv", NULL);
+    char *pathartistas = g_strconcat(path, "/artists.csv", NULL);
 
     FILE *fileartistas = fopen(pathartistas, "r");
 
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     }
     g_free(pathartistas);
 
-    char *pathmusicas = g_strconcat(path, "/com_erros/musics.csv",NULL);
+    char *pathmusicas = g_strconcat(path, "/musics.csv",NULL);
     FILE *filemusicas = fopen(pathmusicas, "r");
     // dar parse às musicas
     if(filemusicas){
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     }
     g_free(pathmusicas);
 
-    char *pathusers = g_strconcat(path, "/com_erros/users.csv",NULL);
+    char *pathusers = g_strconcat(path, "/users.csv",NULL);
 
     FILE *fileusers = fopen(pathusers, "r");
     // dar parse aos users

@@ -10,15 +10,19 @@
 #include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/parsing/writer.h"
-#include "../include/parsing/rowreader.h"
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/parsing/string_utils.h"
+
+struct GenrePopularity
+{
+    char *genre;
+    int total_likes;
+};
 
 void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
 {
     char *buffer = "";
     size_t buffer_size = 0;
-    // RowReader *reader = initialize_row_reader(buffer, ' ');
     int line_number = 1;
 
     while (getline(&buffer, &buffer_size, file) != -1)
@@ -26,7 +30,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
         g_strstrip(buffer);
         if (strlen(buffer) == 0)
             continue; // Skipar linhas vazias
-        // reader_set_row(reader, buffer);
+
         char *token = procura_espaço(buffer);
         // querie 1
         if (strcmp(token, "1") == 0)
@@ -40,14 +44,15 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 g_free(token);
             }
         }
-
+        // querie 2
         else if (strcmp(token, "2") == 0)
         {
             g_free(token);
             token = procura_espaço2(buffer);
+            int num = 0;
             if (token != NULL)
             {
-                int num = atoi(token);
+                num = atoi(token);
                 g_free(token);
 
                 token = procura_espaço3(buffer);
@@ -56,35 +61,35 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             {
                 char *country = g_strdup(token);
                 g_free(token);
-                // querie2(gestorsis,num,country)
+                querie_2(gestorsis, num, country);
                 g_free(country);
             }
-            // querie2(gestorsis,num,country);
         }
+        // querie 3
         else if (strcmp(token, "3") == 0)
         {
             g_free(token);
             token = procura_espaço2(buffer);
+            int min_age = 0;
             if (token != NULL)
             {
-                int min_age = atoi(token);
+                min_age = atoi(token);
                 g_free(token);
                 token = procura_espaço3(buffer);
-                int max_age = 200;
-                querie_3 (min_age,max_age,gestorsis,line_number);
+                int max_age = 0;
                 if (token != NULL)
                 {
                     max_age = atoi(token);
                     g_free(token);
-                    querie_3 (min_age,max_age,gestorsis,line_number);
-
                 }
+                querie_3(min_age, max_age, gestorsis, line_number);
+                if (token != NULL)
+                    g_free(token);
             }
         }
         line_number++;
     }
     g_free(buffer);
-    // free_row_reader(reader);
 }
 
 void querie_1(GestorUsuarios *gestor, char *username, int line_number)
@@ -135,7 +140,55 @@ void querie_1(GestorUsuarios *gestor, char *username, int line_number)
     }
 }
 
-/*
+void querie_2(GestorSistema *gestorsis, int num, gchar *country)
+{
+    GestorArtistas *gestorartistas = get_gestor_artistas(gestorsis);
+    GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
+    GHashTable *hashartistas = get_hash_artistas(gestorartistas);
+    GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
+
+    if (!hashartistas || !gestormusicas)
+        return;
+
+    calcular_discografia_artistas(hashmusicas, hashartistas);
+
+    GList *lista_artistas = NULL;
+
+    if (country != NULL) // se existir filtro de país
+    {
+        GHashTableIter iter;
+        gpointer key, value;
+        g_hash_table_iter_init(&iter, hashartistas);
+
+        while (g_hash_table_iter_next(&iter, &key, &value))
+        {
+            Artista *artista = (Artista *)value;
+            char *artist_country = get_artist_country(artista);
+
+            // se pertencer ao país vai para a lista
+            if (g_strcmp0(artist_country, country) == 0)
+            {
+                lista_artistas = g_list_append(lista_artistas, artista);
+                g_free(artist_country);
+            }
+            g_free(artist_country);
+        }
+    }
+    else
+    {
+        lista_artistas = g_hash_table_get_values(hashmusicas);
+    }
+
+    lista_artistas = g_list_sort(lista_artistas, compara_duracoes_discografia);
+
+    // copiar só os top n artistas para uma lista final
+    GList *lista_top_n_artistas = NULL;
+    GList *node = lista_artistas;
+    for (int i = 0; i < num && node != NULL; i++, node = node->next)
+    {
+        lista_top_n_artistas = g_list_append(lista_top_n_artistas, node->data);
+    }
+}
 
 // Função para converter "HH:MM:SS" para segundos
 gint duracao_para_segundos(const gchar *duracao)
@@ -155,95 +208,140 @@ gchar *segundos_para_duracao(gint total_segundos)
     return g_strdup_printf("%02d:%02d:%02d", horas, minutos, segundos);
 }
 
-
-gchar *calcular_discografia(GestorArtistas *gestorartistas, const Artista *artista)
+void calcular_discografia_artistas(GHashTable *hashmusicas, GHashTable *hashartistas)
 {
-    GHashTable *hash_musicas = get_hash_table(gestorartistas);
-    gint duracao_total_segundos = 0;
 
-    for (int i = 0; get_ar != NULL && artista->id_constituent[i] != NULL; i++)
+    GList *lista_musicas = g_hash_table_get_values(hashmusicas);
+
+    for (GList *node = lista_musicas; node != NULL; node = node->next)
     {
-        gchar *id_musica = artista->id_constituent[i];
-        Musica *musica = (Musica *)g_hash_table_lookup(hash_musicas, id_musica);
+        Musica *musica = (Musica *)node->data;
+        if (!musica)
+            continue;
 
-        if (musica != NULL)
+        gchar *duracao_musica = get_music_duration(musica);
+
+        int duracao_musica_seg = duracao_para_segundos(duracao_musica);
+
+        gchar **artist_ids = get_music_artist_ids(musica);
+
+        for (int i = 0; artist_ids[i] != NULL; i++)
         {
-            duracao_total_segundos += duracao_para_segundos(musica ->duration);
+            gchar *artist_id = artist_ids[i];
+            Artista *artista = (Artista *)g_hash_table_lookup(hashartistas, artist_id);
+            if (artista != NULL)
+            {
+                int duracao_atual = get_artist_duracao_disco(artista);
+                int nova_duracao = duracao_atual + duracao_musica_seg;
+                set_artista_duracao_disco(artista, nova_duracao);
+            }
         }
+        g_free(duracao_musica);
+        g_strfreev(artist_ids);
     }
-
-    return segundos_para_duracao(duracao_total_segundos);
+    g_list_free(lista_musicas);
 }
 
-*/
+gint compara_duracoes_discografia(gconstpointer a, gconstpointer b)
+{
+    Artista *artista_a = (Artista *)a;
+    Artista *artista_b = (Artista *)b;
 
+    gint duracao_a = get_artist_duracao_disco(artista_a);
+    gint duracao_b = get_artist_duracao_disco(artista_b);
+
+    // Primary comparison by duration
+    if (duracao_a < duracao_b)
+        return 1;
+    else if (duracao_a > duracao_b)
+        return -1;
+
+    // Secondary comparison by artist name in alphabetical order if durations are equal
+    const gchar *nome_a = get_artist_name(artista_a);
+    const gchar *nome_b = get_artist_name(artista_b);
+    return g_strcmp0(nome_a, nome_b);
+}
 
 // Função para criar uma nova instância de GenrePopularity
-GenrePopularity *create_genre_popularity(const char *genre) {
-    GenrePopularity *gp = malloc(sizeof( GenrePopularity));
-    gp->genre = g_strdup(genre);  // Copia a string para evitar problemas de ponteiros
+GenrePopularity *create_genre_popularity(const char *genre)
+{
+    GenrePopularity *gp = malloc(sizeof(GenrePopularity));
+    gp->genre = g_strdup(genre); // Copia a string para evitar problemas de ponteiros
     gp->total_likes = 0;
     return gp;
 }
 
 // Função para liberar a memória de GenrePopularity
-void free_genre_popularity(GenrePopularity *gp) {
+void free_genre_popularity(GenrePopularity *gp)
+{
     g_free(gp->genre);
     free(gp);
 }
 
 // Função de comparação para ordenar primeiro pela popularidade e depois alfabeticamente (em caso de empate)
-int compare_genre_popularity(const void *a, const void *b) {
-    //Converter 
-    GenrePopularity *gp_a = (GenrePopularity *)a; 
+int compare_genre_popularity(const void *a, const void *b)
+{
+    // Converter
+    GenrePopularity *gp_a = (GenrePopularity *)a;
     GenrePopularity *gp_b = (GenrePopularity *)b;
 
-    if (gp_b->total_likes != gp_a->total_likes) {
-        return gp_b->total_likes - gp_a->total_likes;  // Ordena por likes decrescentemente
+    if (gp_b->total_likes != gp_a->total_likes)
+    {
+        return gp_b->total_likes - gp_a->total_likes; // Ordena por likes decrescentemente
     }
-    return g_strcmp0(gp_a->genre, gp_b->genre);  // Ordena alfabeticamente em caso de empate (usando uma funcao pre-definida do Glib)
+    return g_strcmp0(gp_a->genre, gp_b->genre); // Ordena alfabeticamente em caso de empate (usando uma funcao pre-definida do Glib)
 }
-void querie_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number) {
-    if (!gestor_sistema) {
+void querie_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number)
+{
+    if (!gestor_sistema)
+    {
         return;
     }
 
     GestorUsuarios *gestor_usuarios = get_gestor_usuarios(gestor_sistema);
     GestorMusicas *gestor_musicas = get_gestor_musicas(gestor_sistema);
-    if (!gestor_usuarios || !gestor_musicas) {
+    if (!gestor_usuarios || !gestor_musicas)
+    {
         return;
     }
 
     GHashTable *usuarios = get_hash_usuarios(gestor_usuarios);
-    if (!usuarios) {
+    if (!usuarios)
+    {
         return;
     }
 
     GHashTable *generos_likes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)free_genre_popularity);
 
-   // Parte que vai iterar sobre a hash criada onde ira armazena os generos verificados em cada musica
+    // Parte que vai iterar sobre a hash criada onde ira armazena os generos verificados em cada musica
     GHashTableIter iter;
     gpointer key, value;
     g_hash_table_iter_init(&iter, usuarios);
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
+    while (g_hash_table_iter_next(&iter, &key, &value))
+    {
         Usuario *usuario = (Usuario *)value;
-        
+
         int idade = calcularIdade(usuario); // clcular a idade de cada usuario
 
-        if (idade >= min_age && idade <= max_age) { // a idade_min e a idade_max inclusive
+        if (idade >= min_age && idade <= max_age)
+        {                                                             // a idade_min e a idade_max inclusive
             gchar **liked_musics = user_get_liked_musics_id(usuario); // Em caso positivo acedemos ás liked_musics do artista
 
-            if (liked_musics == NULL || *liked_musics == NULL) {
+            if (liked_musics == NULL || *liked_musics == NULL)
+            {
                 continue; // Caso o usuário não tenha músicas curtidas, ignora
             }
 
-            for (gchar **music_id = liked_musics; *music_id != NULL; music_id++) {
+            for (gchar **music_id = liked_musics; *music_id != NULL; music_id++)
+            {
                 Musica *musica = buscar_musicas(gestor_musicas, *music_id);
-                if (musica) {
+                if (musica)
+                {
                     char *genre = get_music_genre(musica);
 
                     GenrePopularity *gp = (GenrePopularity *)g_hash_table_lookup(generos_likes, genre);
-                    if (!gp) {
+                    if (!gp)
+                    {
                         gp = create_genre_popularity(genre);
                         g_hash_table_insert(generos_likes, g_strdup(genre), gp);
                     }
@@ -254,9 +352,8 @@ void querie_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_
             g_strfreev(liked_musics); // Libera o array de strings após o uso
         }
     }
- 
 
- //  Tranformar a hastable dos generos e likes, numa lista ligada
+    //  Tranformar a hastable dos generos e likes, numa lista ligada
     GList *generos_lista = g_hash_table_get_values(generos_likes);
     generos_lista = g_list_sort(generos_lista, (GCompareFunc)compare_genre_popularity);
 
@@ -271,17 +368,21 @@ void querie_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_
     char *formatting[] = {"%s", "%d"};
     row_writer_set_field_names(writer, field_names, 2);
     row_writer_set_formatting(writer, formatting);
-    
+
     // Mesmo que o output seja vazio, o ficheiro tem que ser criado
-    if (generos_lista == NULL) {
+    if (generos_lista == NULL)
+    {
         char *field_names_empty[] = {""};
         char *formatting_empty[] = {"%s"};
         row_writer_set_field_names(writer, field_names_empty, 1);
         row_writer_set_formatting(writer, formatting_empty);
         write_row(writer, 1, "");
-    } else {
-        // Imprime os gêneros e likes no arquivo 
-            for (GList *node = generos_lista; node != NULL; node = node->next) {
+    }
+    else
+    {
+        // Imprime os gêneros e likes no arquivo
+        for (GList *node = generos_lista; node != NULL; node = node->next)
+        {
             GenrePopularity *gp = (GenrePopularity *)node->data;
             write_row(writer, 2, gp->genre, gp->total_likes);
         }

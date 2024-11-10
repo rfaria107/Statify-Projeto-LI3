@@ -13,6 +13,9 @@ gdouble get_artist_recipe_per_stream(Artista *artista);
 gchar **get_artist_id_constituent(Artista *artista);
 gchar *get_artist_country(Artista *artista);
 gchar *get_artist_type(Artista *artista);
+int get_artist_duracao_disco(Artista *artista);
+
+void set_artista_duracao_disco(Artista *artista, gint nova_duração);
 
 // Funções para manipulação de artistas
 void free_artista(Artista *artista);
