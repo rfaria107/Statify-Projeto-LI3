@@ -3,6 +3,7 @@
     "files.associations": {
         "artists.h": "c",
         "valida_user.h": "c",
-        "parser.h": "c"
+        "parser.h": "c",
+        "queries.h": "c"
     }
 }

@@ -7,17 +7,11 @@
 
 typedef struct rowReader RowReader;
 
-// Função para inicializar o RowReader
-RowReader *initialize_row_reader(char *line, char delimiter);
-
-//Define a linha atual do rowReader
-void reader_set_row(RowReader *reader, char *line);
-
-// Função para ler a próxima célula
-char *reader_next_cell(RowReader *reader);
-//função para libertar a row
-void free_row(RowReader *reader);
-// Função para liberar a memória do RowReader
+RowReader *initialize_row_reader(const char *line, char delimiter);
+void reset_row(RowReader *reader, const char *line);
+char *get_current_cell(const RowReader *reader);
+char *get_next_cell(RowReader *reader);
+void free_row_content(RowReader *reader);
 void free_row_reader(RowReader *reader);
 
 #endif // ROW_READER_H

@@ -71,13 +71,15 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 g_free(token);
                 token = procura_espaço3(buffer);
                 int max_age = 200;
+                querie_3 (min_age,max_age,gestorsis,line_number);
                 if (token != NULL)
                 {
                     max_age = atoi(token);
                     g_free(token);
+                    querie_3 (min_age,max_age,gestorsis,line_number);
+
                 }
             }
-            // querie3(min_age,max_age,gestorsis);
         }
         line_number++;
     }
@@ -173,51 +175,121 @@ gchar *calcular_discografia(GestorArtistas *gestorartistas, const Artista *artis
     return segundos_para_duracao(duracao_total_segundos);
 }
 
+*/
 
-Querie 3
 
-void querie_3(int idade_min, int idade_max, GHashTable *gestor_usuarios, GHashTable *gestor_musicas) {
+// Função para criar uma nova instância de GenrePopularity
+GenrePopularity *create_genre_popularity(const char *genre) {
+    GenrePopularity *gp = malloc(sizeof( GenrePopularity));
+    gp->genre = g_strdup(genre);  // Copia a string para evitar problemas de ponteiros
+    gp->total_likes = 0;
+    return gp;
+}
+
+// Função para liberar a memória de GenrePopularity
+void free_genre_popularity(GenrePopularity *gp) {
+    g_free(gp->genre);
+    free(gp);
+}
+
+// Função de comparação para ordenar primeiro pela popularidade e depois alfabeticamente (em caso de empate)
+int compare_genre_popularity(const void *a, const void *b) {
+    //Converter 
+    GenrePopularity *gp_a = (GenrePopularity *)a; 
+    GenrePopularity *gp_b = (GenrePopularity *)b;
+
+    if (gp_b->total_likes != gp_a->total_likes) {
+        return gp_b->total_likes - gp_a->total_likes;  // Ordena por likes decrescentemente
+    }
+    return g_strcmp0(gp_a->genre, gp_b->genre);  // Ordena alfabeticamente em caso de empate (usando uma funcao pre-definida do Glib)
+}
+void querie_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number) {
+    if (!gestor_sistema) {
+        return;
+    }
+
+    GestorUsuarios *gestor_usuarios = get_gestor_usuarios(gestor_sistema);
+    GestorMusicas *gestor_musicas = get_gestor_musicas(gestor_sistema);
+    if (!gestor_usuarios || !gestor_musicas) {
+        return;
+    }
+
+    GHashTable *usuarios = get_hash_usuarios(gestor_usuarios);
+    if (!usuarios) {
+        return;
+    }
+
+    GHashTable *generos_likes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)free_genre_popularity);
+
+   // Parte que vai iterar sobre a hash criada onde ira armazena os generos verificados em cada musica
     GHashTableIter iter;
     gpointer key, value;
-    GHashTable *genero_contagem = g_hash_table_new(g_str_hash, g_str_equal);
-
-    // Itera pelos usuários
-    g_hash_table_iter_init(&iter, gestor_usuarios);
+    g_hash_table_iter_init(&iter, usuarios);
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         Usuario *usuario = (Usuario *)value;
-        if (usuario == NULL) continue; // Verifica se o usuário é NULL
-        int idade = calcularIdade(usuario);
+        
+        int idade = calcularIdade(usuario); // clcular a idade de cada usuario
 
-        // Verifica se o usuário está dentro da faixa etária
-        if (idade >= idade_min && idade <= idade_max) {
+        if (idade >= min_age && idade <= max_age) { // a idade_min e a idade_max inclusive
+            gchar **liked_musics = user_get_liked_musics_id(usuario); // Em caso positivo acedemos ás liked_musics do artista
 
-            // Itera pelas músicas curtidas pelo usuário
-            for (int i = 0; usuario->liked_musics_id && usuario->liked_musics_id[i] != NULL; i++) {
-                int music_id = atoi(usuario->liked_musics_id[i]);
+            if (liked_musics == NULL || *liked_musics == NULL) {
+                continue; // Caso o usuário não tenha músicas curtidas, ignora
+            }
 
-                Musica *musica = g_hash_table_lookup(gestor_musicas, GINT_TO_POINTER(music_id));
-                if (musica != NULL && musica->genre != NULL) {
-                    const char *genero = musica->genre;
+            for (gchar **music_id = liked_musics; *music_id != NULL; music_id++) {
+                Musica *musica = buscar_musicas(gestor_musicas, *music_id);
+                if (musica) {
+                    char *genre = get_music_genre(musica);
 
-                    gpointer count_ptr = g_hash_table_lookup(genero_contagem, genero);
-                    int count = (count_ptr != NULL) ? GPOINTER_TO_INT(count_ptr) : 0;
-                    g_hash_table_insert(genero_contagem, g_strdup(genero), GINT_TO_POINTER(count + 1));
+                    GenrePopularity *gp = (GenrePopularity *)g_hash_table_lookup(generos_likes, genre);
+                    if (!gp) {
+                        gp = create_genre_popularity(genre);
+                        g_hash_table_insert(generos_likes, g_strdup(genre), gp);
+                    }
+                    gp->total_likes++;
                 }
             }
+
+            g_strfreev(liked_musics); // Libera o array de strings após o uso
+        }
+    }
+ 
+
+ //  Tranformar a hastable dos generos e likes, numa lista ligada
+    GList *generos_lista = g_hash_table_get_values(generos_likes);
+    generos_lista = g_list_sort(generos_lista, (GCompareFunc)compare_genre_popularity);
+
+    // Aloca dinamicamente o nome do arquivo baseado no número da linha
+    int size = snprintf(NULL, 0, "command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+
+    // Define nomes e formatos dos campos para o RowWriter
+    char *field_names[] = {"Genre", "Total Likes"};
+    char *formatting[] = {"%s", "%d"};
+    row_writer_set_field_names(writer, field_names, 2);
+    row_writer_set_formatting(writer, formatting);
+    
+    // Mesmo que o output seja vazio, o ficheiro tem que ser criado
+    if (generos_lista == NULL) {
+        char *field_names_empty[] = {""};
+        char *formatting_empty[] = {"%s"};
+        row_writer_set_field_names(writer, field_names_empty, 1);
+        row_writer_set_formatting(writer, formatting_empty);
+        write_row(writer, 1, "");
+    } else {
+        // Imprime os gêneros e likes no arquivo 
+            for (GList *node = generos_lista; node != NULL; node = node->next) {
+            GenrePopularity *gp = (GenrePopularity *)node->data;
+            write_row(writer, 2, gp->genre, gp->total_likes);
         }
     }
 
-    // Ordenação e exibição
-    GList *genero_lista = g_hash_table_get_keys(genero_contagem);
-    genero_lista = g_list_sort(genero_lista, (GCompareFunc)g_ascii_strcasecmp);
+    free_and_finish_writing(writer);
+    free(output_file_name);
 
-    for (GList *iter = genero_lista; iter != NULL; iter = iter->next) {
-        const char *genero = iter->data;
-        int count = GPOINTER_TO_INT(g_hash_table_lookup(genero_contagem, genero));
-        printf("%s: % curtidas\n", genero, count);
-    }
-
-    g_list_free_full(genero_lista, g_free);
-    g_hash_table_destroy(genero_contagem);
+    g_list_free(generos_lista);
+    g_hash_table_destroy(generos_likes);
 }
-*/
