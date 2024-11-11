@@ -40,7 +40,7 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
 
 # Alvos (executáveis)
 TARGET = programa-principal
-TEST_TARGET = testes
+TEST_TARGET = programa-testes
 
 # Regra padrão
 all: $(TARGET) $(TEST_TARGET)
