@@ -11,7 +11,6 @@
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/gestores/gestor_usuarios.h"
-#include "../include/parsing/rowreader.h"
 
 void parser_principal(FILE *file, GestorSistema *gestor, char tipo);
 Artista *parse_csv_line_artista(gchar *line);

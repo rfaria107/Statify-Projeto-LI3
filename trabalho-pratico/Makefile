@@ -14,7 +14,6 @@ OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/gestores/gestor_artistas.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
            $(SRC_DIR)/parsing/parser.o \
-           $(SRC_DIR)/parsing/rowreader.o \
            $(SRC_DIR)/parsing/string_utils.o \
            $(SRC_DIR)/parsing/writer.o \
            $(SRC_DIR)/parsing/file.o \
@@ -31,7 +30,6 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/gestores/gestor_artistas.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
            $(SRC_DIR)/parsing/parser.o \
-           $(SRC_DIR)/parsing/rowreader.o \
            $(SRC_DIR)/parsing/string_utils.o \
            $(SRC_DIR)/parsing/writer.o \
            $(SRC_DIR)/parsing/file.o \
@@ -79,9 +77,6 @@ $(SRC_DIR)/gestores/gestor_sistemas.o: $(SRC_DIR)/gestores/gestor_sistemas.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/parsing/parser.o: $(SRC_DIR)/parsing/parser.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(SRC_DIR)/parsing/rowreader.o: $(SRC_DIR)/parsing/rowreader.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/parsing/string_utils.o: $(SRC_DIR)/parsing/string_utils.c   

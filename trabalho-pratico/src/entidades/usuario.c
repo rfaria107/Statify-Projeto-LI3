@@ -3,7 +3,6 @@
 #include <glib.h>
 #include "../../include/entidades/usuario.h"
 #include "../../include/entidades/musica.h"
-#include "../../include/parsing/rowreader.h"
 #include "../../include/gestores/gestor_usuarios.h"
 
 struct Usuario

@@ -11,7 +11,6 @@
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/parsing/parser.h"
-#include "../include/parsing/rowreader.h"
 #include "../include/parsing/string_utils.h"
 #include "../include/validacao/valida.h"
 

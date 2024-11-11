@@ -9,7 +9,6 @@
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/gestores/gestor_artistas.h"
-#include "../include/parsing/rowreader.h"
 #include "../include/validacao/valida.h"
 #include "../include/parsing/writer.h"
 
@@ -52,7 +51,6 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             continue; // o continue faz com que o resto do loop seja ignorado, deste modo nao processamos a primeira linha e copiamos a segunda para o buffer
         }
         g_strstrip(buffer);
-        // reader_set_row(reader, buffer); // colocar o reader na linha atual
 
         if (tipo == 'a') // se o parser estiver a ser usado para processar um artista deve dar malloc a um novo artista e processar a linha atualmente contida no buffer
         {
@@ -105,7 +103,6 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
     }
 
     free(buffer);
-    // free_row_reader(reader);
     if (tipo == 'a')
         free_and_finish_writing(writer_error_artists);
     if (tipo == 'm')
