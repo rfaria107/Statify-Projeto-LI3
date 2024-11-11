@@ -50,9 +50,7 @@ gint get_music_year(Musica *musica) { return musica->year; }
 
 gchar *get_music_lyrics(Musica *musica) { return g_strdup(musica->lyrics); }
 
-Musica *create_musica(char *id, char *title, char **artist_ids,
-                      char *duration, char *genre, int year,
-                      char *lyrics)
+Musica *create_musica(char *id, char *title, char **artist_ids, char *duration, char *genre, int year, char *lyrics)
 {
     Musica *musica = inicializar_musica();
 
@@ -98,7 +96,6 @@ Musica *inicializar_musica()
     musica->id = NULL;
     musica->title = NULL;
     musica->artist_ids = NULL;
-    ;
     musica->duration = NULL;
     musica->genre = NULL;
     musica->year = 0;

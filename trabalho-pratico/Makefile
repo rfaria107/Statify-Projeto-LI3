@@ -19,7 +19,7 @@ OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/parsing/writer.o \
            $(SRC_DIR)/parsing/file.o \
            $(SRC_DIR)/validacao/valida.o \
-           $(SRC_DIR)/queries.o
+           $(SRC_DIR)/queries.o \
 
 # Objetos de teste (para o executável de testes)
 OBJ_TEST = $(SRC_DIR)/testes.o \
@@ -36,7 +36,7 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/parsing/writer.o \
            $(SRC_DIR)/parsing/file.o \
            $(SRC_DIR)/validacao/valida.o \
-           $(SRC_DIR)/queries.o
+           $(SRC_DIR)/queries.o \
 
 # Alvos (executáveis)
 TARGET = programa-principal

@@ -18,7 +18,6 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
     char *buffer = NULL;
     size_t buffer_size = 0;
     gboolean first_line = TRUE;
-    // RowReader *reader = initialize_row_reader(buffer, ';');
     RowWriter *writer_error_artists;
     RowWriter *writer_error_musics;
     RowWriter *writer_error_users;
@@ -294,7 +293,6 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas)
     }
 
     g_strfreev(artist_ids);
-
     return musica;
 }
 

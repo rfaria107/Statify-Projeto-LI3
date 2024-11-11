@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
     char *path = g_strdup(argv[1]);
 
     // Parse dos arquivos de entrada
-    char *pathartistas = g_strconcat(path, "/com_erros/artists.csv", NULL);
+    char *pathartistas = g_strconcat(path, "/artists.csv", NULL);
     FILE *fileartistas = fopen(pathartistas, "r");
     if (fileartistas) {
         parser_principal(fileartistas, gestor, 'a');
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
     }
     g_free(pathartistas);
 
-    char *pathmusicas = g_strconcat(path, "/com_erros/musics.csv", NULL);
+    char *pathmusicas = g_strconcat(path, "/musics.csv", NULL);
     FILE *filemusicas = fopen(pathmusicas, "r");
     if (filemusicas) {
         parser_principal(filemusicas, gestor, 'm');
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     }
     g_free(pathmusicas);
 
-    char *pathusers = g_strconcat(path, "/com_erros/users.csv", NULL);
+    char *pathusers = g_strconcat(path, "/users.csv", NULL);
     FILE *fileusers = fopen(pathusers, "r");
     if (fileusers) {
         parser_principal(fileusers, gestor, 'u');

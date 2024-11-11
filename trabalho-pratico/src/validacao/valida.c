@@ -200,7 +200,7 @@ gboolean tudoNum(gchar *str)
         return FALSE;
     for (gint i = 0; str[i] != '\0'; i++)
     {
-        if (!isdigit(str[i]))
+        if (!g_ascii_isdigit(str[i]))
         {
             return FALSE;
         }
@@ -225,7 +225,6 @@ gboolean validaDuracao(Musica *musica)
     if (!tudoNum(horasStr) || !tudoNum(minutosStr) || !tudoNum(segundosStr))
     {
         g_free(duracao);
-
         return FALSE;
     }
 
@@ -236,11 +235,9 @@ gboolean validaDuracao(Musica *musica)
     if (horas < 0 || horas > 99 || minutos < 0 || minutos > 59 || segundos < 0 || segundos > 59)
     {
         g_free(duracao);
-
         return FALSE;
     }
     g_free(duracao);
-
     return TRUE;
 }
 // valida se a lista de artistas duma música ou banda começa e acaba em []

@@ -35,36 +35,39 @@ int main(int argc, char *argv[])
     }
     g_free(pathartistas);
 
-    char *pathmusicas = g_strconcat(path, "/musics.csv",NULL);
+    char *pathmusicas = g_strconcat(path, "/musics.csv", NULL);
     FILE *filemusicas = fopen(pathmusicas, "r");
     // dar parse às musicas
-    if(filemusicas){
-    parser_principal(filemusicas, gestor, 'm');
-    fclose(filemusicas);
+    if (filemusicas)
+    {
+        parser_principal(filemusicas, gestor, 'm');
+        fclose(filemusicas);
     }
     g_free(pathmusicas);
 
-    char *pathusers = g_strconcat(path, "/users.csv",NULL);
+    char *pathusers = g_strconcat(path, "/users.csv", NULL);
 
     FILE *fileusers = fopen(pathusers, "r");
     // dar parse aos users
-    if(fileusers){
-    parser_principal(fileusers, gestor, 'u');
-    fclose(fileusers);
+    if (fileusers)
+    {
+        parser_principal(fileusers, gestor, 'u');
+        fclose(fileusers);
     }
     g_free(pathusers);
 
     g_free(path);
-    
+
     char *pathinputs = g_strdup(argv[2]);
     FILE *fileinputs = fopen(pathinputs, "r");
-    if(fileinputs){
-    interpreter_inputs(fileinputs,gestor);
-    fclose(fileinputs);
+    if (fileinputs)
+    {
+        interpreter_inputs(fileinputs, gestor);
+        fclose(fileinputs);
     }
     g_free(pathinputs);
 
     liberar_gestor_sistema(gestor);
-    
+
     return 0;
 }

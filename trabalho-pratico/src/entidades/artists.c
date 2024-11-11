@@ -12,7 +12,7 @@ struct Artista
     gchar **id_constituent;    // Lista de IDs de membros (para grupos musicais), array dinâmico de strings
     gchar *country;            // País de origem (string dinâmica)
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
-    int duracao_discografia;   // Duração da discografia em segundos
+    gint duracao_discografia;   // Duração da discografia em segundos
 };
 
 gchar *get_artist_id(Artista *artista)
@@ -53,7 +53,7 @@ gchar *get_artist_type(Artista *artista)
     return g_strdup(artista->type);
 }
 
-int get_artist_duracao_disco(Artista *artista)
+gint get_artist_duracao_disco(Artista *artista)
 {
     return (artista->duracao_discografia);
 }
@@ -71,7 +71,7 @@ Artista *inicializar_artista()
         return NULL; // Retorna NULL se a alocação falhar
     }
 
-    // Inicializa os campos do usuário
+    // Inicializa os campos do artista
     artista->id = NULL;
     artista->name = NULL;
     artista->description = NULL;
@@ -80,7 +80,7 @@ Artista *inicializar_artista()
     artista->country = NULL;
     artista->type = NULL;
     artista->duracao_discografia = 0;
-    return artista; // Retorna o ponteiro para o usuário inicializado
+    return artista;
 }
 
 void free_artista(Artista *artista)
@@ -120,7 +120,7 @@ Artista *create_artista(gchar *id, gchar *name, gchar *description, gdouble reci
     artista->recipe_per_stream = recipe_per_stream;
     artista->country = g_strdup(country);
     artista->type = g_strdup(type);
-
+    
     // Inicializa a lista de IDs de membros, se fornecida
     if (id_constituent)
     {
@@ -141,6 +141,5 @@ Artista *create_artista(gchar *id, gchar *name, gchar *description, gdouble reci
     {
         artista->id_constituent = NULL; // Caso não haja membros, define como NULL
     }
-
     return artista; // Retorna o artista criado
 }
