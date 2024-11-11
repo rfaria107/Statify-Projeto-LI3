@@ -93,8 +93,8 @@ void compare_all_files(const char *dir1, const char *dir2) {
     int missing_files_in_dir2 = 0;
     int total_expected_files = 0;
 
-    GHashTable *expected_files = g_hash_table_new(g_str_hash, g_str_equal);
-
+    GHashTable *expected_files = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    
     // Adicionar todos os arquivos do diretório `resultados-esperados` a uma hash table
     while ((entry = readdir(dp2)) != NULL) {
         if (entry->d_type == DT_REG) {  // Apenas arquivos regulares
@@ -143,6 +143,7 @@ void compare_all_files(const char *dir1, const char *dir2) {
     // Exibe os resultados
     printf("Arquivos .txt corretos: %d de %d\n", matching_files, total_files);
     printf("Arquivos .txt faltando em 'resultados': %d de %d\n", missing_files_in_dir2, total_expected_files);
+    g_hash_table_destroy(expected_files);
 }
 
 // Função principal
