@@ -1,9 +1,9 @@
-#include "../include/parsing/writer.h"
+#include "../include/write/writer.h"
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../include/parsing/file.h"
+#include "../include/write/file.h"
 
 #define BUFFER_SIZE 1024
 #define VALUE_BUFFER_SIZE 128
@@ -82,6 +82,8 @@ void write_row(RowWriter *writer, int fields, ...)
     va_end(args); // Finaliza a manipulação dos argumentos variáveis
 }
 
+
+// Escrever ficheiros de erro
 void log_error(RowWriter *error_writer, const char *error_line)
 {
     append_to_file_buffer(error_writer->buffer, error_line);

@@ -21,5 +21,7 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas);
 
 Usuario *parse_csv_line_usuario(gchar* line, GestorMusicas *gestormusicas);
 Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas);
+int open_file(int argc, char *argv[]);
+
 
 #endif

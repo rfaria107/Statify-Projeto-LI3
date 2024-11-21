@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../include/parsing/file.h"
+#include "../include/write/file.h"
 
 FileBuffer *initialize_file_buffer(const char *file_name) {
   FileBuffer *buffer = malloc(sizeof(FileBuffer));

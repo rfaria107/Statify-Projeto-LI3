@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <string.h>
-#include "../include/parsing/queries.h"
+#include "../include/queries.h"
 #include "../include/entidades/artists.h"
 #include "../include/entidades/musica.h"
 #include "../include/entidades/usuario.h"
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_usuarios.h"
-#include "../include/parsing/writer.h"
+#include "../include/write/writer.h"
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/parsing/string_utils.h"
 

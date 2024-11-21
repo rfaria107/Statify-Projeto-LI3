@@ -4,7 +4,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include "../include/gestores/gestor_sistemas.h"
-#include "../include/parsing/writer.h"
+#include "../include/write/writer.h"
 
 // Estrutura para representar a popularidade de um gênero
 typedef struct GenrePopularity GenrePopularity;

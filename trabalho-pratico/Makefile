@@ -15,8 +15,8 @@ OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
            $(SRC_DIR)/parsing/parser.o \
            $(SRC_DIR)/parsing/string_utils.o \
-           $(SRC_DIR)/parsing/writer.o \
-           $(SRC_DIR)/parsing/file.o \
+           $(SRC_DIR)/write/writer.o \
+           $(SRC_DIR)/write/file.o \
            $(SRC_DIR)/validacao/valida.o \
            $(SRC_DIR)/queries.o \
 
@@ -31,8 +31,8 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
            $(SRC_DIR)/parsing/parser.o \
            $(SRC_DIR)/parsing/string_utils.o \
-           $(SRC_DIR)/parsing/writer.o \
-           $(SRC_DIR)/parsing/file.o \
+           $(SRC_DIR)/write/writer.o \
+           $(SRC_DIR)/write/file.o \
            $(SRC_DIR)/validacao/valida.o \
            $(SRC_DIR)/queries.o \
 
@@ -82,10 +82,10 @@ $(SRC_DIR)/parsing/parser.o: $(SRC_DIR)/parsing/parser.c
 $(SRC_DIR)/parsing/string_utils.o: $(SRC_DIR)/parsing/string_utils.c   
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/parsing/writer.o: $(SRC_DIR)/parsing/writer.c   
+$(SRC_DIR)/write/writer.o: $(SRC_DIR)/write/writer.c   
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/parsing/file.o: $(SRC_DIR)/parsing/file.c   
+$(SRC_DIR)/write/file.o: $(SRC_DIR)/write/file.c   
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/validacao/valida.o: $(SRC_DIR)/validacao/valida.c  
