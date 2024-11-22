@@ -21,5 +21,7 @@ int valida_parenteses_lista_artistas(gchar *lista_artistas);
 int valida_single_quotes_lista_artistas(gchar *artista);
 int valida_ano_lançamento(Musica *musica);
 int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas);
+gboolean valida_album (Musica *musica, GestorAlbuns *gestor_albuns);
+gboolean valida_artista_tipo (Artista *artista);
 
 #endif

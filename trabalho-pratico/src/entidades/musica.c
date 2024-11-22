@@ -9,10 +9,12 @@ struct Musica
     gchar *id;          // ID único da música
     gchar *title;       // Título da música (string dinâmica)
     gchar **artist_ids; // Lista de IDs dos artistas (array dinâmico de strings)
+    gchar *album_id; // identificador do album a que a música pertence
     gchar *duration;    // Duração da música em segundos
     gchar *genre;       // Gênero (string dinâmica)
     gint year;          // Ano de lançamento
-    gchar *lyrics;      // Letra da música (string dinâmica)
+    gchar *lyrics;
+          // Letra da música (string dinâmica)
 };
 
 // Função para criar músicas
@@ -42,6 +44,8 @@ gchar **get_music_artist_ids(Musica *musica)
     return artist_ids_copy;
 }
 
+gchar *get_music_album (Musica *musica) {return g_strdup(musica->album_id);}
+
 gchar *get_music_duration(Musica *musica) { return g_strdup(musica->duration); }
 
 gchar *get_music_genre(Musica *musica) { return g_strdup(musica->genre); }
@@ -50,7 +54,7 @@ gint get_music_year(Musica *musica) { return musica->year; }
 
 gchar *get_music_lyrics(Musica *musica) { return g_strdup(musica->lyrics); }
 
-Musica *create_musica(char *id, char *title, char **artist_ids, char *duration, char *genre, int year, char *lyrics)
+Musica *create_musica(char *id, char *title, char **artist_ids, char *album_id, char *duration, char *genre, int year, char *lyrics)
 {
     Musica *musica = inicializar_musica();
 
@@ -58,6 +62,7 @@ Musica *create_musica(char *id, char *title, char **artist_ids, char *duration, 
     musica->id = g_strdup(id);
     musica->year = year;
     musica->title = g_strdup(title);
+    musica->album_id = g_strdup(album_id);
     musica->duration = g_strdup(duration);
     musica->genre = g_strdup(genre);
     musica->lyrics = g_strdup(lyrics);
@@ -96,6 +101,7 @@ Musica *inicializar_musica()
     musica->id = NULL;
     musica->title = NULL;
     musica->artist_ids = NULL;
+    musica->album_id = NULL;
     musica->duration = NULL;
     musica->genre = NULL;
     musica->year = 0;
@@ -121,7 +127,7 @@ void free_musica(Musica *musica)
             }
             g_free(musica->artist_ids); // Libera o array de IDs
         }
-
+        g_free (musica->album_id);
         g_free(musica->duration);
         g_free(musica->genre);
         g_free(musica->lyrics);

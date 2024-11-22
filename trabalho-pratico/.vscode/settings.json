@@ -6,6 +6,7 @@
         "parser.h": "c",
         "queries.h": "c",
         "string.h": "c",
-        "gestor_musicas.h": "c"
+        "gestor_musicas.h": "c",
+        "usuario.h": "c"
     }
 }

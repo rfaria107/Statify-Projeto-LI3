@@ -13,6 +13,7 @@
 #include "../include/parsing/parser.h"
 #include "../include/parsing/string_utils.h"
 #include "../include/validacao/valida.h"
+#include "../include/gestores/gestor_albuns.h"
 
 // Valida se a data está no formato correto "YYYY/MM/DD"
 gboolean validarFormatoData(gchar *data)
@@ -153,7 +154,7 @@ gboolean valida_subscricao(Usuario *usuario)
     return TRUE;
 }
 
-// Função que valida se as músicas que têm gosto existem
+// Função que valida se as músicas que têm liked_musics_copygosto existem
 gboolean valida_liked_musics_id(Usuario *usuario, GestorMusicas *gestor_musicas)
 {
 
@@ -308,4 +309,73 @@ int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas)
     }
     g_strfreev(artist_ids);
     return 1;
+}
+
+gboolean valida_album (Musica *musica, GestorAlbuns *gestor_albuns) {
+
+    gchar *album_copy = get_music_album(musica);
+
+    if (album_copy == NULL)
+    {
+        return TRUE;
+    }
+
+    GHashTable *hash_albuns = get_hash_albuns(gestor_albuns);
+
+    Album *album_encontrado = (Album *)g_hash_table_lookup(hash_albuns, album_copy);
+
+        if (album_copy == NULL)
+        {
+            g_strfreev(album_copy);
+            return FALSE;
+        }
+    
+
+    // Libera a cópia da lista de IDs curtidos e retorna TRUE
+    g_strfreev(album_copy);
+    return TRUE;
+}
+
+gboolean valida_plataforma (History *historico) {
+     
+     gchar *historico_plataform = get_history_platform (historico);
+
+     if (!(historico_plataform)) {
+     return FALSE;
+     }
+
+     gchar *platform_lower = g_ascii_strdown(historico_plataform, -1); // Converte para minúsculas
+     g_free (historico_plataform);
+
+     
+     if (strcmp (platform_lower, "mobile") ==0 || strcmp (platform_lower, "desktop")==0 ) {
+     g_free (platform_lower);
+     return TRUE;
+     }
+
+g_free (platform_lower);
+return TRUE;
+
+}
+
+gboolean valida_artista_tipo (Artista *artista) {
+
+gchar *artista_tipo = get_history_platform (artista);
+
+     if (!(artista_tipo)) {
+     return FALSE;
+     }
+
+     gchar *artista_tipo_lower = g_ascii_strdown(artista_tipo, -1); // Converte para minúsculas
+     g_free (artista_tipo);
+
+     
+     if (strcmp (artista_tipo_lower, "individual") ==0 || strcmp (artista_tipo_lower, "group")==0 ) {
+     g_free (artista_tipo_lower);
+     return TRUE;
+     }
+
+g_free (artista_tipo_lower);
+return TRUE;
+
 }

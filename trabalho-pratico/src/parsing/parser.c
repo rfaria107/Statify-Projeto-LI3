@@ -12,7 +12,7 @@
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/validacao/valida.h"
 #include "../include/write/writer.h"
-
+#include "../include/gestores/gestor_albuns.h"
 
 int open_file(int argc, char *argv[])
 {
@@ -130,7 +130,8 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
         {
             GestorArtistas *gestorartistas = get_gestor_artistas(gestor);
             GestorMusicas *gestormusicas = get_gestor_musicas(gestor);
-            Musica *musica = parse_csv_line_musica(buffer, gestorartistas);
+            GestorAlbuns *gestoralbuns = get_gestor_albuns (gestor);
+            Musica *musica = parse_csv_line_musica(buffer, gestorartistas,gestoralbuns);
             if (musica)
             {
                 inserir_musica(gestormusicas, musica);
@@ -247,7 +248,7 @@ Artista *preenche_artista(GPtrArray *campostemp)
 
     Artista *artista = create_artista(id_str, name, description, recipe_per_stream, id_constituent, country, type);
 
-    if (!artista || valida_artista_individual(artista) == FALSE)
+    if (!artista || valida_artista_individual(artista) == FALSE || valida_artista_tipo (artista)== FALSE)
     {
         g_strfreev(id_constituent);
         return NULL;
@@ -258,9 +259,9 @@ Artista *preenche_artista(GPtrArray *campostemp)
     return artista;
 }
 
-Musica *parse_csv_line_musica(gchar *line, GestorArtistas *gestorartistas)
+Musica *parse_csv_line_musica(gchar *line, GestorArtistas *gestorartistas, GestorAlbuns *gestoralbuns)
 {
-    int numcampos = 7;
+    int numcampos = 8;
     gchar **tokens = g_strsplit(line, ";", numcampos);
 
     GPtrArray *campostemp = g_ptr_array_new_with_free_func(g_free); // Array temporario
@@ -281,7 +282,7 @@ Musica *parse_csv_line_musica(gchar *line, GestorArtistas *gestorartistas)
         return NULL;
     }
 
-    Musica *musica = preenche_musica(campostemp, gestorartistas);
+    Musica *musica = preenche_musica(campostemp, gestorartistas,gestoralbuns);
 
     if (!musica)
     {
@@ -297,7 +298,7 @@ Musica *parse_csv_line_musica(gchar *line, GestorArtistas *gestorartistas)
     return musica; // Retorna 1 se o parsing foi bem-sucedido
 }
 
-Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas)
+Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas, GestorAlbuns *gestoralbuns)
 {
 
     gchar *id = g_ptr_array_index(campostemp, 0);
@@ -321,17 +322,19 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas)
         }
         trim_single_quotes_gchar(artist_ids[i]);
     }
-    gchar *duration = g_ptr_array_index(campostemp, 3);
+    gchar *album_id = g_ptr_array_index (campostemp,3);
 
-    gchar *genre = g_ptr_array_index(campostemp, 4);
+    gchar *duration = g_ptr_array_index(campostemp, 4);
 
-    gchar *year_str = g_ptr_array_index(campostemp, 5);
+    gchar *genre = g_ptr_array_index(campostemp, 5);
+
+    gchar *year_str = g_ptr_array_index(campostemp, 6);
 
     int year = atoi(year_str);
 
-    gchar *lyrics = g_ptr_array_index(campostemp, 6);
+    gchar *lyrics = g_ptr_array_index(campostemp, 7);
 
-    Musica *musica = create_musica(id, title, artist_ids, duration, genre, year, lyrics);
+    Musica *musica = create_musica(id, title, artist_ids, album_id,duration, genre, year, lyrics);
 
     if (!musica)
     {
@@ -340,7 +343,7 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas)
         return NULL;
     }
 
-    if (validaDuracao(musica) == FALSE || valida_ano_lançamento(musica) == 0 || valida_artistids_musica(musica, gestorartistas) == 0)
+    if (validaDuracao(musica) == FALSE || valida_ano_lançamento(musica) == 0 || valida_artistids_musica(musica, gestorartistas) == 0 || valida_album (musica, gestoralbuns))
     {
         free_musica(musica);
         g_strfreev(artist_ids);
