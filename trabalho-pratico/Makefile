@@ -9,9 +9,13 @@ OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/entidades/usuario.o \
            $(SRC_DIR)/entidades/musica.o \
            $(SRC_DIR)/entidades/artists.o \
+           $(SRC_DIR)/entidades/albuns.o \
+           $(SRC_DIR)/entidades/history.o \
            $(SRC_DIR)/gestores/gestor_usuarios.o \
            $(SRC_DIR)/gestores/gestor_musicas.o \
            $(SRC_DIR)/gestores/gestor_artistas.o \
+           $(SRC_DIR)/gestores/gestor_albuns.o \
+           $(SRC_DIR)/gestores/gestor_histories.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
            $(SRC_DIR)/parsing/parser.o \
            $(SRC_DIR)/parsing/string_utils.o \
@@ -25,10 +29,14 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/entidades/usuario.o \
            $(SRC_DIR)/entidades/musica.o \
            $(SRC_DIR)/entidades/artists.o \
+           $(SRC_DIR)/entidades/albuns.o \
+           $(SRC_DIR)/entidades/history.o \
            $(SRC_DIR)/gestores/gestor_usuarios.o \
            $(SRC_DIR)/gestores/gestor_musicas.o \
            $(SRC_DIR)/gestores/gestor_artistas.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
+           $(SRC_DIR)/gestores/gestor_albuns.o \
+           $(SRC_DIR)/gestores/gestor_histories.o \
            $(SRC_DIR)/parsing/parser.o \
            $(SRC_DIR)/parsing/string_utils.o \
            $(SRC_DIR)/write/writer.o \
@@ -64,6 +72,12 @@ $(SRC_DIR)/entidades/musica.o: $(SRC_DIR)/entidades/musica.c
 $(SRC_DIR)/entidades/artists.o: $(SRC_DIR)/entidades/artists.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(SRC_DIR)/entidades/albuns.o: $(SRC_DIR)/entidades/albuns.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/entidades/history.o: $(SRC_DIR)/entidades/history.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(SRC_DIR)/gestores/gestor_usuarios.o: $(SRC_DIR)/gestores/gestor_usuarios.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -71,6 +85,12 @@ $(SRC_DIR)/gestores/gestor_musicas.o: $(SRC_DIR)/gestores/gestor_musicas.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/gestores/gestor_artistas.o: $(SRC_DIR)/gestores/gestor_artistas.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/gestores/gestor_albuns.o: $(SRC_DIR)/gestores/gestor_albuns.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/gestores/gestor_histories.o: $(SRC_DIR)/gestores/gestor_histories.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/gestores/gestor_sistemas.o: $(SRC_DIR)/gestores/gestor_sistemas.c
