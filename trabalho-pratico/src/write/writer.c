@@ -82,7 +82,31 @@ void write_row(RowWriter *writer, int fields, ...)
     va_end(args); // Finaliza a manipulação dos argumentos variáveis
 }
 
+void write_row_2(RowWriter *writer, int fields, ...)
+{
+    va_list args;
+    va_start(args, fields); // Inicializa a manipulação dos argumentos variáveis
 
+    char line[BUFFER_SIZE] = "";
+    char formatting[BUFFER_SIZE] = "";
+
+    // Adiciona os formatos para cada campo, separados por ponto e vírgula
+    for (int i = 0; i < fields - 1; i++)
+    {
+        strcat(formatting, writer->format[i]);
+        strcat(formatting, ":"); // Adiciona o ";" que caracteriza o ficheiro .csv
+    }
+
+    strcat(formatting, writer->format[fields - 1]);
+    strcat(formatting, "\n");
+
+    vsnprintf(line, BUFFER_SIZE, formatting, args);
+
+    writer->row++;
+    append_to_file_buffer(writer->buffer, line); // Chama append_to_file_buffer para escrever a linha no arquivo
+
+    va_end(args); // Finaliza a manipulação dos argumentos variáveis
+}
 // Escrever ficheiros de erro
 void log_error(RowWriter *error_writer, const char *error_line)
 {

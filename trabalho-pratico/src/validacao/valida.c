@@ -324,15 +324,15 @@ gboolean valida_album (Musica *musica, GestorAlbuns *gestor_albuns) {
 
     Album *album_encontrado = (Album *)g_hash_table_lookup(hash_albuns, album_copy);
 
-        if (album_copy == NULL)
+        if (album_encontrado == NULL)
         {
-            g_strfreev(album_copy);
+            g_free(album_copy);
             return FALSE;
         }
     
 
     // Libera a cópia da lista de IDs curtidos e retorna TRUE
-    g_strfreev(album_copy);
+    g_free(album_copy);
     return TRUE;
 }
 
@@ -360,7 +360,7 @@ return TRUE;
 
 gboolean valida_artista_tipo (Artista *artista) {
 
-gchar *artista_tipo = get_history_platform (artista);
+gchar *artista_tipo = get_artist_type (artista);
 
      if (!(artista_tipo)) {
      return FALSE;

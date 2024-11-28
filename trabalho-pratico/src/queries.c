@@ -13,6 +13,7 @@
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/parsing/string_utils.h"
 
+
 struct GenrePopularity
 {
     char *genre;

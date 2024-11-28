@@ -13,6 +13,7 @@
 #include "../include/validacao/valida.h"
 #include "../include/write/writer.h"
 #include "../include/gestores/gestor_albuns.h"
+#include "../include/queries.h"
 
 int open_file(int argc, char *argv[])
 {
