@@ -56,7 +56,7 @@ void row_writer_set_formatting(RowWriter *writer, char **formatting)
 }
 
 // Função para escrever dados em formato CSV
-void write_row(RowWriter *writer, int fields, ...)
+void write_row(RowWriter *writer, char separator, int fields, ...)
 {
     va_list args;
     va_start(args, fields); // Inicializa a manipulação dos argumentos variáveis
@@ -67,8 +67,11 @@ void write_row(RowWriter *writer, int fields, ...)
     // Adiciona os formatos para cada campo, separados por ponto e vírgula
     for (int i = 0; i < fields - 1; i++)
     {
+        
         strcat(formatting, writer->format[i]);
-        strcat(formatting, ";"); // Adiciona o ";" que caracteriza o ficheiro .csv
+        char sep_str[2] = {separator, '\0'}; // Converte o separador para string
+
+        strcat(formatting, sep_str); // Adiciona o ";" que caracteriza o ficheiro .csv
     }
 
     strcat(formatting, writer->format[fields - 1]);
@@ -82,31 +85,7 @@ void write_row(RowWriter *writer, int fields, ...)
     va_end(args); // Finaliza a manipulação dos argumentos variáveis
 }
 
-void write_row_2(RowWriter *writer, int fields, ...)
-{
-    va_list args;
-    va_start(args, fields); // Inicializa a manipulação dos argumentos variáveis
 
-    char line[BUFFER_SIZE] = "";
-    char formatting[BUFFER_SIZE] = "";
-
-    // Adiciona os formatos para cada campo, separados por ponto e vírgula
-    for (int i = 0; i < fields - 1; i++)
-    {
-        strcat(formatting, writer->format[i]);
-        strcat(formatting, ":"); // Adiciona o ";" que caracteriza o ficheiro .csv
-    }
-
-    strcat(formatting, writer->format[fields - 1]);
-    strcat(formatting, "\n");
-
-    vsnprintf(line, BUFFER_SIZE, formatting, args);
-
-    writer->row++;
-    append_to_file_buffer(writer->buffer, line); // Chama append_to_file_buffer para escrever a linha no arquivo
-
-    va_end(args); // Finaliza a manipulação dos argumentos variáveis
-}
 // Escrever ficheiros de erro
 void log_error(RowWriter *error_writer, const char *error_line)
 {
@@ -147,7 +126,7 @@ void escrever_cabecalho_users_erro(RowWriter *error_writer)
     row_writer_set_formatting(error_writer, formatting);
 
     // Escreve o cabeçalho no arquivo de erros
-    write_row(error_writer, 8, "username", "email", "first_name", "last_name", "birth_date", "country", "subscription_type", "liked_songs_id");
+    write_row(error_writer, ';',8, "username", "email", "first_name", "last_name", "birth_date", "country", "subscription_type", "liked_songs_id");
 }
 
 void escrever_cabecalho_musics_erro(RowWriter *error_writer)
@@ -160,7 +139,7 @@ void escrever_cabecalho_musics_erro(RowWriter *error_writer)
     row_writer_set_field_names(error_writer, field_names, 7);
     row_writer_set_formatting(error_writer, formatting);
 
-    write_row(error_writer, 7, "id", "title", "artist_id", "duration", "genre", "year", "lyrics");
+    write_row(error_writer, ';', 7, "id" ,"title", "artist_id", "duration", "genre", "year", "lyrics");
 }
 
 void escrever_cabecalho_artists_erro(RowWriter *error_writer)
@@ -173,5 +152,25 @@ void escrever_cabecalho_artists_erro(RowWriter *error_writer)
     row_writer_set_field_names(error_writer, field_names, 7);
     row_writer_set_formatting(error_writer, formatting);
 
-    write_row(error_writer, 7, "id", "name", "description", "recipe_per_stream", "id_constituent", "country", "type");
+    write_row(error_writer, ';',7,"id", "name", "description", "recipe_per_stream", "id_constituent", "country", "type");
+}
+
+void escrever_cabecalho_history_erro (RowWriter *error_writer) {
+    char *field_names[] = {"id", "user_id", "music_id", "timestamp", "duration", "plataform"};
+    char *formatting[] = {"%s", "%s", "%s", "%s", "%s", "%s"};
+    
+    row_writer_set_field_names(error_writer, field_names, 6);
+    row_writer_set_formatting(error_writer, formatting);
+    write_row(error_writer, ';',6,"id","user_id","music_id","timestamp","duration", "platform");
+
+}
+
+void escrever_cabecalho_album_erro (RowWriter *error_writer) {
+    char *field_names[] = {"id", "tittle", "artists_id", "year", "producers"};
+    char *formatting[] = {"%s", "%s", "%s", "%s", "%s"};
+    
+    row_writer_set_field_names(error_writer, field_names, 5);
+    row_writer_set_formatting(error_writer, formatting);
+    write_row(error_writer, ';',5,"id","tittle","artists_id","year","producers");
+
 }

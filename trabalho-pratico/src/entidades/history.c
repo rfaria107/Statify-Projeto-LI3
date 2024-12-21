@@ -24,6 +24,18 @@ gchar *get_history_music_id(History *history) {return g_strdup(history->music_id
 
 gchar *get_history_timestamp(History *history) {return g_strdup(history->timestamp);}
 
+gchar *get_history_date(History *history) {
+    if (history == NULL || history->timestamp == NULL) {
+        return NULL; // Verificar se o histórico ou timestamp são válidos
+    }
+    
+    gchar *date = g_malloc(11);
+    strncpy(date, history->timestamp, 10);
+    date[10] = '\0';
+    return date; // Retornar a data como string dinâmica
+}
+
+
 gchar *get_history_duration(History *history) {return g_strdup(history->duration);}
 
 gchar *get_history_platform(History *history) {return g_strdup(history->platform);}

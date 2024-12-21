@@ -13,7 +13,7 @@
 #include "../include/parsing/parser.h"
 #include "../include/parsing/string_utils.h"
 #include "../include/validacao/valida.h"
-#include "../include/queries.h"
+#include "../include/queries/queries.h"
 
 int main(int argc, char *argv[])
 {

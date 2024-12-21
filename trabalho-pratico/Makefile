@@ -22,7 +22,9 @@ OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/write/writer.o \
            $(SRC_DIR)/write/file.o \
            $(SRC_DIR)/validacao/valida.o \
-           $(SRC_DIR)/queries.o \
+           $(SRC_DIR)/queries/queries.o \
+           $(SRC_DIR)/queries/queries_aux.o \
+
 
 # Objetos de teste (para o executável de testes)
 OBJ_TEST = $(SRC_DIR)/testes.o \
@@ -42,7 +44,9 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/write/writer.o \
            $(SRC_DIR)/write/file.o \
            $(SRC_DIR)/validacao/valida.o \
-           $(SRC_DIR)/queries.o \
+           $(SRC_DIR)/queries/queries.o \
+           $(SRC_DIR)/queries/queries_aux.o \
+
 
 # Alvos (executáveis)
 TARGET = programa-principal
@@ -111,11 +115,18 @@ $(SRC_DIR)/write/file.o: $(SRC_DIR)/write/file.c
 $(SRC_DIR)/validacao/valida.o: $(SRC_DIR)/validacao/valida.c  
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/queries.o: $(SRC_DIR)/queries.c  
+$(SRC_DIR)/queries/queries.o: $(SRC_DIR)/queries/queries.c  
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/queries/queries_aux.o: $(SRC_DIR)/queries/queries_aux.c  
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/testes.o: $(SRC_DIR)/testes.c  
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Regra para executar o programa principal com o Valgrind
+valgrind: $(TARGET)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(TARGET)
 
 # Limpar arquivos gerados
 clean:

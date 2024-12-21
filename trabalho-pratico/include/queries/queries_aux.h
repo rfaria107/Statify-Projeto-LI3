@@ -1,5 +1,5 @@
-#ifndef queryS_H
-#define queryS_H
+#ifndef QUERIES_AUX_H
+#define QUERIEES_AUX_H
 
 #include <glib.h>
 #include <stdio.h>
@@ -8,6 +8,7 @@
 
 // Estrutura para representar a popularidade de um gênero
 typedef struct GenrePopularity GenrePopularity;
+typedef struct Semana Semana ;
 
 // Funções para gerenciamento de GenrePopularity
 GenrePopularity *create_genre_popularity(const char *genre);
@@ -21,12 +22,4 @@ void calcular_discografia_artistas(GestorSistema *gestorsis);
 gint duracao_para_segundos(const gchar *duracao);
 gchar *segundos_para_duracao(gint total_segundos);
 
-// Funções de query
-void query_1(GestorUsuarios *gestor, char *username, int line_number);
-void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number);
-void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number);
-
-// Função principal para interpretar inputs e executar querys
-void interpreter_inputs(FILE *file, GestorSistema *gestorsis);
-
-#endif // queryS_H
+#endif

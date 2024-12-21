@@ -15,7 +15,7 @@
 #include "../include/parsing/parser.h"
 #include "../include/parsing/string_utils.h"
 #include "../include/validacao/valida.h"
-#include "../include/queries.h"
+#include "../include/queries/queries.h"
 
 // Função para medir o uso de memória (em megabytes)
 long get_memory_usage_mb() {

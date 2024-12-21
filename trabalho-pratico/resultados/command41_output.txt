@@ -1,3 +1,10 @@
-DJ Thomas;individual;11:30:34;Maldives
-DJ David;individual;05:19:11;Maldives
-Become Policy;individual;05:02:27;Maldives
+Electronic;105728
+Hip Hop;105370
+Metal;105071
+Country;104627
+Blues;104220
+Reggae;104148
+Classical;104021
+Jazz;102737
+Pop;102006
+Rock;101026

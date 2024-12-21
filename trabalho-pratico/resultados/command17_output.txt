@@ -1,1 +1,1 @@
-duanenewton@example.org;Kristen;Adams;26;Mauritania
+tlevine@example.net=Mary=Dickson=32=Burundi

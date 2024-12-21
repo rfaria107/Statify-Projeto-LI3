@@ -23,6 +23,11 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas,Ge
 Usuario *parse_csv_line_usuario(gchar* line, GestorMusicas *gestormusicas);
 Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas);
 int open_file(int argc, char *argv[]);
+void process_file(const char *base_path, const char *file_name, GestorSistema *gestor, char tipo);
 
+Album *parse_csv_line_album(gchar *line, GestorAlbuns *gestor_albuns);
+Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns);
+History *parse_csv_line_history(gchar *line, GestorHistories *gestorhistory);
+History *preenche_history(GPtrArray *campostemp, GestorHistories *gestorhistory);
 
 #endif

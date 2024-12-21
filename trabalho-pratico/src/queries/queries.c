@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <string.h>
-#include "../include/queries.h"
+#include "../include/queries/queries.h"
 #include "../include/entidades/artists.h"
 #include "../include/entidades/musica.h"
 #include "../include/entidades/usuario.h"
@@ -12,7 +12,7 @@
 #include "../include/write/writer.h"
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/parsing/string_utils.h"
-
+#include "../include/queries/queries_aux.h"
 
 struct GenrePopularity
 {
@@ -43,10 +43,20 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             if (token != NULL)
             {
                 GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
-                query_1(gestor_users, token, line_number);
+                query_1(gestor_users, token, line_number,0);
                 g_free(token);
             }
         }
+
+        else if (strcmp (token, "1S")==0)
+        { g_free(token);
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
+                query_1(gestor_users, token, line_number,1);
+                g_free(token);
+            }}
         // query 2
         else if (strcmp(token, "2") == 0)
         {
@@ -94,7 +104,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
     g_free(buffer);
 }
 
-void query_1(GestorUsuarios *gestor, char *username, int line_number)
+void query_1(GestorUsuarios *gestor, char *username, int line_number, int n)
 {
     Usuario *usuario = buscar_usuario_id(gestor, username);
     // Agora com caminho para a pasta de resultados
@@ -119,7 +129,8 @@ void query_1(GestorUsuarios *gestor, char *username, int line_number)
         char *country = user_get_country(usuario);
 
         // Escreve a linha com os dados do usuário no arquivo de saída
-        write_row(writer, 5, mail, first_name, last_name, idade, country);
+       if (n==0) { write_row(writer, ';',5, mail, first_name, last_name, idade, country);}
+       else if (n==1) {write_row(writer, '=',5, mail, first_name, last_name, idade, country);}
 
         free_and_finish_writing(writer);
         free(mail);
@@ -128,7 +139,8 @@ void query_1(GestorUsuarios *gestor, char *username, int line_number)
         free(country);
         free(output_file_name);
     }
-    else
+    else 
+    
     {
 
         char *field_names[] = {""};
@@ -136,7 +148,7 @@ void query_1(GestorUsuarios *gestor, char *username, int line_number)
         row_writer_set_field_names(writer, field_names, 1);
         row_writer_set_formatting(writer, formatting);
 
-        write_row(writer, 1, "");
+        write_row(writer, ';',1, "");
         free_and_finish_writing(writer);
         free(output_file_name);
     }
@@ -155,7 +167,7 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number)
         char *formatting_empty[] = {"%s"};
         row_writer_set_field_names(writer, field_names_empty, 1);
         row_writer_set_formatting(writer, formatting_empty);
-        write_row(writer, 1, "");
+        write_row(writer, ';',1, "");
         free_and_finish_writing(writer);
         free(output_file_name);
         return;
@@ -219,7 +231,7 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number)
         // Converter de volta para string
         gchar *duration_str = segundos_para_duracao(duracao_total);
 
-        write_row(writer, 4, name, type, duration_str, country_artista);
+        write_row(writer, ';',4,name, type, duration_str, country_artista);
 
         g_free(name);
         g_free(type);
@@ -233,116 +245,6 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number)
     g_list_free(lista_artistas);
 }
 
-// Função para converter "HH:MM:SS" para segundos
-gint duracao_para_segundos(const gchar *duracao)
-{
-    gint horas, minutos, segundos;
-    sscanf(duracao, "%d:%d:%d", &horas, &minutos, &segundos);
-    return horas * 3600 + minutos * 60 + segundos;
-}
-
-// Função para converter segundos em "HH:MM:SS"
-gchar *segundos_para_duracao(gint total_segundos)
-{
-    gint horas = total_segundos / 3600;
-    gint minutos = (total_segundos % 3600) / 60;
-    gint segundos = total_segundos % 60;
-
-    return g_strdup_printf("%02d:%02d:%02d", horas, minutos, segundos);
-}
-
-void calcular_discografia_artistas(GestorSistema *gestorsis)
-{
-    GestorArtistas *gestorartistas = get_gestor_artistas(gestorsis);
-    GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
-
-    GHashTable *hashartistas = get_hash_artistas(gestorartistas);
-    GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
-
-    GList *lista_musicas = g_hash_table_get_values(hashmusicas);
-    for (GList *node = lista_musicas; node != NULL; node = node->next)
-    {
-        Musica *musica = (Musica *)node->data;
-        if (!musica)
-            continue;
-
-        gchar *duracao_musica = get_music_duration(musica);
-        int duracao_musica_seg = duracao_para_segundos(duracao_musica);
-        gchar **artist_ids = get_music_artist_ids(musica);
-
-        for (int i = 0; artist_ids[i] != NULL; i++)
-        {
-            gchar *artist_id = g_strdup(artist_ids[i]);
-            Artista *artista = (Artista *)g_hash_table_lookup(hashartistas, artist_id);
-            g_free(artist_id);
-            if (artista != NULL)
-            {
-                int duracao_atual = get_artist_duracao_disco(artista);
-                int nova_duracao = duracao_atual + duracao_musica_seg;
-                set_artista_duracao_disco(artista, nova_duracao);
-            }
-        }
-        g_free(duracao_musica);
-        g_strfreev(artist_ids);
-    }
-    g_list_free(lista_musicas);
-}
-
-gint compara_duracoes_discografia(gconstpointer a, gconstpointer b)
-{
-    Artista *artista_a = (Artista *)a;
-    Artista *artista_b = (Artista *)b;
-
-    gint duracao_a = get_artist_duracao_disco(artista_a);
-    gint duracao_b = get_artist_duracao_disco(artista_b);
-
-    // compara por duracao
-    if (duracao_a < duracao_b)
-    {
-        return 1;
-    }
-    else if (duracao_a > duracao_b)
-    {
-        return -1;
-    }
-
-    // se a duracao for igual comparar ordem alfabetica do nome
-    gchar *nome_a = get_artist_name(artista_a);
-    gchar *nome_b = get_artist_name(artista_b);
-    int r = g_strcmp0(nome_a, nome_b);
-    g_free(nome_a);
-    g_free(nome_b);
-    return r;
-}
-// Função para criar uma nova instância de GenrePopularity
-GenrePopularity *create_genre_popularity(const char *genre)
-{
-    GenrePopularity *gp = malloc(sizeof(GenrePopularity));
-    gp->genre = g_strdup(genre); // Copia a string para evitar problemas de ponteiros
-    gp->total_likes = 0;
-    return gp;
-}
-
-// Função para liberar a memória de GenrePopularity
-void free_genre_popularity(GenrePopularity *gp)
-{
-    g_free(gp->genre);
-    free(gp);
-}
-
-// Função de comparação para ordenar primeiro pela popularidade e depois alfabeticamente (em caso de empate)
-int compare_genre_popularity(const void *a, const void *b)
-{
-    // Converter
-    GenrePopularity *gp_a = (GenrePopularity *)a;
-    GenrePopularity *gp_b = (GenrePopularity *)b;
-
-    if (gp_b->total_likes != gp_a->total_likes)
-    {
-        return gp_b->total_likes - gp_a->total_likes; // Ordena por likes decrescentemente
-    }
-    return g_strcmp0(gp_a->genre, gp_b->genre); // Ordena alfabeticamente em caso de empate (usando uma funcao pre-definida do Glib)
-}
 
 void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number)
 {
@@ -424,7 +326,7 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
         char *formatting_empty[] = {"%s"};
         row_writer_set_field_names(writer, field_names_empty, 1);
         row_writer_set_formatting(writer, formatting_empty);
-        write_row(writer, 1, "");
+        write_row(writer, ';',1, "");
     }
     else
     {
@@ -438,7 +340,7 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
         for (GList *node = generos_lista; node != NULL; node = node->next)
         {
             GenrePopularity *gp = (GenrePopularity *)node->data;
-            write_row(writer, 2, gp->genre, gp->total_likes);
+            write_row(writer, ';',2, gp->genre, gp->total_likes);
         }
     }
 

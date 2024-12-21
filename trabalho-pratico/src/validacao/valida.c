@@ -354,7 +354,7 @@ gboolean valida_plataforma (History *historico) {
      }
 
 g_free (platform_lower);
-return TRUE;
+return FALSE;
 
 }
 

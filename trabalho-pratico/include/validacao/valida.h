@@ -23,5 +23,7 @@ int valida_ano_lançamento(Musica *musica);
 int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas);
 gboolean valida_album (Musica *musica, GestorAlbuns *gestor_albuns);
 gboolean valida_artista_tipo (Artista *artista);
+gboolean valida_plataforma (History *historico);
+
 
 #endif
