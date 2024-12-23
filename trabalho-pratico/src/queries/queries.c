@@ -108,11 +108,13 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
 
 void query_1(GestorSistema *gestorsis, char *username, int line_number, int n)
 {
-    // Agora com caminho para a pasta de resultados
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
     RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+
+    // Flag para verificar se já escreveu algo
+    int has_written = 0;
 
     // Inicializa variáveis para identificar se é usuário ou artista
     Usuario *usuario = NULL;
@@ -144,60 +146,70 @@ void query_1(GestorSistema *gestorsis, char *username, int line_number, int n)
             write_row(writer, '=', 5, mail, first_name, last_name, idade, country);
         }
 
-        free_and_finish_writing(writer);
+        // Marca que algo foi escrito no arquivo
+        has_written = 1;
+
+        // Libera memória do usuário
         free(mail);
         free(first_name);
         free(last_name);
         free(country);
-        free(output_file_name);
-    }
-
-    // Se não for usuário, verifica se é artista
-    GestorArtistas *gestorartistas = get_gestor_artistas(gestorsis);
-    artista = buscar_artista(gestorartistas, username);
-
-    if (artista) 
-    {
-        GestorAlbuns *gestoralbuns = get_gestor_albuns(gestorsis);
-        GestorHistories *gestorhistories = get_gestor_histories(gestorsis);
-        GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
-
-        char *field_names[] = {"Name", "Type", "Country", "Num Albums", "Total Recipe"};
-        char *formatting[] = {"%s", "%s", "%s", "%d", "%.2f"};
-        row_writer_set_field_names(writer, field_names, 5);
-        row_writer_set_formatting(writer, formatting);
-
-        char *name = get_artist_name(artista);
-        char *type = get_artist_type(artista);
-        char *country = get_artist_country(artista);
-        int num_albums = get_artist_num_albuns_individual(artista, gestoralbuns);
-        double total_recipe = calcular_receita_total_artista(artista,get_hash_musicas(gestormusicas), get_hash_histories(gestorhistories), get_hash_artistas(gestorartistas));
-
-        if (n == 0) {
-            write_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
-        } else if (n == 1) {
-            write_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
-        }
-
-        free(name);
-        free(type);
-        free(country);
     }
     else
     {
-        // Caso username não seja usuário nem artista
+        // Se não for usuário, verifica se é artista
+        GestorArtistas *gestorartistas = get_gestor_artistas(gestorsis);
+        artista = buscar_artista(gestorartistas, username);
+
+        if (artista) 
+        {
+            GestorAlbuns *gestoralbuns = get_gestor_albuns(gestorsis);
+            GestorHistories *gestorhistories = get_gestor_histories(gestorsis);
+            GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
+
+            char *field_names[] = {"Name", "Type", "Country", "Num Albums", "Total Recipe"};
+            char *formatting[] = {"%s", "%s", "%s", "%d", "%.2f"};
+            row_writer_set_field_names(writer, field_names, 5);
+            row_writer_set_formatting(writer, formatting);
+
+            char *name = get_artist_name(artista);
+            char *type = get_artist_type(artista);
+            char *country = get_artist_country(artista);
+            int num_albums = get_artist_num_albuns_individual(artista, gestoralbuns);
+            double total_recipe = calcular_receita_total_artista(artista, get_hash_musicas(gestormusicas), get_hash_histories(gestorhistories), get_hash_artistas(gestorartistas));
+
+            if (n == 0) {
+                write_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
+            } else if (n == 1) {
+                write_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
+            }
+
+            // Marca que algo foi escrito no arquivo
+            has_written = 1;
+
+            // Libera memória do artista
+            free(name);
+            free(type);
+            free(country);
+        }
+    }
+
+    // Se não escreveu nada ainda, escreve a linha em branco
+    if (!has_written) {
         char *field_names[] = {""};
         char *formatting[] = {"%s"};
         row_writer_set_field_names(writer, field_names, 1);
         row_writer_set_formatting(writer, formatting);
 
-        write_row(writer, ';', 1, "");
+        write_row(writer, ';', 1, ""); // Linha em branco
     }
 
+    // Finaliza a escrita
     free_and_finish_writing(writer);
+
+    // Libera a memória do arquivo de saída
     free(output_file_name);
 }
-
 
 void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number)
 {
