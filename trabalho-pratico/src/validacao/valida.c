@@ -317,7 +317,7 @@ gboolean valida_album (Musica *musica, GestorAlbuns *gestor_albuns) {
 
     if (album_copy == NULL)
     {
-        return TRUE;
+        return FALSE;
     }
 
     GHashTable *hash_albuns = get_hash_albuns(gestor_albuns);

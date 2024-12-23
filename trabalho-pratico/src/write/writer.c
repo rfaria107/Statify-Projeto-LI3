@@ -125,52 +125,68 @@ void escrever_cabecalho_users_erro(RowWriter *error_writer)
     row_writer_set_field_names(error_writer, field_names, 8);
     row_writer_set_formatting(error_writer, formatting);
 
-    // Escreve o cabeçalho no arquivo de erros
-    write_row(error_writer, ';',8, "username", "email", "first_name", "last_name", "birth_date", "country", "subscription_type", "liked_songs_id");
+    // Escreve o cabeçalho no arquivo de erros com aspas ao redor de cada campo
+    write_row(error_writer, ';', 8, 
+        "\"username\"", "\"email\"", "\"first_name\"", "\"last_name\"", "\"birth_date\"", 
+        "\"country\"", "\"subscription_type\"", "\"liked_songs_id\"");
 }
 
 void escrever_cabecalho_musics_erro(RowWriter *error_writer)
 {
     // "id";"title";"artist_id";"duration";"genre";"year";"lyrics"
-
     char *field_names[] = {"id", "title", "artist_id", "duration", "genre", "year", "lyrics"};
     char *formatting[] = {"%s", "%s", "%s", "%s", "%s", "%s", "%s"};
 
+    // Define os campos e formatação
     row_writer_set_field_names(error_writer, field_names, 7);
     row_writer_set_formatting(error_writer, formatting);
 
-    write_row(error_writer, ';', 7, "id" ,"title", "artist_id", "duration", "genre", "year", "lyrics");
+    // Escreve o cabeçalho com aspas ao redor de cada campo
+    write_row(error_writer, ';', 7, 
+        "\"id\"", "\"title\"", "\"artist_id\"", "\"duration\"", "\"genre\"", "\"year\"", "\"lyrics\"");
 }
 
 void escrever_cabecalho_artists_erro(RowWriter *error_writer)
 {
     // "id";"name";"description";"recipe_per_stream";"id_constituent";"country";"type"
-
     char *field_names[] = {"id", "name", "description", "recipe_per_stream", "id_constituent", "country", "type"};
     char *formatting[] = {"%s", "%s", "%s", "%s", "%s", "%s", "%s"};
 
+    // Define os campos e formatação
     row_writer_set_field_names(error_writer, field_names, 7);
     row_writer_set_formatting(error_writer, formatting);
 
-    write_row(error_writer, ';',7,"id", "name", "description", "recipe_per_stream", "id_constituent", "country", "type");
+    // Escreve o cabeçalho com aspas ao redor de cada campo
+    write_row(error_writer, ';', 7, 
+        "\"id\"", "\"name\"", "\"description\"", "\"recipe_per_stream\"", "\"id_constituent\"", "\"country\"", "\"type\"");
 }
 
-void escrever_cabecalho_history_erro (RowWriter *error_writer) {
-    char *field_names[] = {"id", "user_id", "music_id", "timestamp", "duration", "plataform"};
+void escrever_cabecalho_history_erro(RowWriter *error_writer)
+{
+    // "id";"user_id";"music_id";"timestamp";"duration";"plataform"
+    char *field_names[] = {"id", "user_id", "music_id", "timestamp", "duration", "platform"};
     char *formatting[] = {"%s", "%s", "%s", "%s", "%s", "%s"};
-    
+
+    // Define os campos e formatação
     row_writer_set_field_names(error_writer, field_names, 6);
     row_writer_set_formatting(error_writer, formatting);
-    write_row(error_writer, ';',6,"id","user_id","music_id","timestamp","duration", "platform");
 
+    // Escreve o cabeçalho com aspas ao redor de cada campo
+    write_row(error_writer, ';', 6, 
+        "\"id\"", "\"user_id\"", "\"music_id\"", "\"timestamp\"", "\"duration\"", "\"platform\"");
 }
 
-void escrever_cabecalho_album_erro (RowWriter *error_writer) {
-    char *field_names[] = {"id", "tittle", "artists_id", "year", "producers"};
+void escrever_cabecalho_album_erro(RowWriter *error_writer)
+{
+    // "id";"tittle";"artists_id";"year";"producers"
+    char *field_names[] = {"id", "title", "artists_id", "year", "producers"};
     char *formatting[] = {"%s", "%s", "%s", "%s", "%s"};
-    
+
+    // Define os campos e formatação
     row_writer_set_field_names(error_writer, field_names, 5);
     row_writer_set_formatting(error_writer, formatting);
-    write_row(error_writer, ';',5,"id","tittle","artists_id","year","producers");
 
+    // Escreve o cabeçalho com aspas ao redor de cada campo
+    write_row(error_writer, ';', 5, 
+        "\"id\"", "\"title\"", "\"artists_id\"", "\"year\"", "\"producers\"");
 }
