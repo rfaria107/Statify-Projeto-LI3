@@ -6,9 +6,13 @@
 #include "../include/entidades/artists.h"
 #include "../include/entidades/musica.h"
 #include "../include/entidades/usuario.h"
+#include "../include/entidades/albuns.h"
+#include "../include/entidades/history.h"
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_usuarios.h"
+#include "../include/gestores/gestor_histories.h"
+#include "../include/gestores/gestor_albuns.h"
 #include "../include/write/writer.h"
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/parsing/string_utils.h"
@@ -42,8 +46,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
-                query_1(gestor_users, token, line_number,0);
+                query_1(gestorsis, token, line_number,0);
                 g_free(token);
             }
         }
@@ -53,8 +56,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                GestorUsuarios *gestor_users = get_gestor_usuarios(gestorsis);
-                query_1(gestor_users, token, line_number,1);
+                query_1(gestorsis, token, line_number,1);
                 g_free(token);
             }}
         // query 2
@@ -104,16 +106,23 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
     g_free(buffer);
 }
 
-void query_1(GestorUsuarios *gestor, char *username, int line_number, int n)
+void query_1(GestorSistema *gestorsis, char *username, int line_number, int n)
 {
-    Usuario *usuario = buscar_usuario_id(gestor, username);
     // Agora com caminho para a pasta de resultados
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
     RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
-    if (usuario)
+    // Inicializa variáveis para identificar se é usuário ou artista
+    Usuario *usuario = NULL;
+    Artista *artista = NULL;
+
+    // Verifica se o username pertence a um usuário
+    GestorUsuarios *gestoruser = get_gestor_usuarios(gestorsis);
+    usuario = buscar_usuario_id(gestoruser, username);
+
+    if (usuario)    
     {
         // Define nomes e formatos dos campos para o RowWriter
         char *field_names[] = {"Email", "First Name", "Last Name", "Age", "Country"};
@@ -129,8 +138,11 @@ void query_1(GestorUsuarios *gestor, char *username, int line_number, int n)
         char *country = user_get_country(usuario);
 
         // Escreve a linha com os dados do usuário no arquivo de saída
-       if (n==0) { write_row(writer, ';',5, mail, first_name, last_name, idade, country);}
-       else if (n==1) {write_row(writer, '=',5, mail, first_name, last_name, idade, country);}
+        if (n == 0) {
+            write_row(writer, ';', 5, mail, first_name, last_name, idade, country);
+        } else if (n == 1) {
+            write_row(writer, '=', 5, mail, first_name, last_name, idade, country);
+        }
 
         free_and_finish_writing(writer);
         free(mail);
@@ -139,20 +151,53 @@ void query_1(GestorUsuarios *gestor, char *username, int line_number, int n)
         free(country);
         free(output_file_name);
     }
-    else 
-    
-    {
 
+    // Se não for usuário, verifica se é artista
+    GestorArtistas *gestorartistas = get_gestor_artistas(gestorsis);
+    artista = buscar_artista(gestorartistas, username);
+
+    if (artista) 
+    {
+        GestorAlbuns *gestoralbuns = get_gestor_albuns(gestorsis);
+        GestorHistories *gestorhistories = get_gestor_histories(gestorsis);
+        GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
+
+        char *field_names[] = {"Name", "Type", "Country", "Num Albums", "Total Recipe"};
+        char *formatting[] = {"%s", "%s", "%s", "%d", "%.2f"};
+        row_writer_set_field_names(writer, field_names, 5);
+        row_writer_set_formatting(writer, formatting);
+
+        char *name = get_artist_name(artista);
+        char *type = get_artist_type(artista);
+        char *country = get_artist_country(artista);
+        int num_albums = get_artist_num_albuns_individual(artista, gestoralbuns);
+        double total_recipe = calcular_receita_total_artista(artista,get_hash_musicas(gestormusicas), get_hash_histories(gestorhistories), get_hash_artistas(gestorartistas));
+
+        if (n == 0) {
+            write_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
+        } else if (n == 1) {
+            write_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
+        }
+
+        free(name);
+        free(type);
+        free(country);
+    }
+    else
+    {
+        // Caso username não seja usuário nem artista
         char *field_names[] = {""};
         char *formatting[] = {"%s"};
         row_writer_set_field_names(writer, field_names, 1);
         row_writer_set_formatting(writer, formatting);
 
-        write_row(writer, ';',1, "");
-        free_and_finish_writing(writer);
-        free(output_file_name);
+        write_row(writer, ';', 1, "");
     }
+
+    free_and_finish_writing(writer);
+    free(output_file_name);
 }
+
 
 void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number)
 {
