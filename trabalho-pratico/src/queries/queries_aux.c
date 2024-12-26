@@ -25,7 +25,8 @@ struct GenrePopularity
     int total_likes;
 };
 
-struct Semana {
+struct Semana
+{
     char *inicio;
     char *fim;
     GPtrArray *historico;
@@ -142,10 +143,10 @@ int compare_genre_popularity(const void *a, const void *b)
     return g_strcmp0(gp_a->genre, gp_b->genre); // Ordena alfabeticamente em caso de empate (usando uma funcao pre-definida do Glib)
 }
 
-
 // Funcao para calcular o num_albums_individual (Possivel erro se tiverem 2 como grupo)
 
-int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albuns) {
+int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albuns)
+{
 
     GHashTable *hash_albuns = get_hash_albuns(gestor_albuns);
 
@@ -154,14 +155,18 @@ int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albu
     gpointer key, value;
     g_hash_table_iter_init(&iter, hash_albuns);
 
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
+    while (g_hash_table_iter_next(&iter, &key, &value))
+    {
         Album *album = (Album *)value;
 
         // Itera pelos IDs dos artistas associados ao álbum
         gchar **artist_ids = get_album_artist_ids(album);
-        if (artist_ids) {
-            for (int i = 0; artist_ids[i] != NULL; i++) {
-                if (strcmp(artist_ids[i], get_artist_id(artista)) == 0) {
+        if (artist_ids)
+        {
+            for (int i = 0; artist_ids[i] != NULL; i++)
+            {
+                if (strcmp(artist_ids[i], get_artist_id(artista)) == 0)
+                {
                     count++;
                     break; // Já encontramos uma correspondência, podemos sair do loop
                 }
@@ -172,7 +177,8 @@ int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albu
     return count;
 }
 
-double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas, GHashTable *hash_history, GHashTable *hash_artistas) {
+double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas, GHashTable *hash_history, GHashTable *hash_artistas)
+{
     double receita_artista = 0.0;
     double receita_participacao = 0.0;
 
@@ -181,13 +187,16 @@ double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas
     gpointer music_key, music_value;
     g_hash_table_iter_init(&music_iter, hash_musicas);
 
-    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value)) {
+    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value))
+    {
         Musica *musica = (Musica *)music_value;
 
         // Verifica se a música pertence ao artista
         gchar **artist_ids = get_music_artist_ids(musica); // Obtém os IDs de artistas associados à música
-        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++) {
-            if (g_strcmp0(artist_ids[i], get_artist_id(artista)) == 0) {
+        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++)
+        {
+            if (g_strcmp0(artist_ids[i], get_artist_id(artista)) == 0)
+            {
                 const char *musica_id = get_music_id(musica);
 
                 // Conta reproduções no histórico para a música
@@ -195,48 +204,58 @@ double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas
                 gpointer history_key, history_value;
                 g_hash_table_iter_init(&history_iter, hash_history);
 
-                while (g_hash_table_iter_next(&history_iter, &history_key, &history_value)) {
+                while (g_hash_table_iter_next(&history_iter, &history_key, &history_value))
+                {
                     History *history = (History *)history_value;
 
-                    if (g_strcmp0(get_history_music_id(history), musica_id) == 0) {
+                    if (g_strcmp0(get_history_music_id(history), musica_id) == 0)
+                    {
                         receita_artista += get_artist_recipe_per_stream(artista);
                     }
                 }
                 break; // Encerra o loop pelos IDs de artistas
             }
         }
-        if (artist_ids) {
+        if (artist_ids)
+        {
             g_strfreev(artist_ids); // Libera memória associada aos IDs
         }
     }
 
     // Verifica se o artista é individual; caso contrário, retorna apenas receita direta
-    if (g_strcmp0(get_artist_type(artista), "individual") != 0) {
+    if (g_strcmp0(get_artist_type(artista), "individual") != 0)
+    {
         return receita_artista;
     }
 
     // Considera músicas dos grupos dos quais o artista participa
     g_hash_table_iter_init(&music_iter, hash_musicas);
-    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value)) {
+    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value))
+    {
         Musica *musica = (Musica *)music_value;
 
         gchar **artist_ids = get_music_artist_ids(musica); // Obtém os IDs de artistas associados à música
-        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++) {
+        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++)
+        {
             // Verifica se o ID do artista é parte de um grupo que participa da música
             Artista *grupo = g_hash_table_lookup(hash_artistas, artist_ids[i]);
-            if (grupo && grupo != artista) {
+            if (grupo && grupo != artista)
+            {
                 gchar **constituents = get_artist_id_constituent(grupo);
 
                 // Confere se o artista é um dos membros do grupo
                 int is_member = 0;
-                for (int j = 0; constituents && constituents[j] != NULL; j++) {
-                    if (g_strcmp0(constituents[j], get_artist_id(artista)) == 0) {
+                for (int j = 0; constituents && constituents[j] != NULL; j++)
+                {
+                    if (g_strcmp0(constituents[j], get_artist_id(artista)) == 0)
+                    {
                         is_member = 1;
                         break;
                     }
                 }
 
-                if (is_member) {
+                if (is_member)
+                {
                     const char *musica_id = get_music_id(musica);
 
                     // Conta reproduções no histórico para a música
@@ -244,22 +263,26 @@ double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas
                     gpointer history_key, history_value;
                     g_hash_table_iter_init(&history_iter, hash_history);
 
-                    while (g_hash_table_iter_next(&history_iter, &history_key, &history_value)) {
+                    while (g_hash_table_iter_next(&history_iter, &history_key, &history_value))
+                    {
                         History *history = (History *)history_value;
 
-                        if (g_strcmp0(get_history_music_id(history), musica_id) == 0) {
+                        if (g_strcmp0(get_history_music_id(history), musica_id) == 0)
+                        {
                             receita_participacao += get_artist_recipe_per_stream(grupo) / get_num_constituents(grupo);
                         }
                     }
                 }
 
                 // Libera memória dos constituents
-                if (constituents) {
+                if (constituents)
+                {
                     g_strfreev(constituents);
                 }
             }
         }
-        if (artist_ids) {
+        if (artist_ids)
+        {
             g_strfreev(artist_ids); // Libera memória associada aos IDs
         }
     }
@@ -268,21 +291,50 @@ double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas
     return receita_artista + receita_participacao;
 }
 
-
-
-
 // Função para contar o número de constituintes (membros) de um artista/grupo
-int get_num_constituents(Artista *artista) {
+int get_num_constituents(Artista *artista)
+{
     gchar **constituents = get_artist_id_constituent(artista);
     int num_constituents = 0;
 
     // Conta o número de membros
-    if (constituents) {
-        while (constituents[num_constituents] != NULL) {
+    if (constituents)
+    {
+        while (constituents[num_constituents] != NULL)
+        {
             num_constituents++;
         }
         g_strfreev(constituents); // Libera memória associada aos IDs
     }
 
     return num_constituents;
+}
+
+char **lista_user_ids(GestorUsuarios *gestorusers)
+{
+    GHashTable *hashusers = get_hash_usuarios(gestorusers);
+    if (!hashusers)
+        return NULL;
+
+    GList *user_ids_glist = g_hash_table_get_keys(hashusers); // os ids dos utilizadores são utilizados como keys na hashtable, basta extrair as keys com a funcção da glib e converter a GList em char**
+    int num_users = g_list_length(user_ids_glist);
+
+    char **user_ids = malloc((num_users + 1) * sizeof(char *));
+
+    if (!user_ids)
+    {
+        g_list_free(user_ids_glist);
+        return NULL;
+    }
+
+    int i = 0;
+    for (GList *node = user_ids_glist; node != NULL; node = node->next, i++)
+    {
+        user_ids[i] = g_strdup((char *)node->data);
+    }
+    user_ids[i] = NULL;
+
+    g_list_free(user_ids_glist);
+
+    return user_ids;
 }

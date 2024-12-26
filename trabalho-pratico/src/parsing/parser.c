@@ -247,7 +247,6 @@ Artista *preenche_artista(GPtrArray *campostemp)
 
     gchar *id_str = g_ptr_array_index(campostemp, 0);
     gchar *name = g_ptr_array_index(campostemp, 1);
-    gchar *description = g_ptr_array_index(campostemp, 2);
     gchar *recipe_str = g_ptr_array_index(campostemp, 3);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 4);
     if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
@@ -278,7 +277,7 @@ Artista *preenche_artista(GPtrArray *campostemp)
         }
     }
 
-    Artista *artista = create_artista(id_str, name, description, recipe_per_stream, id_constituent, country, type);
+    Artista *artista = create_artista(id_str, name, recipe_per_stream, id_constituent, country, type);
 
     if (!artista || valida_artista_individual(artista) == FALSE || valida_artista_tipo (artista)== FALSE)
     {
