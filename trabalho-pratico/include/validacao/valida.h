@@ -17,7 +17,7 @@ gboolean valida_user(Usuario *user, GestorMusicas *musics);
 gboolean tudoNum(gchar *str);
 gboolean validaDuracao(Musica *musica);
 gboolean valida_artista_individual(Artista *artista);
-int valida_parenteses_lista_artistas(gchar *lista_artistas);
+int valida_parenteses_lista(gchar *string);
 int valida_single_quotes_lista_artistas(gchar *artista);
 int valida_ano_lançamento(Musica *musica);
 int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas);

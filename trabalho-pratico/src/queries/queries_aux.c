@@ -147,7 +147,7 @@ int compare_genre_popularity(const void *a, const void *b)
 
 int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albuns)
 {
-
+    gchar *artist_id = get_artist_id(artista);
     GHashTable *hash_albuns = get_hash_albuns(gestor_albuns);
 
     int count = 0;
@@ -165,7 +165,7 @@ int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albu
         {
             for (int i = 0; artist_ids[i] != NULL; i++)
             {
-                if (strcmp(artist_ids[i], get_artist_id(artista)) == 0)
+                if (strcmp(artist_ids[i], artist_id) == 0)
                 {
                     count++;
                     break; // Já encontramos uma correspondência, podemos sair do loop
@@ -174,7 +174,7 @@ int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albu
             g_strfreev(artist_ids);
         }
     }
-
+    free(artist_id);
     return count;
 }
 
@@ -201,6 +201,7 @@ void calcula_streams(GestorSistema *gestorsis)
             stream_count++;
             set_music_streams(musica, stream_count);
         }
+        free(music_id);
     }
 }
 
@@ -208,9 +209,11 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
 {
     GHashTable *hash_artistas = get_hash_artistas(gestorartistas);
     GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
+    gchar *artist_id = get_artist_id(artista);
+
     double receita_artista = 0.0;
 
-    // Itera pelas músicas no hash para encontrar as músicas do artista diretamente
+    // Itera pelas músicas na hash para encontrar as músicas do artista diretamente
     GHashTableIter music_iter;
     gpointer music_key, music_value;
     g_hash_table_iter_init(&music_iter, hash_musicas);
@@ -223,7 +226,7 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
         gchar **artist_ids = get_music_artist_ids(musica); // Obtém os IDs de artistas associados à música
         for (int i = 0; artist_ids && artist_ids[i] != NULL; i++)
         {
-            if (g_strcmp0(artist_ids[i], get_artist_id(artista)) == 0)
+            if (g_strcmp0(artist_ids[i], artist_id) == 0)
             {
                 int stream_count = get_music_streams(musica);
                 receita_artista += stream_count * get_artist_recipe_per_stream(artista);
@@ -235,10 +238,13 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
             g_strfreev(artist_ids); // Libera memória associada aos IDs
         }
     }
+    gchar *artist_type = get_artist_type(artista);
 
     // Verifica se o artista é individual; caso contrário, retorna apenas receita direta
-    if (g_strcmp0(get_artist_type(artista), "individual") != 0)
+    if (g_strcmp0(artist_type, "individual") != 0)
     {
+        free(artist_type);
+        free(artist_id);
         return receita_artista;
     }
 
@@ -263,7 +269,7 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
                 int is_member = 0;
                 for (int j = 0; constituents && constituents[j] != NULL; j++)
                 {
-                    if (g_strcmp0(constituents[j], get_artist_id(artista)) == 0)
+                    if (g_strcmp0(constituents[j], artist_id) == 0)
                     {
                         is_member = 1;
                         break;
@@ -288,7 +294,8 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
             g_strfreev(artist_ids); // Libera memória associada aos IDs
         }
     }
-
+    free(artist_type);
+    free(artist_id);
     // Soma as receitas diretas e de participação
     return ((int)(receita_artista + receita_participacao) * 100 + 0.5) / 100.0;
 }

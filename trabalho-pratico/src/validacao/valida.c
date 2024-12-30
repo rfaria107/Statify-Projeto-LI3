@@ -241,13 +241,14 @@ gboolean validaDuracao(Musica *musica)
     return TRUE;
 }
 // valida se a lista de artistas duma música ou banda começa e acaba em []
-int valida_parenteses_lista_artistas(gchar *lista_artistas)
+int valida_parenteses_lista(gchar *string)
 {
-    int len = strlen(lista_artistas);
-    if (lista_artistas == NULL || len == 0 || lista_artistas[0] != '[' || lista_artistas[len - 1] != ']')
+    int len = strlen(string);
+    if (string == NULL || len == 0 || string[0] != '[' || string[len - 1] != ']')
         return 0;
     return 1;
 }
+
 // valida se o artista tem ''
 int valida_single_quotes_lista_artistas(gchar *artista)
 {
@@ -311,7 +312,8 @@ int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas)
     return 1;
 }
 
-gboolean valida_album (Musica *musica, GestorAlbuns *gestor_albuns) {
+gboolean valida_album(Musica *musica, GestorAlbuns *gestor_albuns)
+{
 
     gchar *album_copy = get_music_album(musica);
 
@@ -320,62 +322,69 @@ gboolean valida_album (Musica *musica, GestorAlbuns *gestor_albuns) {
         return FALSE;
     }
 
+    if (valida_parenteses_lista(album_copy) == 1)
+    {
+        g_free(album_copy);
+        return FALSE;
+    }
+
     GHashTable *hash_albuns = get_hash_albuns(gestor_albuns);
 
     Album *album_encontrado = (Album *)g_hash_table_lookup(hash_albuns, album_copy);
 
-        if (album_encontrado == NULL)
-        {
-            g_free(album_copy);
-            return FALSE;
-        }
-    
+    if (album_encontrado == NULL)
+    {
+        g_free(album_copy);
+        return FALSE;
+    }
 
     // Libera a cópia da lista de IDs curtidos e retorna TRUE
     g_free(album_copy);
     return TRUE;
 }
 
-gboolean valida_plataforma (History *historico) {
-     
-     gchar *historico_plataform = get_history_platform (historico);
+gboolean valida_plataforma(History *historico)
+{
 
-     if (!(historico_plataform)) {
-     return FALSE;
-     }
+    gchar *historico_plataform = get_history_platform(historico);
 
-     gchar *platform_lower = g_ascii_strdown(historico_plataform, -1); // Converte para minúsculas
-     g_free (historico_plataform);
+    if (!(historico_plataform))
+    {
+        return FALSE;
+    }
 
-     
-     if (strcmp (platform_lower, "mobile") ==0 || strcmp (platform_lower, "desktop")==0 ) {
-     g_free (platform_lower);
-     return TRUE;
-     }
+    gchar *platform_lower = g_ascii_strdown(historico_plataform, -1); // Converte para minúsculas
+    g_free(historico_plataform);
 
-g_free (platform_lower);
-return FALSE;
+    if (strcmp(platform_lower, "mobile") == 0 || strcmp(platform_lower, "desktop") == 0)
+    {
+        g_free(platform_lower);
+        return TRUE;
+    }
 
+    g_free(platform_lower);
+    return FALSE;
 }
 
-gboolean valida_artista_tipo (Artista *artista) {
+gboolean valida_artista_tipo(Artista *artista)
+{
 
-gchar *artista_tipo = get_artist_type (artista);
+    gchar *artista_tipo = get_artist_type(artista);
 
-     if (!(artista_tipo)) {
-     return FALSE;
-     }
+    if (!(artista_tipo))
+    {
+        return FALSE;
+    }
 
-     gchar *artista_tipo_lower = g_ascii_strdown(artista_tipo, -1); // Converte para minúsculas
-     g_free (artista_tipo);
+    gchar *artista_tipo_lower = g_ascii_strdown(artista_tipo, -1); // Converte para minúsculas
+    g_free(artista_tipo);
 
-     
-     if (strcmp (artista_tipo_lower, "individual") ==0 || strcmp (artista_tipo_lower, "group")==0 ) {
-     g_free (artista_tipo_lower);
-     return TRUE;
-     }
+    if (strcmp(artista_tipo_lower, "individual") == 0 || strcmp(artista_tipo_lower, "group") == 0)
+    {
+        g_free(artista_tipo_lower);
+        return TRUE;
+    }
 
-g_free (artista_tipo_lower);
-return TRUE;
-
+    g_free(artista_tipo_lower);
+    return TRUE;
 }

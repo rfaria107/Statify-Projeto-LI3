@@ -206,7 +206,7 @@ Artista *preenche_artista(GPtrArray *campostemp)
     gchar *name = g_ptr_array_index(campostemp, 1);
     gchar *recipe_str = g_ptr_array_index(campostemp, 3);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 4);
-    if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
+    if (valida_parenteses_lista(artist_ids_str) == 0)
     {
         return NULL;
     }
@@ -294,7 +294,7 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas, G
     gchar *title = g_ptr_array_index(campostemp, 1);
 
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
-    if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
+    if (valida_parenteses_lista(artist_ids_str) == 0)
     {
         return NULL;
     }
@@ -393,7 +393,7 @@ Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
     gchar *country = g_ptr_array_index(campostemp, 5);
     gchar *subscription_type = g_ptr_array_index(campostemp, 6);
     gchar *liked_musics_str = g_ptr_array_index(campostemp, 7);
-    if (valida_parenteses_lista_artistas(liked_musics_str) == 0)
+    if (valida_parenteses_lista(liked_musics_str) == 0)
     {
         printf("erro nos []\n");
         return NULL;
@@ -471,7 +471,7 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
     gchar *id = g_ptr_array_index(campostemp, 0);
     gchar *tittle = g_ptr_array_index(campostemp, 1);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
-    if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
+    if (valida_parenteses_lista(artist_ids_str) == 0)
     {
         return NULL;
     }
@@ -494,7 +494,7 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
 
     gchar *producers = g_ptr_array_index(campostemp, 4);
 
-    if (valida_parenteses_lista_artistas(producers) == 0)
+    if (valida_parenteses_lista(producers) == 0)
     {
         printf("erro nos []\n");
         return NULL;
