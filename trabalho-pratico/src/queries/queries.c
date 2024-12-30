@@ -135,7 +135,7 @@ void query_1(GestorSistema *gestorsis, char *username, int line_number, int n)
     free(output_file_name);
 }
 
-void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number)
+void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,int n)
 {
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
@@ -211,9 +211,12 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number)
         gchar *country_artista = get_artist_country(artista);
         // Converter de volta para string
         gchar *duration_str = segundos_para_duracao(duracao_total);
-
+        if (n == 0){
         write_row(writer, ';', 4, name, type, duration_str, country_artista);
-
+        }
+        if (n == 1){
+         write_row(writer, '=', 4, name, type, duration_str, country_artista);
+        }
         g_free(name);
         g_free(type);
         g_free(duration_str);
@@ -226,7 +229,7 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number)
     g_list_free(lista_artistas);
 }
 
-void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number)
+void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number,int n)
 {
     if (!gestor_sistema)
     {
@@ -306,7 +309,12 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
         char *formatting_empty[] = {"%s"};
         row_writer_set_field_names(writer, field_names_empty, 1);
         row_writer_set_formatting(writer, formatting_empty);
+        if (n == 0) {
         write_row(writer, ';', 1, "");
+        }
+        if (n == 1) {
+        write_row(writer, '=', 1, "");
+        }
     }
     else
     {
@@ -320,7 +328,12 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
         for (GList *node = generos_lista; node != NULL; node = node->next)
         {
             GenrePopularity *gp = (GenrePopularity *)node->data;
+            if (n == 0) {
             write_row(writer, ';', 2, gp->genre, gp->total_likes);
+            }
+            if (n == 1) {
+            write_row(writer, '=', 2, gp->genre, gp->total_likes);
+            }
         }
     }
 

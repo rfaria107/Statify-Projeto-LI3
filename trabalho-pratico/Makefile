@@ -59,11 +59,11 @@ all: $(TARGET) $(TEST_TARGET)
 
 # Regra para compilar o executável principal
 $(TARGET): $(OBJ_MAIN)
-	$(CC) -o $(TARGET) $(OBJ_MAIN) `pkg-config --libs glib-2.0`
+	$(CC) -o $(TARGET) $(OBJ_MAIN) `pkg-config --libs glib-2.0` -lm
 
 # Regra para compilar o programa de testes
 $(TEST_TARGET): $(OBJ_TEST)
-	$(CC) -o $(TEST_TARGET) $(OBJ_TEST) `pkg-config --libs glib-2.0`
+	$(CC) -o $(TEST_TARGET) $(OBJ_TEST) `pkg-config --libs glib-2.0` -lm
 
 # Regras para compilar os arquivos .o
 $(SRC_DIR)/main.o: $(SRC_DIR)/main.c
