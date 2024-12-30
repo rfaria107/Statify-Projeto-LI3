@@ -1,7 +1,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
-#include "../include/parsing/string_utils.h"
+#include "../include/utils/string_utils.h"
 
 void trim_quotes(GString *string)
 {

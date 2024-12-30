@@ -3,7 +3,7 @@
 #include <string.h>
 #include <glib.h>
 #include "../include/parsing/parser.h"
-#include "../include/parsing/string_utils.h"
+#include "../include/utils/string_utils.h"
 #include "../include/entidades/artists.h"
 #include "../include/entidades/musica.h"
 #include "../include/entidades/usuario.h"
@@ -14,52 +14,6 @@
 #include "../include/write/writer.h"
 #include "../include/gestores/gestor_albuns.h"
 #include "../include/queries/queries.h"
-
-int open_file(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <path_to_csvs> <path_to_inputs>\n", argv[0]);
-        return 1;
-    }
-
-    GestorSistema *gestor = criar_gestor_sistema(); // Inicializa o gestor
-    char *path = g_strdup(argv[1]);
-
-    // Processa os arquivos principais
-    process_file(path, "artists.csv", gestor, 'a');
-    process_file(path, "musics.csv", gestor, 'm');
-    process_file(path, "users.csv", gestor, 'u');
-    process_file(path, "history.csv", gestor, 'h');
-    process_file(path, "albums.csv", gestor, 'l');
-
-    // Processa o arquivo de inputs
-    char *pathinputs = g_strdup(argv[2]);
-    FILE *fileinputs = fopen(pathinputs, "r");
-    if (fileinputs) {
-        interpreter_inputs(fileinputs, gestor);
-        fclose(fileinputs);
-    } else {
-        fprintf(stderr, "Error opening file: %s\n", pathinputs);
-    }
-    g_free(pathinputs);
-
-    g_free(path);
-    liberar_gestor_sistema(gestor);
-
-    return 0;
-}
-
-void process_file(const char *base_path, const char *file_name, GestorSistema *gestor, char tipo) {
-    char *file_path = g_strconcat(base_path, "/", file_name, NULL);
-    FILE *file = fopen(file_path, "r");
-    if (file) {
-        parser_principal(file, gestor, tipo);
-        fclose(file);
-    } else {
-        fprintf(stderr, "Error opening file: %s\n", file_path);
-    }
-    g_free(file_path);
-}
-
 
 void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
 {
@@ -89,17 +43,17 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
         writer_error_users = initialize_error_writer(error_file_users);
         escrever_cabecalho_users_erro(writer_error_users);
     }
-    if (tipo== 'h')
+    if (tipo == 'h')
     {
-        const char *error_files_history= "resultados/history_errors.csv";
-        writer_error_history = initialize_error_writer (error_files_history);
-        escrever_cabecalho_history_erro (writer_error_history);
+        const char *error_files_history = "resultados/history_errors.csv";
+        writer_error_history = initialize_error_writer(error_files_history);
+        escrever_cabecalho_history_erro(writer_error_history);
     }
-    if (tipo== 'l')
+    if (tipo == 'l')
     {
         const char *error_file_album = "resultados/albums.csv";
-        writer_error_album = initialize_error_writer (error_file_album);
-        escrever_cabecalho_album_erro (writer_error_album);
+        writer_error_album = initialize_error_writer(error_file_album);
+        escrever_cabecalho_album_erro(writer_error_album);
     }
     // Inicializa os writers de erro apenas uma vez no início
 
@@ -122,7 +76,7 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
             // Artista *artista = inicializar_artista();
             if (artista)
             {
-                inserir_artista(gestorartistas, artista); 
+                inserir_artista(gestorartistas, artista);
             }
             else
             {
@@ -135,8 +89,8 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
         {
             GestorArtistas *gestorartistas = get_gestor_artistas(gestor);
             GestorMusicas *gestormusicas = get_gestor_musicas(gestor);
-            GestorAlbuns *gestoralbuns = get_gestor_albuns (gestor);
-            Musica *musica = parse_csv_line_musica(buffer, gestorartistas,gestoralbuns);
+            GestorAlbuns *gestoralbuns = get_gestor_albuns(gestor);
+            Musica *musica = parse_csv_line_musica(buffer, gestorartistas, gestoralbuns);
             if (musica)
             {
                 inserir_musica(gestormusicas, musica);
@@ -164,27 +118,32 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
                 free_usuario(usuario);
             }
         }
-        if (tipo== 'h')
+        if (tipo == 'h')
         {
-            GestorHistories *gestorhistories = get_gestor_histories (gestor);
-            History *history = parse_csv_line_history (buffer, gestorhistories);
-            if (history) {
+            GestorHistories *gestorhistories = get_gestor_histories(gestor);
+            History *history = parse_csv_line_history(buffer, gestorhistories);
+            if (history)
+            {
                 inserir_history(gestorhistories, history);
             }
-            else {
-                log_error (writer_error_history, buffer);
+            else
+            {
+                log_error(writer_error_history, buffer);
                 free_history(history);
             }
         }
-        if (tipo == 'l') {
-            GestorAlbuns *gestoralbuns = get_gestor_albuns (gestor);
-            Album *album = parse_csv_line_album (buffer, gestoralbuns);
-            if (album) {
-                inserir_album (gestoralbuns,album);
-            } 
-            else {
-                log_error (writer_error_album, buffer); 
-                free (album);
+        if (tipo == 'l')
+        {
+            GestorAlbuns *gestoralbuns = get_gestor_albuns(gestor);
+            Album *album = parse_csv_line_album(buffer, gestoralbuns);
+            if (album)
+            {
+                inserir_album(gestoralbuns, album);
+            }
+            else
+            {
+                log_error(writer_error_album, buffer);
+                free(album);
             }
         }
     }
@@ -193,15 +152,13 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
     if (tipo == 'a')
         free_and_finish_writing(writer_error_artists);
     if (tipo == 'm')
-
         free_and_finish_writing(writer_error_musics);
     if (tipo == 'u')
-
         free_and_finish_writing(writer_error_users);
-    if (tipo == 'h') 
-        free_and_finish_writing (writer_error_history);
+    if (tipo == 'h')
+        free_and_finish_writing(writer_error_history);
     if (tipo == 'l')
-        free_and_finish_writing (writer_error_album);
+        free_and_finish_writing(writer_error_album);
 }
 
 Artista *parse_csv_line_artista(gchar *line)
@@ -279,7 +236,7 @@ Artista *preenche_artista(GPtrArray *campostemp)
 
     Artista *artista = create_artista(id_str, name, recipe_per_stream, id_constituent, country, type);
 
-    if (!artista || valida_artista_individual(artista) == FALSE || valida_artista_tipo (artista)== FALSE)
+    if (!artista || valida_artista_individual(artista) == FALSE || valida_artista_tipo(artista) == FALSE)
     {
         g_strfreev(id_constituent);
         return NULL;
@@ -313,7 +270,7 @@ Musica *parse_csv_line_musica(gchar *line, GestorArtistas *gestorartistas, Gesto
         return NULL;
     }
 
-    Musica *musica = preenche_musica(campostemp, gestorartistas,gestoralbuns);
+    Musica *musica = preenche_musica(campostemp, gestorartistas, gestoralbuns);
 
     if (!musica)
     {
@@ -353,7 +310,7 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas, G
         }
         trim_single_quotes_gchar(artist_ids[i]);
     }
-    gchar *album_id = g_ptr_array_index (campostemp,3);
+    gchar *album_id = g_ptr_array_index(campostemp, 3);
 
     gchar *duration = g_ptr_array_index(campostemp, 4);
 
@@ -363,9 +320,7 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas, G
 
     int year = atoi(year_str);
 
-    gchar *lyrics = g_ptr_array_index(campostemp, 7);
-
-    Musica *musica = create_musica(id, title, artist_ids, album_id,duration, genre, year, lyrics);
+    Musica *musica = create_musica(id, title, artist_ids, album_id, duration, genre, year,0);
 
     if (!musica)
     {
@@ -374,7 +329,7 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas, G
         return NULL;
     }
 
-    if (validaDuracao(musica) == FALSE || valida_ano_lançamento(musica) == 0 || valida_artistids_musica(musica, gestorartistas) == 0 || valida_album (musica, gestoralbuns))
+    if (validaDuracao(musica) == FALSE || valida_ano_lançamento(musica) == 0 || valida_artistids_musica(musica, gestorartistas) == 0 || valida_album(musica, gestoralbuns))
     {
         free_musica(musica);
         g_strfreev(artist_ids);
@@ -469,7 +424,6 @@ Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
     return usuario;
 }
 
-
 Album *parse_csv_line_album(gchar *line, GestorAlbuns *gestor_albuns)
 {
     int numcampos = 5;
@@ -516,7 +470,7 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
     // Recupera os valores de cada campo do GPtrArray
     gchar *id = g_ptr_array_index(campostemp, 0);
     gchar *tittle = g_ptr_array_index(campostemp, 1);
-     gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
+    gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
     if (valida_parenteses_lista_artistas(artist_ids_str) == 0)
     {
         return NULL;
@@ -534,10 +488,12 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
         trim_single_quotes_gchar(artist_ids[i]);
     }
 
-    gchar *year = g_ptr_array_index(campostemp, 3);
+    gchar *year_str = g_ptr_array_index(campostemp, 3);
+
+    int year = atoi(year_str);
 
     gchar *producers = g_ptr_array_index(campostemp, 4);
-  
+
     if (valida_parenteses_lista_artistas(producers) == 0)
     {
         printf("erro nos []\n");
@@ -559,15 +515,12 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
     Album *album = create_album(id, tittle, artist_ids, year, producers_name);
 
     g_strfreev(producers_name);
-    g_strfreev (artist_ids);
+    g_strfreev(artist_ids);
 
-
-   // faltam as validacoes dos albuns
+    // faltam as validacoes dos albuns
 
     return album;
 }
-
-
 
 History *parse_csv_line_history(gchar *line, GestorHistories *gestorhistory)
 {
@@ -577,7 +530,6 @@ History *parse_csv_line_history(gchar *line, GestorHistories *gestorhistory)
     GPtrArray *campostemp = g_ptr_array_new_with_free_func(g_free); // Array temporario
 
     for (int i = 0; i < numcampos; i++)
-
 
     {
 
@@ -621,9 +573,8 @@ History *preenche_history(GPtrArray *campostemp, GestorHistories *gestorhistory)
     gchar *timestamp = g_ptr_array_index(campostemp, 3);
     gchar *duration = g_ptr_array_index(campostemp, 4);
     gchar *plataform = g_ptr_array_index(campostemp, 5);
-    
-    History *history = create_history(id, user_id, music_id, timestamp, duration, plataform);
 
+    History *history = create_history(id, user_id, music_id, timestamp, duration, plataform);
 
     if (valida_plataforma(history) == FALSE)
     {

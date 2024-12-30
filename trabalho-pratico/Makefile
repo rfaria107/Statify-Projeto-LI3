@@ -17,8 +17,9 @@ OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/gestores/gestor_albuns.o \
            $(SRC_DIR)/gestores/gestor_histories.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
+           $(SRC_DIR)/io/io.o \
            $(SRC_DIR)/parsing/parser.o \
-           $(SRC_DIR)/parsing/string_utils.o \
+           $(SRC_DIR)/utils/string_utils.o \
            $(SRC_DIR)/write/writer.o \
            $(SRC_DIR)/write/file.o \
            $(SRC_DIR)/validacao/valida.o \
@@ -39,8 +40,9 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
            $(SRC_DIR)/gestores/gestor_albuns.o \
            $(SRC_DIR)/gestores/gestor_histories.o \
+           $(SRC_DIR)/io/io.o \
            $(SRC_DIR)/parsing/parser.o \
-           $(SRC_DIR)/parsing/string_utils.o \
+           $(SRC_DIR)/utils/string_utils.o \
            $(SRC_DIR)/write/writer.o \
            $(SRC_DIR)/write/file.o \
            $(SRC_DIR)/validacao/valida.o \

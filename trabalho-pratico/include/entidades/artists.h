@@ -14,7 +14,7 @@ gchar *get_artist_country(Artista *artista);
 gchar *get_artist_type(Artista *artista);
 gint get_artist_duracao_disco(Artista *artista);
 
-void set_artista_duracao_disco(Artista *artista, gint nova_duração);
+void set_artista_duracao_disco(Artista *artista, gint nova_duracao);
 
 // Funções para manipulação de artistas
 void free_artista(Artista *artista);

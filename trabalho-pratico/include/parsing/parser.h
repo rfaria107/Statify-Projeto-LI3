@@ -4,10 +4,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
-#include "../include/parsing/string_utils.h"
-#include "../include/entidades/artists.h"
-#include "../include/entidades/usuario.h"
-#include "../include/entidades/musica.h"
+#include "../include/utils/string_utils.h"
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/gestores/gestor_usuarios.h"
@@ -22,8 +19,6 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas,Ge
 
 Usuario *parse_csv_line_usuario(gchar* line, GestorMusicas *gestormusicas);
 Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas);
-int open_file(int argc, char *argv[]);
-void process_file(const char *base_path, const char *file_name, GestorSistema *gestor, char tipo);
 
 Album *parse_csv_line_album(gchar *line, GestorAlbuns *gestor_albuns);
 Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns);

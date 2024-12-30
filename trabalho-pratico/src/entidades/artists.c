@@ -55,9 +55,9 @@ gint get_artist_duracao_disco(Artista *artista)
     return (artista->duracao_discografia);
 }
 
-void set_artista_duracao_disco(Artista *artista, gint nova_duração)
+void set_artista_duracao_disco(Artista *artista, gint nova_duracao)
 {
-    artista->duracao_discografia = nova_duração;
+    artista->duracao_discografia = nova_duracao;
 }
 
 Artista *inicializar_artista()

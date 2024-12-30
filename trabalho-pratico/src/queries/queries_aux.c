@@ -16,7 +16,7 @@
 #include "../include/gestores/gestor_albuns.h"
 #include "../include/write/writer.h"
 #include "../include/gestores/gestor_sistemas.h"
-#include "../include/parsing/string_utils.h"
+#include "../include/utils/string_utils.h"
 #include "../include/queries/queries_aux.h"
 
 struct GenrePopularity
@@ -171,16 +171,44 @@ int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albu
                     break; // Já encontramos uma correspondência, podemos sair do loop
                 }
             }
+            g_strfreev(artist_ids);
         }
     }
 
     return count;
 }
 
-double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas, GHashTable *hash_history, GHashTable *hash_artistas)
+void calcula_streams(GestorSistema *gestorsis)
+{ // atualiza o campo streams das músicas encontradas no histórico
+    GestorHistories *gestorhistory = get_gestor_histories(gestorsis);
+    GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
+    GHashTable *hash_history = get_hash_histories(gestorhistory);
+    GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
+
+    GHashTableIter iter;
+    gpointer key, value;
+    g_hash_table_iter_init(&iter, hash_history);
+
+    while (g_hash_table_iter_next(&iter, &key, &value))
+    {
+        History *history = (History *)value;
+        gchar *music_id = get_history_music_id(history);
+
+        Musica *musica = g_hash_table_lookup(hash_musicas, music_id);
+        if (musica)
+        {
+            int stream_count = get_music_streams(musica);
+            stream_count++;
+            set_music_streams(musica, stream_count);
+        }
+    }
+}
+
+double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorartistas, GestorMusicas *gestormusicas)
 {
+    GHashTable *hash_artistas = get_hash_artistas(gestorartistas);
+    GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
     double receita_artista = 0.0;
-    double receita_participacao = 0.0;
 
     // Itera pelas músicas no hash para encontrar as músicas do artista diretamente
     GHashTableIter music_iter;
@@ -197,23 +225,9 @@ double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas
         {
             if (g_strcmp0(artist_ids[i], get_artist_id(artista)) == 0)
             {
-                const char *musica_id = get_music_id(musica);
-
-                // Conta reproduções no histórico para a música
-                GHashTableIter history_iter;
-                gpointer history_key, history_value;
-                g_hash_table_iter_init(&history_iter, hash_history);
-
-                while (g_hash_table_iter_next(&history_iter, &history_key, &history_value))
-                {
-                    History *history = (History *)history_value;
-
-                    if (g_strcmp0(get_history_music_id(history), musica_id) == 0)
-                    {
-                        receita_artista += get_artist_recipe_per_stream(artista);
-                    }
-                }
-                break; // Encerra o loop pelos IDs de artistas
+                int stream_count = get_music_streams(musica);
+                receita_artista += stream_count * get_artist_recipe_per_stream(artista);
+                break;
             }
         }
         if (artist_ids)
@@ -227,6 +241,8 @@ double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas
     {
         return receita_artista;
     }
+
+    double receita_participacao = 0.0;
 
     // Considera músicas dos grupos dos quais o artista participa
     g_hash_table_iter_init(&music_iter, hash_musicas);
@@ -256,22 +272,8 @@ double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas
 
                 if (is_member)
                 {
-                    const char *musica_id = get_music_id(musica);
-
-                    // Conta reproduções no histórico para a música
-                    GHashTableIter history_iter;
-                    gpointer history_key, history_value;
-                    g_hash_table_iter_init(&history_iter, hash_history);
-
-                    while (g_hash_table_iter_next(&history_iter, &history_key, &history_value))
-                    {
-                        History *history = (History *)history_value;
-
-                        if (g_strcmp0(get_history_music_id(history), musica_id) == 0)
-                        {
-                            receita_participacao += get_artist_recipe_per_stream(grupo) / get_num_constituents(grupo);
-                        }
-                    }
+                    int stream_count = get_music_streams(musica);
+                    receita_participacao += (stream_count * get_artist_recipe_per_stream(grupo)) / get_num_constituents(grupo);
                 }
 
                 // Libera memória dos constituents
@@ -288,7 +290,7 @@ double calcular_receita_total_artista(Artista *artista, GHashTable *hash_musicas
     }
 
     // Soma as receitas diretas e de participação
-    return receita_artista + receita_participacao;
+    return ((int)(receita_artista + receita_participacao) * 100 + 0.5) / 100.0;
 }
 
 // Função para contar o número de constituintes (membros) de um artista/grupo
