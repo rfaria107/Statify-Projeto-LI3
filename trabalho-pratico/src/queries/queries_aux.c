@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <glib.h>
 #include <string.h>
+#include <math.h>
 #include "../include/queries/queries.h"
 #include "../include/entidades/artists.h"
 #include "../include/entidades/musica.h"
@@ -205,21 +206,19 @@ void calcula_streams(GestorSistema *gestorsis)
     }
 }
 
-double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorartistas, GestorMusicas *gestormusicas)
-{
+double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorartistas, GestorMusicas *gestormusicas) {
+    GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
     GHashTable *hash_artistas = get_hash_artistas(gestorartistas);
     GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
     gchar *artist_id = get_artist_id(artista);
 
     double receita_artista = 0.0;
 
-    // Itera pelas músicas na hash para encontrar as músicas do artista diretamente
+    // Iterar pelas músicas para calcular receita direta
     GHashTableIter music_iter;
     gpointer music_key, music_value;
     g_hash_table_iter_init(&music_iter, hash_musicas);
-
-    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value))
-    {
+    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value)) {
         Musica *musica = (Musica *)music_value;
 
         // Verifica se a música pertence ao artista
@@ -233,10 +232,7 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
                 break;
             }
         }
-        if (artist_ids)
-        {
-            g_strfreev(artist_ids); // Libera memória associada aos IDs
-        }
+        g_strfreev(artist_ids);
     }
     gchar *artist_type = get_artist_type(artista);
 
@@ -248,24 +244,17 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
         return receita_artista;
     }
 
+    // Calcular receita por participação em grupos
     double receita_participacao = 0.0;
-
-    // Considera músicas dos grupos dos quais o artista participa
     g_hash_table_iter_init(&music_iter, hash_musicas);
-    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value))
-    {
+    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value)) {
         Musica *musica = (Musica *)music_value;
+        gchar **artist_ids = get_music_artist_ids(musica);
 
-        gchar **artist_ids = get_music_artist_ids(musica); // Obtém os IDs de artistas associados à música
-        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++)
-        {
-            // Verifica se o ID do artista é parte de um grupo que participa da música
+        for (int i = 0; artist_ids && artist_ids[i]; i++) {
             Artista *grupo = g_hash_table_lookup(hash_artistas, artist_ids[i]);
-            if (grupo && grupo != artista)
-            {
+            if (grupo && grupo != artista) {
                 gchar **constituents = get_artist_id_constituent(grupo);
-
-                // Confere se o artista é um dos membros do grupo
                 int is_member = 0;
                 for (int j = 0; constituents && constituents[j] != NULL; j++)
                 {
@@ -276,29 +265,21 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
                     }
                 }
 
-                if (is_member)
-                {
+                if (is_member) {
                     int stream_count = get_music_streams(musica);
                     receita_participacao += (stream_count * get_artist_recipe_per_stream(grupo)) / get_num_constituents(grupo);
                 }
-
-                // Libera memória dos constituents
-                if (constituents)
-                {
-                    g_strfreev(constituents);
-                }
+                g_strfreev(constituents);
             }
         }
-        if (artist_ids)
-        {
-            g_strfreev(artist_ids); // Libera memória associada aos IDs
-        }
+        g_strfreev(artist_ids);
     }
     free(artist_type);
     free(artist_id);
     // Soma as receitas diretas e de participação
     return ((int)(receita_artista + receita_participacao) * 100 + 0.5) / 100.0;
 }
+
 
 // Função para contar o número de constituintes (membros) de um artista/grupo
 int get_num_constituents(Artista *artista)

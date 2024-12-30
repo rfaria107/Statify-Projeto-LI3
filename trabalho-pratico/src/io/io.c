@@ -111,7 +111,28 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 country = g_strdup(token);
                 g_free(token);
             }
-            query_2(gestorsis, num, country, line_number);
+            query_2(gestorsis, num, country, line_number,0);
+            if (country != NULL)
+                g_free(country);
+        }
+        else if (strcmp(token, "2S") == 0)
+        {
+            g_free(token);
+            token = procura_espaço2(buffer);
+            int num = 0;
+            gchar *country = NULL;
+            if (token != NULL)
+            {
+                num = atoi(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+            }
+            if (token != NULL)
+            {
+                country = g_strdup(token);
+                g_free(token);
+            }
+            query_2(gestorsis, num, country, line_number,1);
             if (country != NULL)
                 g_free(country);
         }
@@ -132,7 +153,26 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                     max_age = atoi(token);
                     g_free(token);
                 }
-                query_3(min_age, max_age, gestorsis, line_number);
+                query_3(min_age, max_age, gestorsis, line_number,0);
+            }
+        }
+        else if (strcmp(token, "3S") == 0)
+        {
+            g_free(token);
+            token = procura_espaço2(buffer);
+            int min_age = 0;
+            if (token != NULL)
+            {
+                min_age = atoi(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+                int max_age = 0;
+                if (token != NULL)
+                {
+                    max_age = atoi(token);
+                    g_free(token);
+                }
+                query_3(min_age, max_age, gestorsis, line_number,1);
             }
         }
         else

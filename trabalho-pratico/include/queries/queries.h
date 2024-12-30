@@ -8,8 +8,8 @@
 
 // Funções de query
 void query_1(GestorSistema *gestorsis, char *username, int line_number, int n);
-void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number);
-void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number);
+void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,int n);
+void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number,int n);
 
 // Função principal para interpretar inputs e executar querys
 void interpreter_inputs(FILE *file, GestorSistema *gestorsis);

@@ -133,17 +133,17 @@ void escrever_cabecalho_users_erro(RowWriter *error_writer)
 
 void escrever_cabecalho_musics_erro(RowWriter *error_writer)
 {
-    // "id";"title";"artist_id";"duration";"genre";"year";"lyrics"
-    char *field_names[] = {"id", "title", "artist_id", "duration", "genre", "year", "lyrics"};
-    char *formatting[] = {"%s", "%s", "%s", "%s", "%s", "%s", "%s"};
+    // "id";"title";"artist_id";"album_id";"duration";"genre";"year";"lyrics"
+    char *field_names[] = {"id", "title", "artist_id", "album_id", "duration", "genre", "year", "lyrics"};
+    char *formatting[] = {"%s", "%s", "%s","%s", "%s", "%s", "%s", "%s"};
 
     // Define os campos e formatação
-    row_writer_set_field_names(error_writer, field_names, 7);
+    row_writer_set_field_names(error_writer, field_names, 8);
     row_writer_set_formatting(error_writer, formatting);
 
     // Escreve o cabeçalho com aspas ao redor de cada campo
-    write_row(error_writer, ';', 7, 
-        "\"id\"", "\"title\"", "\"artist_id\"", "\"duration\"", "\"genre\"", "\"year\"", "\"lyrics\"");
+    write_row(error_writer, ';', 8, 
+        "\"id\"", "\"title\"", "\"artist_id\"", "\"album_id\"","\"duration\"", "\"genre\"", "\"year\"", "\"lyrics\"");
 }
 
 void escrever_cabecalho_artists_erro(RowWriter *error_writer)
