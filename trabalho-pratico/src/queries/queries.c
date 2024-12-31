@@ -493,11 +493,11 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     }
 
     // Encontrar os mais populares
-    gchar *top_artist_id = find_top_entry_with_tiebreaker(artist_time, FALSE, TRUE);  // Alfabético (ID menor)
+    gchar *top_artist_id = find_top_entry_with_tiebreaker(artist_time, FALSE, FALSE);  // Alfabético (ID menor)
     gchar *top_day = find_top_entry_with_tiebreaker(day_count, FALSE, FALSE);         // Mais recente
     gchar *top_hour = find_top_entry_with_tiebreaker(hour_time, TRUE, FALSE);         // Mais cedo
     gchar *top_genre = find_top_entry_with_tiebreaker(genre_popularity, FALSE, TRUE); // Alfabético
-    gchar *top_album = find_top_entry_with_tiebreaker(album_time, FALSE, TRUE);       // Alfabético
+    gchar *top_album = find_top_entry_with_tiebreaker(album_time, FALSE, FALSE);       // Alfabético
 
     if (!top_artist_id || *top_artist_id == '\0' || !top_day || *top_day == '\0' || !top_hour || *top_hour == '\0' || !top_genre || *top_genre == '\0' || !top_genre || !top_album || *top_album == '\0')
     {

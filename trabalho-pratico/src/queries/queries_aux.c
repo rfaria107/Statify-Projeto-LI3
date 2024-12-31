@@ -93,7 +93,8 @@ void calcular_discografia_artistas(GestorSistema *gestorsis)
         for (int i = 0; artist_ids[i] != NULL; i++)
         {
             gchar *artist_id = g_strdup(artist_ids[i]);
-            Artista *artista = (Artista *)g_hash_table_lookup(hashartistas, artist_id);
+            int artist_id_int = atoi(artist_id + 1);
+            Artista *artista = buscar_artista(gestorartistas, artist_id_int);
             g_free(artist_id);
 
             if (artista != NULL)
@@ -208,7 +209,6 @@ void calcula_streams(GestorSistema *gestorsis)
     GestorHistories *gestorhistory = get_gestor_histories(gestorsis);
     GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
     GHashTable *hash_history = get_hash_histories(gestorhistory);
-    GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
 
     GHashTableIter iter;
     gpointer key, value;
@@ -218,8 +218,7 @@ void calcula_streams(GestorSistema *gestorsis)
     {
         History *history = (History *)value;
         int music_id = get_history_music_id(history);
-
-        Musica *musica = g_hash_table_lookup(hash_musicas, GINT_TO_POINTER(music_id));
+        Musica *musica = buscar_musicas(gestormusicas, music_id);
         if (musica)
         {
             int stream_count = get_music_streams(musica);
@@ -233,7 +232,6 @@ void calcula_streams(GestorSistema *gestorsis)
 double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorartistas, GestorMusicas *gestormusicas)
 {
     GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
-    GHashTable *hash_artistas = get_hash_artistas(gestorartistas);
     int artist_id = get_artist_id(artista);
 
     double receita_artista = 0.0;
@@ -280,7 +278,8 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
 
         for (int i = 0; artist_ids && artist_ids[i]; i++)
         {
-            Artista *grupo = g_hash_table_lookup(hash_artistas, artist_ids[i]);
+            int artist_id_int = atoi(artist_ids[i] + 1);
+            Artista *grupo = buscar_artista(gestorartistas, artist_id_int);
             if (grupo && grupo != artista)
             {
                 gchar **constituents = get_artist_id_constituent(grupo);
@@ -386,24 +385,23 @@ gchar *find_top_entry_with_tiebreaker(GHashTable *table, gboolean is_numeric, gb
 
 gint compare_by_value_with_tiebreaker(gconstpointer a, gconstpointer b, gpointer user_data)
 {
-    // Converte os ponteiros de valores (que são inteiros) para inteiros
+        // Converte os ponteiros de valores (que são inteiros) para inteiros
     gint value_a = GPOINTER_TO_INT(a);
     gint value_b = GPOINTER_TO_INT(b);
 
-    gboolean reverse = GPOINTER_TO_INT(user_data); // Se True, reverte a ordem
+    // Caso os valores sejam iguais, a comparação será feita pela chave (ID do artista)
+
+    gint key_a = (gchar *)g_hash_table_lookup(user_data, a);
+    gint key_b = (gchar *)g_hash_table_lookup(user_data, b);
 
     // Se os valores são diferentes, retorna a diferença para ordenar
     if (value_a != value_b)
     {
-        return reverse ? value_b - value_a : value_a - value_b;
+        return value_b - value_a;
     }
 
-    // Caso os valores sejam iguais, a comparação será feita pela chave (ID do artista)
-    gchar *key_a = (gchar *)g_hash_table_lookup(user_data, a);
-    gchar *key_b = (gchar *)g_hash_table_lookup(user_data, b);
-
     // Para o desempate, caso seja alfabético
-    return strcmp(key_a, key_b);
+    return key_a - key_b;
 }
 
 // Função para ordenar a GHashTable por valor com desempate
