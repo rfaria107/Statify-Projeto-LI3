@@ -14,5 +14,6 @@ void inicializar_gestor_histories(GestorHistories *gestor);
 void liberar_gestor_histories(GestorHistories *gestor);
 void inserir_history(GestorHistories *gestor, History *history);
 History* buscar_history(GestorHistories *gestor, const gchar *id);
+History* buscar_history_por_user_id(GestorHistories *gestor, const gchar *user_id);
 
 #endif

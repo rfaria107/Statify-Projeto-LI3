@@ -13,6 +13,7 @@ void trim_single_quotes_gchar(gchar *string);
 gchar* procura_espaço(gchar* buffer);
 gchar *procura_espaço2(gchar *buffer);
 gchar *procura_espaço3(gchar *buffer);
+gchar *procura_espaço4(gchar *buffer);
 void trim_quotes_gchar(gchar *string);
 
 #endif

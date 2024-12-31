@@ -43,3 +43,14 @@ void inserir_history(GestorHistories *gestor, History *history)
 History* buscar_history(GestorHistories *gestor, const gchar*id) {
     return (History*) g_hash_table_lookup(gestor->histories, id);
 }
+
+History* buscar_history_por_user_id(GestorHistories *gestor, const gchar *user_id) {
+
+    if (gestor == NULL || gestor->histories == NULL) {
+        return NULL;
+    }
+
+    History* history = (History*) g_hash_table_lookup(gestor->histories, user_id);
+
+    return history;
+}

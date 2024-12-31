@@ -136,3 +136,37 @@ gchar *procura_espaço3(gchar *buffer)
     g_free(string);
     return result;
 }
+
+// Retorna a string a partir do 3º espaço
+gchar *procura_espaço4(gchar *buffer)
+{
+    int i = 0, space_count = 0;
+    gchar *string = g_strdup(buffer);
+
+    // Encontra o terceiro espaço
+    while (string[i] != '\0')
+    {
+        if (string[i] == ' ')
+        {
+            space_count++;
+            if (space_count == 3)
+            {
+                i++; // Avança para o próximo caractere após o terceiro espaço
+                break;
+            }
+        }
+        i++;
+    }
+
+    // Se chegar ao final sem encontrar o terceiro espaço, retorna NULL
+    if (space_count < 3)
+    {
+        g_free(string);
+        return NULL;
+    }
+
+    // Cria a substring a partir do terceiro espaço até o fim
+    gchar *result = g_strdup(string + i);
+    g_free(string);
+    return result;
+}

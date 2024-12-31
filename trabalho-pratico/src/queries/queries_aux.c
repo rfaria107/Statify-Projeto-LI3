@@ -327,3 +327,59 @@ char **lista_user_ids(GestorUsuarios *gestorusers)
 
     return user_ids;
 }
+
+gchar *find_top_entry_with_tiebreaker(GHashTable *table, gboolean is_numeric, gboolean alphabetical) {
+    GHashTableIter iter;
+    gpointer key, value;
+    gchar *top_key = NULL;
+    gint64 top_value = -1;
+
+    g_hash_table_iter_init(&iter, table);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        gchar *current_key = (gchar *)key;
+        gint64 current_value = GPOINTER_TO_INT(value);
+
+        if (current_value > top_value || 
+            (current_value == top_value && 
+             ((alphabetical && g_strcmp0(current_key, top_key) < 0) || 
+              (!alphabetical && is_numeric && g_ascii_strcasecmp(current_key, top_key) < 0)))) {
+            top_key = current_key;
+            top_value = current_value;
+        }
+    }
+    return top_key ? g_strdup(top_key) : NULL;
+}
+
+gint compare_by_value_with_tiebreaker(gconstpointer a, gconstpointer b, gpointer user_data) {
+    // Converte os ponteiros de valores (que são inteiros) para inteiros
+    gint value_a = GPOINTER_TO_INT(a);
+    gint value_b = GPOINTER_TO_INT(b);
+
+    gboolean reverse = GPOINTER_TO_INT(user_data);  // Se True, reverte a ordem
+
+    // Se os valores são diferentes, retorna a diferença para ordenar
+    if (value_a != value_b) {
+        return reverse ? value_b - value_a : value_a - value_b;
+    }
+
+    // Caso os valores sejam iguais, a comparação será feita pela chave (ID do artista)
+    gchar *key_a = (gchar *)g_hash_table_lookup(user_data, a);
+    gchar *key_b = (gchar *)g_hash_table_lookup(user_data, b);
+
+    // Para o desempate, caso seja alfabético
+    return strcmp(key_a, key_b);
+}
+
+// Função para ordenar a GHashTable por valor com desempate
+GList* sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reverse, gboolean alphabetical) {
+    // Lista para armazenar as chaves da tabela
+    GList *keys = g_hash_table_get_keys(table);
+
+    // Criando um ponteiro para os dados do usuário
+    gpointer user_data = GINT_TO_POINTER(reverse);
+
+    // Ordena a lista de chaves
+    keys = g_list_sort_with_data(keys, compare_by_value_with_tiebreaker, user_data);
+
+    return keys;
+}

@@ -175,6 +175,60 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 query_3(min_age, max_age, gestorsis, line_number,1);
             }
         }
+        else if (strcmp(token, "6") == 0)
+        {
+            g_free(token); 
+            token = procura_espaço2(buffer); 
+            if (token != NULL)
+            {
+                char *user_id = g_strdup(token);
+                g_free(token); 
+                token = procura_espaço3(buffer);
+                int year = 0, N = 0;
+
+                if (token != NULL)
+                {
+                    year = atoi(token);
+                    g_free(token); 
+                    token = procura_espaço4(buffer);
+
+                    if (token != NULL)
+                    {
+                        N = atoi(token);
+                        g_free(token);
+                    }
+                }
+                query_6(user_id, year, N, gestorsis, line_number, 0); 
+                g_free(user_id);
+            }
+        }
+        else if (strcmp(token, "6S") == 0)
+        {
+            g_free(token); 
+            token = procura_espaço2(buffer); 
+            if (token != NULL)
+            {
+                char *user_id = g_strdup(token);
+                g_free(token); 
+                token = procura_espaço3(buffer);
+                int year = 0, N = 0;
+
+                if (token != NULL)
+                {
+                    year = atoi(token);
+                    g_free(token); 
+                    token = procura_espaço4(buffer);
+
+                    if (token != NULL)
+                    {
+                        N = atoi(token);
+                        g_free(token);
+                    }
+                }
+                query_6(user_id, year, N, gestorsis, line_number, 1); 
+                g_free(user_id);
+            }
+        }
         else
             g_free(token);
         line_number++;
