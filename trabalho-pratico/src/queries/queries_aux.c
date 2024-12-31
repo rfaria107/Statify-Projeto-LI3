@@ -209,7 +209,6 @@ void calcula_streams(GestorSistema *gestorsis)
 double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorartistas, GestorMusicas *gestormusicas) {
     GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
     GHashTable *hash_artistas = get_hash_artistas(gestorartistas);
-    GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
     gchar *artist_id = get_artist_id(artista);
 
     double receita_artista = 0.0;
@@ -277,7 +276,7 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
     free(artist_type);
     free(artist_id);
     // Soma as receitas diretas e de participação
-    return ((int)(receita_artista + receita_participacao) * 100 + 0.5) / 100.0;
+    return (receita_artista + receita_participacao);
 }
 
 
