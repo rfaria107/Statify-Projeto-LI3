@@ -25,7 +25,7 @@ GestorArtistas* criar_gestor_artistas() {
 
 void inicializar_gestor_artistas(GestorArtistas *gestor)
 {
-    gestor->artistas = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,free_artista_value);
+    gestor->artistas = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free_artista_value);
 }
 
 void liberar_gestor_artistas(GestorArtistas *gestor)
@@ -36,10 +36,10 @@ void liberar_gestor_artistas(GestorArtistas *gestor)
 
 void inserir_artista(GestorArtistas *gestor, Artista *artista)
 {
-    gchar *id = get_artist_id(artista);
-    g_hash_table_insert(gestor->artistas, id, artista);
+    int id = get_artist_id(artista);
+    g_hash_table_insert(gestor->artistas, GINT_TO_POINTER(id), artista);
 }
 
-Artista* buscar_artista(GestorArtistas *gestor, const gchar*id) {
-    return (Artista*) g_hash_table_lookup(gestor->artistas, id);
+Artista* buscar_artista(GestorArtistas *gestor, int id) {
+    return (Artista*) g_hash_table_lookup(gestor->artistas, GINT_TO_POINTER(id));
 }

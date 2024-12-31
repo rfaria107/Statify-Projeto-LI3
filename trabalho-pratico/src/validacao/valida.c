@@ -302,7 +302,8 @@ int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas)
     gchar **artist_ids = get_music_artist_ids(musica);
     for (int i = 0; artist_ids[i] != NULL; i++)
     {
-        if (buscar_artista(gestorartistas, artist_ids[i]) == NULL)
+        int artist_id_int = atoi(artist_ids[i]+1); 
+        if (buscar_artista(gestorartistas, artist_id_int) == NULL)
         {
             g_strfreev(artist_ids);
             return 0;

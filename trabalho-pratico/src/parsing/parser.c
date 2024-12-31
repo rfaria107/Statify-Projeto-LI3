@@ -203,6 +203,9 @@ Artista *preenche_artista(GPtrArray *campostemp)
 {
 
     gchar *id_str = g_ptr_array_index(campostemp, 0);
+    char *parte_numerica = id_str+1;
+    int id = atoi(parte_numerica);
+
     gchar *name = g_ptr_array_index(campostemp, 1);
     gchar *recipe_str = g_ptr_array_index(campostemp, 3);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 4);
@@ -234,7 +237,7 @@ Artista *preenche_artista(GPtrArray *campostemp)
         }
     }
 
-    Artista *artista = create_artista(id_str, name, recipe_per_stream, id_constituent, country, type);
+    Artista *artista = create_artista(id, name, recipe_per_stream, id_constituent, country, type);
 
     if (!artista || valida_artista_individual(artista) == FALSE || valida_artista_tipo(artista) == FALSE)
     {
@@ -289,55 +292,62 @@ Musica *parse_csv_line_musica(gchar *line, GestorArtistas *gestorartistas, Gesto
 Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas, GestorAlbuns *gestoralbuns)
 {
 
-    gchar *id = g_ptr_array_index(campostemp, 0);
-
-    gchar *title = g_ptr_array_index(campostemp, 1);
-
-    gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
-    if (valida_parenteses_lista(artist_ids_str) == 0)
+    gchar *id_str = g_ptr_array_index(campostemp, 0);
+    if (strncmp(id_str, "S", 1) == 0)
     {
-        return NULL;
-    }
+        memmove(id_str, id_str + 1, strlen(id_str));
+        int id = atoi(id_str);
 
-    trim_parenteses_gchar(artist_ids_str);
-    gchar **artist_ids = g_strsplit(artist_ids_str, ",", -1);
-    for (int i = 0; artist_ids[i] != NULL; i++)
-    {
-        if (valida_single_quotes_lista_artistas(artist_ids[i]) == 0)
+        gchar *title = g_ptr_array_index(campostemp, 1);
+
+        gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
+        if (valida_parenteses_lista(artist_ids_str) == 0)
         {
+            return NULL;
+        }
+
+        trim_parenteses_gchar(artist_ids_str);
+        gchar **artist_ids = g_strsplit(artist_ids_str, ",", -1);
+        for (int i = 0; artist_ids[i] != NULL; i++)
+        {
+            if (valida_single_quotes_lista_artistas(artist_ids[i]) == 0)
+            {
+                g_strfreev(artist_ids);
+                return NULL;
+            }
+            trim_single_quotes_gchar(artist_ids[i]);
+        }
+        gchar *album_id = g_ptr_array_index(campostemp, 3);
+
+        gchar *duration = g_ptr_array_index(campostemp, 4);
+
+        gchar *genre = g_ptr_array_index(campostemp, 5);
+
+        gchar *year_str = g_ptr_array_index(campostemp, 6);
+
+        int year = atoi(year_str);
+
+        Musica *musica = create_musica(id, title, artist_ids, album_id, duration, genre, year, 0);
+
+        if (!musica)
+        {
+            free_musica(musica);
             g_strfreev(artist_ids);
             return NULL;
         }
-        trim_single_quotes_gchar(artist_ids[i]);
-    }
-    gchar *album_id = g_ptr_array_index(campostemp, 3);
 
-    gchar *duration = g_ptr_array_index(campostemp, 4);
+        if (validaDuracao(musica) == FALSE || valida_ano_lançamento(musica) == 0 || valida_artistids_musica(musica, gestorartistas) == 0 || valida_album(musica, gestoralbuns))
+        {
+            free_musica(musica);
+            g_strfreev(artist_ids);
+            return NULL;
+        }
 
-    gchar *genre = g_ptr_array_index(campostemp, 5);
-
-    gchar *year_str = g_ptr_array_index(campostemp, 6);
-
-    int year = atoi(year_str);
-
-    Musica *musica = create_musica(id, title, artist_ids, album_id, duration, genre, year,0);
-
-    if (!musica)
-    {
-        free_musica(musica);
         g_strfreev(artist_ids);
-        return NULL;
+        return musica;
     }
-
-    if (validaDuracao(musica) == FALSE || valida_ano_lançamento(musica) == 0 || valida_artistids_musica(musica, gestorartistas) == 0 || valida_album(musica, gestoralbuns))
-    {
-        free_musica(musica);
-        g_strfreev(artist_ids);
+    else
         return NULL;
-    }
-
-    g_strfreev(artist_ids);
-    return musica;
 }
 
 // Parser para usuarios
@@ -385,43 +395,51 @@ Usuario *parse_csv_line_usuario(gchar *line, GestorMusicas *gestormusicas)
 Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
 {
     // Recupera os valores de cada campo do GPtrArray
-    gchar *username = g_ptr_array_index(campostemp, 0);
-    gchar *email = g_ptr_array_index(campostemp, 1);
-    gchar *first_name = g_ptr_array_index(campostemp, 2);
-    gchar *last_name = g_ptr_array_index(campostemp, 3);
-    gchar *birth_date = g_ptr_array_index(campostemp, 4);
-    gchar *country = g_ptr_array_index(campostemp, 5);
-    gchar *subscription_type = g_ptr_array_index(campostemp, 6);
-    gchar *liked_musics_str = g_ptr_array_index(campostemp, 7);
-    if (valida_parenteses_lista(liked_musics_str) == 0)
+    gchar *username_str = g_ptr_array_index(campostemp, 0);
+    if (strncmp(username_str, "U", 1) == 0)
     {
-        printf("erro nos []\n");
-        return NULL;
-    }
-    trim_parenteses_gchar(liked_musics_str);
-    gchar **liked_musics_id = g_strsplit(liked_musics_str, ",", -1);
-    for (int i = 0; liked_musics_id[i] != NULL; i++)
-    {
-        if (valida_single_quotes_lista_artistas(liked_musics_id[i]) == 0)
+        memmove(username_str, username_str + 1, strlen(username_str));
+        int username = atoi(username_str);
+
+        gchar *email = g_ptr_array_index(campostemp, 1);
+        gchar *first_name = g_ptr_array_index(campostemp, 2);
+        gchar *last_name = g_ptr_array_index(campostemp, 3);
+        gchar *birth_date = g_ptr_array_index(campostemp, 4);
+        gchar *country = g_ptr_array_index(campostemp, 5);
+        gchar *subscription_type = g_ptr_array_index(campostemp, 6);
+        gchar *liked_musics_str = g_ptr_array_index(campostemp, 7);
+        if (valida_parenteses_lista(liked_musics_str) == 0)
         {
-            printf("erro nos ''\n");
-            g_strfreev(liked_musics_id);
+            printf("erro nos []\n");
             return NULL;
         }
-        trim_single_quotes_gchar(liked_musics_id[i]);
+        trim_parenteses_gchar(liked_musics_str);
+        gchar **liked_musics_id = g_strsplit(liked_musics_str, ",", -1);
+        for (int i = 0; liked_musics_id[i] != NULL; i++)
+        {
+            if (valida_single_quotes_lista_artistas(liked_musics_id[i]) == 0)
+            {
+                printf("erro nos ''\n");
+                g_strfreev(liked_musics_id);
+                return NULL;
+            }
+            trim_single_quotes_gchar(liked_musics_id[i]);
+        }
+
+        Usuario *usuario = create_usuario(username, email, first_name, last_name, birth_date, country, subscription_type, liked_musics_id);
+
+        g_strfreev(liked_musics_id);
+
+        if (valida_user(usuario, gestormusicas) == FALSE)
+        {
+            free_usuario(usuario);
+            return NULL;
+        }
+
+        return usuario;
     }
-
-    Usuario *usuario = create_usuario(username, email, first_name, last_name, birth_date, country, subscription_type, liked_musics_id);
-
-    g_strfreev(liked_musics_id);
-
-    if (valida_user(usuario, gestormusicas) == FALSE)
-    {
-        free_usuario(usuario);
+    else
         return NULL;
-    }
-
-    return usuario;
 }
 
 Album *parse_csv_line_album(gchar *line, GestorAlbuns *gestor_albuns)
@@ -469,7 +487,8 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
 {
     // Recupera os valores de cada campo do GPtrArray
     gchar *id = g_ptr_array_index(campostemp, 0);
-    gchar *tittle = g_ptr_array_index(campostemp, 1);
+
+    gchar *title = g_ptr_array_index(campostemp, 1);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
     if (valida_parenteses_lista(artist_ids_str) == 0)
     {
@@ -512,7 +531,7 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
         trim_single_quotes_gchar(producers_name[i]);
     }
 
-    Album *album = create_album(id, tittle, artist_ids, year, producers_name);
+    Album *album = create_album(id, title, artist_ids, year, producers_name);
 
     g_strfreev(producers_name);
     g_strfreev(artist_ids);
@@ -567,20 +586,45 @@ History *parse_csv_line_history(gchar *line, GestorHistories *gestorhistory)
 History *preenche_history(GPtrArray *campostemp, GestorHistories *gestorhistory)
 {
     // Recupera os valores de cada campo do GPtrArray
-    gchar *id = g_ptr_array_index(campostemp, 0);
-    gchar *user_id = g_ptr_array_index(campostemp, 1);
-    gchar *music_id = g_ptr_array_index(campostemp, 2);
-    gchar *timestamp = g_ptr_array_index(campostemp, 3);
-    gchar *duration = g_ptr_array_index(campostemp, 4);
-    gchar *plataform = g_ptr_array_index(campostemp, 5);
-
-    History *history = create_history(id, user_id, music_id, timestamp, duration, plataform);
-
-    if (valida_plataforma(history) == FALSE)
+    gchar *id_str = g_ptr_array_index(campostemp, 0);
+    if (strncmp(id_str, "H", 1) == 0)
     {
-        free_history(history);
-        return NULL;
-    }
+        memmove(id_str, id_str + 1, strlen(id_str));
+        int id = atoi(id_str);
 
-    return history;
+        gchar *user_id_str = g_ptr_array_index(campostemp, 1);
+        if (strncmp(user_id_str, "U", 1) == 0)
+        {
+            memmove(user_id_str, user_id_str + 1, strlen(user_id_str));
+            int user_id = atoi(user_id_str);
+
+            gchar *music_id_str = g_ptr_array_index(campostemp, 2);
+            if (strncmp(music_id_str, "S", 1) == 0)
+            {
+                memmove(music_id_str, music_id_str + 1, strlen(music_id_str));
+                int music_id = atoi(music_id_str);
+
+                gchar *timestamp = g_ptr_array_index(campostemp, 3);
+                gchar *duration = g_ptr_array_index(campostemp, 4);
+                gchar *plataform = g_ptr_array_index(campostemp, 5);
+
+                History *history = create_history(id, user_id, music_id, timestamp, duration, plataform);
+
+                if (valida_plataforma(history) == FALSE)
+                {
+                    free_history(history);
+                    return NULL;
+                }
+                else
+                    return history;
+            }
+            else
+                return NULL;
+        }
+
+        else
+            return NULL;
+    }
+    else
+        return NULL;
 }

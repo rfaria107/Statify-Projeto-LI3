@@ -13,6 +13,6 @@ GestorAlbuns* criar_gestor_albuns();
 void inicializar_gestor_albuns(GestorAlbuns *gestor);
 void liberar_gestor_albuns(GestorAlbuns *gestor);
 void inserir_album(GestorAlbuns *gestor, Album *album);
-Album* buscar_album(GestorAlbuns *gestor, const gchar*id);
+Album* buscar_album(GestorAlbuns *gestor, int id);
 
 #endif

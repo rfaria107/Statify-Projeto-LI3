@@ -11,7 +11,7 @@ void inicializar_gestor_musicas(GestorMusicas* gestor);
 void free_music_value(gpointer value);
 GestorMusicas* criar_gestor_musicas();
 void liberar_gestor_musicas(GestorMusicas* gestor);
-Musica* buscar_musicas(GestorMusicas *gestor, const gchar* id); 
+Musica* buscar_musicas(GestorMusicas *gestor, int id); 
 GHashTable *get_hash_musicas(GestorMusicas *gestor);
 void inserir_musica(GestorMusicas *gestor, Musica *musica);
 #endif

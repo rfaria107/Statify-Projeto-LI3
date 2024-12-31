@@ -24,7 +24,7 @@ struct GenrePopularity
     int total_likes;
 };
 
-void query_1(GestorSistema *gestorsis, char *username, int line_number, int n)
+void query_1(GestorSistema *gestorsis, int username, int line_number, int n)
 {
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
@@ -135,7 +135,7 @@ void query_1(GestorSistema *gestorsis, char *username, int line_number, int n)
     free(output_file_name);
 }
 
-void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,int n)
+void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number, int n)
 {
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
@@ -211,11 +211,13 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,
         gchar *country_artista = get_artist_country(artista);
         // Converter de volta para string
         gchar *duration_str = segundos_para_duracao(duracao_total);
-        if (n == 0){
-        write_row(writer, ';', 4, name, type, duration_str, country_artista);
+        if (n == 0)
+        {
+            write_row(writer, ';', 4, name, type, duration_str, country_artista);
         }
-        if (n == 1){
-         write_row(writer, '=', 4, name, type, duration_str, country_artista);
+        if (n == 1)
+        {
+            write_row(writer, '=', 4, name, type, duration_str, country_artista);
         }
         g_free(name);
         g_free(type);
@@ -229,7 +231,7 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,
     g_list_free(lista_artistas);
 }
 
-void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number,int n)
+void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number, int n)
 {
     if (!gestor_sistema)
     {
@@ -270,9 +272,11 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
                 continue; // Caso o usuário não tenha músicas curtidas, ignora
             }
 
-            for (gchar **music_id = liked_musics; *music_id != NULL; music_id++)
+            for (int i = 0;  liked_musics[i] != NULL; i++)
             {
-                Musica *musica = buscar_musicas(gestor_musicas, *music_id);
+                gchar *music_id_str = liked_musics[i];
+                int music_id_int = atoi(music_id_str+1);
+                Musica *musica = buscar_musicas(gestor_musicas, music_id_int);
                 if (musica)
                 {
                     char *genre = get_music_genre(musica);
@@ -309,11 +313,13 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
         char *formatting_empty[] = {"%s"};
         row_writer_set_field_names(writer, field_names_empty, 1);
         row_writer_set_formatting(writer, formatting_empty);
-        if (n == 0) {
-        write_row(writer, ';', 1, "");
+        if (n == 0)
+        {
+            write_row(writer, ';', 1, "");
         }
-        if (n == 1) {
-        write_row(writer, '=', 1, "");
+        if (n == 1)
+        {
+            write_row(writer, '=', 1, "");
         }
     }
     else
@@ -328,11 +334,13 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
         for (GList *node = generos_lista; node != NULL; node = node->next)
         {
             GenrePopularity *gp = (GenrePopularity *)node->data;
-            if (n == 0) {
-            write_row(writer, ';', 2, gp->genre, gp->total_likes);
+            if (n == 0)
+            {
+                write_row(writer, ';', 2, gp->genre, gp->total_likes);
             }
-            if (n == 1) {
-            write_row(writer, '=', 2, gp->genre, gp->total_likes);
+            if (n == 1)
+            {
+                write_row(writer, '=', 2, gp->genre, gp->total_likes);
             }
         }
     }
@@ -344,13 +352,14 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_hash_table_destroy(generos_likes);
 }
 
-void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_number, int n) {
+void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_number, int n)
+{
     char output_file_name[256];
     snprintf(output_file_name, sizeof(output_file_name), "resultados/command%d_output.txt", line_number);
     RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
     // Configura os nomes e formatos dos campos
-    char *field_names[] = {"Total Time", "Music Count", "Top Artist ID", "Top Day","Top Genre", "Top Album","Top Hour"};
+    char *field_names[] = {"Total Time", "Music Count", "Top Artist ID", "Top Day", "Top Genre", "Top Album", "Top Hour"};
     char *formatting[] = {"%s", "%d", "%s", "%s", "%s", "%s", "%s"};
     row_writer_set_field_names(writer, field_names, 7);
     row_writer_set_formatting(writer, formatting);
@@ -373,25 +382,34 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
     int total_time = 0, music_count = 0;
 
     g_hash_table_iter_init(&iter, get_hash_histories(gestorhistories));
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
+    while (g_hash_table_iter_next(&iter, &key, &value))
+    {
         History *history = (History *)value;
-        if (g_strcmp0(get_history_user_id(history), user_id) == 0) {
+        int history_user_id = get_history_user_id(history);
+        if (history_user_id == user_id)
+        {
             user_found = TRUE;
+            //free(history_user_id);
 
             char year_str[5];
             snprintf(year_str, sizeof(year_str), "%d", year);
-            if (strncmp(get_history_timestamp(history), year_str, 4) == 0) {
-                int duration = duracao_para_segundos(get_history_duration(history));
+            gchar *timestamp = get_history_timestamp(history);
+            if (strncmp(timestamp, year_str, 4) == 0)
+            {
+                gchar *history_duration = get_history_duration(history);
+                int duration = duracao_para_segundos(history_duration);
+                free(history_duration);
                 total_time += duration;
                 music_count++;
 
                 // Atualiza dados de dia e hora
-                gchar *timestamp = get_history_timestamp(history);
                 gchar date[11], hour[3];
                 strncpy(date, timestamp, 10);
                 date[10] = '\0';
                 strncpy(hour, timestamp + 11, 2);
                 hour[2] = '\0';
+
+                free(timestamp);
 
                 gpointer current_day_count = g_hash_table_lookup(day_count, date);
                 int day_total = current_day_count ? GPOINTER_TO_INT(current_day_count) + 1 : 1;
@@ -402,14 +420,20 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
                 g_hash_table_insert(hour_time, g_strdup(hour), GINT_TO_POINTER(hour_total));
 
                 // Processa dados da música, artista, gênero e álbum
-                if (get_history_music_id(history)) {
+                int history_music_id = get_history_music_id(history);
+                if (history_music_id)
+                {
                     GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
 
-                    Musica *musica = buscar_musicas(gestormusicas, get_history_music_id(history));
-                    if (musica) {
+                    Musica *musica = buscar_musicas(gestormusicas, history_music_id);
+                    //free(history_music_id);
+
+                    if (musica)
+                    {
                         // Atualiza gêneros
                         char *genre = get_music_genre(musica);
-                        if (genre) {
+                        if (genre)
+                        {
                             // Incrementa a contagem de execuções do gênero
                             gpointer current_genre_count = g_hash_table_lookup(genre_popularity, genre);
                             int genre_total = current_genre_count ? GPOINTER_TO_INT(current_genre_count) + 1 : 1;
@@ -417,10 +441,12 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
                             g_print("Genero encontrado: %s\n", genre);
                             g_free(genre);
                         }
-
+                        else
+                            free(genre);
                         // Atualiza artistas
                         gchar **artist_ids = get_music_artist_ids(musica);
-                        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++) {
+                        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++)
+                        {
                             gchar *artist_id = artist_ids[i];
                             gpointer current_artist_time = g_hash_table_lookup(artist_time, artist_id);
                             int artist_total = current_artist_time ? GPOINTER_TO_INT(current_artist_time) + duration : duration;
@@ -430,22 +456,30 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
                             gpointer current_music_count = g_hash_table_lookup(artist_music_count, artist_id);
                             int music_total = current_music_count ? GPOINTER_TO_INT(current_music_count) + 1 : 1;
                             g_hash_table_insert(artist_music_count, g_strdup(artist_id), GINT_TO_POINTER(music_total));
+                            free(artist_id);
                         }
-
+                        g_strfreev(artist_ids);
                         // Atualiza álbuns
                         gchar *album_id = get_music_album(musica);
-                        if (album_id) {
+                        if (album_id)
+                        {
                             gpointer current_album_time = g_hash_table_lookup(album_time, album_id);
                             int album_total = current_album_time ? GPOINTER_TO_INT(current_album_time) + duration : duration;
                             g_hash_table_insert(album_time, g_strdup(album_id), GINT_TO_POINTER(album_total));
+                            free(album_id);
                         }
                     }
                 }
             }
+            else
+                free(timestamp);
         }
+        //else
+            //free(history_user_id);
     }
 
-    if (!user_found) {
+    if (!user_found)
+    {
         // Se o usuário não foi encontrado
         write_row(writer, ';', 1, "");
         g_hash_table_destroy(artist_time);
@@ -459,13 +493,14 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
     }
 
     // Encontrar os mais populares
-    gchar *top_artist_id = find_top_entry_with_tiebreaker(artist_time, FALSE, TRUE); // Alfabético (ID menor)
-    gchar *top_day = find_top_entry_with_tiebreaker(day_count, FALSE, FALSE);        // Mais recente
-    gchar *top_hour = find_top_entry_with_tiebreaker(hour_time, TRUE, FALSE);        // Mais cedo
+    gchar *top_artist_id = find_top_entry_with_tiebreaker(artist_time, FALSE, TRUE);  // Alfabético (ID menor)
+    gchar *top_day = find_top_entry_with_tiebreaker(day_count, FALSE, FALSE);         // Mais recente
+    gchar *top_hour = find_top_entry_with_tiebreaker(hour_time, TRUE, FALSE);         // Mais cedo
     gchar *top_genre = find_top_entry_with_tiebreaker(genre_popularity, FALSE, TRUE); // Alfabético
-    gchar *top_album = find_top_entry_with_tiebreaker(album_time, FALSE, TRUE);      // Alfabético
+    gchar *top_album = find_top_entry_with_tiebreaker(album_time, FALSE, TRUE);       // Alfabético
 
-    if (!top_artist_id || *top_artist_id == '\0'||!top_day || *top_day == '\0'||!top_hour || *top_hour == '\0'|| !top_genre || *top_genre == '\0'|| !top_genre ||!top_album || *top_album == '\0') {
+    if (!top_artist_id || *top_artist_id == '\0' || !top_day || *top_day == '\0' || !top_hour || *top_hour == '\0' || !top_genre || *top_genre == '\0' || !top_genre || !top_album || *top_album == '\0')
+    {
         write_row(writer, ';', 1, "");
         g_hash_table_destroy(artist_time);
         g_hash_table_destroy(day_count);
@@ -476,25 +511,34 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
         free_and_finish_writing(writer);
         return;
     }
-
+    gchar *total_time_duracao = segundos_para_duracao(total_time);
     // Escrever os resultados no arquivo
-    write_row(writer, (n == 0 ? ';' : '='), 7, 
-    segundos_para_duracao(total_time), music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
-    
+    write_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
+    free(total_time_duracao);
+
     // Ordena os artistas e exibe os N mais ouvidos
     GList *sorted_artists = sort_hash_table_by_value_with_tiebreaker(artist_time, FALSE, TRUE);
     int displayed_artists = 0;
-    for (GList *iter = sorted_artists; iter && displayed_artists < N; iter = iter->next) {
+    for (GList *iter = sorted_artists; iter && displayed_artists < N; iter = iter->next)
+    {
         gchar *artist_id = (gchar *)iter->data;
         int duration = GPOINTER_TO_INT(g_hash_table_lookup(artist_time, artist_id));
         int distinct_musics = GPOINTER_TO_INT(g_hash_table_lookup(artist_music_count, artist_id));
         // Exibe o ID do artista e o tempo total de audição
-        write_row(writer, ';', 3, artist_id, distinct_musics, segundos_para_duracao(duration));
+        gchar *duration_string = segundos_para_duracao(duration);
+        write_row(writer, ';', 3, artist_id, distinct_musics, duration_string);
         displayed_artists++;
+        free(duration_string);
     }
     g_list_free(sorted_artists);
-    
+
     // Limpeza
+    free(top_artist_id);
+    free(top_day);
+    free(top_hour);
+    free(top_genre);
+    free(top_album);
+
     g_hash_table_destroy(artist_time);
     g_hash_table_destroy(day_count);
     g_hash_table_destroy(hour_time);

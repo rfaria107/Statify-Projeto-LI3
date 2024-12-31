@@ -12,6 +12,6 @@ GestorArtistas* criar_gestor_artistas();
 void liberar_gestor_artistas(GestorArtistas *gestor);
 void inserir_artista(GestorArtistas *gestor, Artista *artista);
 GHashTable *get_hash_artistas(GestorArtistas *gestor);
-Artista* buscar_artista(GestorArtistas *gestor, const gchar*id);
+Artista* buscar_artista(GestorArtistas *gestor, int id);
 void free_artista_value(gpointer value);
 #endif

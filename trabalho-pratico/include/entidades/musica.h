@@ -6,12 +6,12 @@
 typedef struct Musica Musica;
 
 // Funções para manipulação de usuários
-Musica *create_musica(char *id, char *title, char **artist_ids, char *album_id, char *duration, char *genre, int year, int streams);
+Musica *create_musica(int id, char *title, char **artist_ids, char *album_id, char *duration, char *genre, int year, int streams);
 Musica *inicializar_musica();
 void free_musica(Musica *musica);
 
 // Funções de acesso aos atributos do usuário
-gchar *get_music_id(Musica *musica);
+int get_music_id(Musica *musica);
 gchar *get_music_title(Musica *musica);
 gchar **get_music_artist_ids(Musica *musica);
 gchar *get_music_album (Musica *musica);

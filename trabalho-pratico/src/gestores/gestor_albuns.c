@@ -7,17 +7,21 @@ struct GestorAlbuns
     GHashTable *albuns; // Tabela hash de albuns
 };
 
-void free_album_value(gpointer value) {
-    free_album((Album *) value); // Assuming liberar_album frees the album struct
+void free_album_value(gpointer value)
+{
+    free_album((Album *)value); // Assuming liberar_album frees the album struct
 }
 
-GHashTable *get_hash_albuns(GestorAlbuns *gestor){
+GHashTable *get_hash_albuns(GestorAlbuns *gestor)
+{
     return (gestor->albuns);
 }
 
-GestorAlbuns* criar_gestor_albuns() {
+GestorAlbuns *criar_gestor_albuns()
+{
     GestorAlbuns *gestor = malloc(sizeof(GestorAlbuns));
-    if (gestor) {
+    if (gestor)
+    {
         inicializar_gestor_albuns(gestor);
     }
     return gestor;
@@ -25,7 +29,7 @@ GestorAlbuns* criar_gestor_albuns() {
 
 void inicializar_gestor_albuns(GestorAlbuns *gestor)
 {
-    gestor->albuns = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,free_album_value);
+    gestor->albuns = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free_album_value);
 }
 
 void liberar_gestor_albuns(GestorAlbuns *gestor)
@@ -37,9 +41,10 @@ void liberar_gestor_albuns(GestorAlbuns *gestor)
 void inserir_album(GestorAlbuns *gestor, Album *album)
 {
     gchar *id = get_album_id(album);
-    g_hash_table_insert(gestor->albuns, id, album);
+    g_hash_table_insert(gestor->albuns, GINT_TO_POINTER(id), album);
 }
 
-Album* buscar_album(GestorAlbuns *gestor, const gchar*id) {
-    return (Album*) g_hash_table_lookup(gestor->albuns, id);
+Album *buscar_album(GestorAlbuns *gestor, int id)
+{
+    return (Album *)g_hash_table_lookup(gestor->albuns, GINT_TO_POINTER(id));
 }

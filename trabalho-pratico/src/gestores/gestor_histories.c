@@ -25,7 +25,7 @@ GestorHistories* criar_gestor_histories() {
 
 void inicializar_gestor_histories(GestorHistories *gestor)
 {
-    gestor->histories = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,free_history_value);
+    gestor->histories = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free_history_value);
 }
 
 void liberar_gestor_histories(GestorHistories *gestor)
@@ -36,21 +36,21 @@ void liberar_gestor_histories(GestorHistories *gestor)
 
 void inserir_history(GestorHistories *gestor, History *history)
 {
-    gchar *id = get_history_id(history);
-    g_hash_table_insert(gestor->histories, id, history);
+    int id = get_history_id(history);
+    g_hash_table_insert(gestor->histories, GINT_TO_POINTER(id), history);
 }
 
-History* buscar_history(GestorHistories *gestor, const gchar*id) {
-    return (History*) g_hash_table_lookup(gestor->histories, id);
+History* buscar_history(GestorHistories *gestor,int id) {
+    return (History*) g_hash_table_lookup(gestor->histories, GINT_TO_POINTER(id));
 }
 
-History* buscar_history_por_user_id(GestorHistories *gestor, const gchar *user_id) {
+History* buscar_history_por_user_id(GestorHistories *gestor, int user_id) {
 
     if (gestor == NULL || gestor->histories == NULL) {
         return NULL;
     }
 
-    History* history = (History*) g_hash_table_lookup(gestor->histories, user_id);
+    History* history = (History*) g_hash_table_lookup(gestor->histories, GINT_TO_POINTER(user_id));
 
     return history;
 }

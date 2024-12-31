@@ -78,7 +78,8 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                query_1(gestorsis, token, line_number, 0);
+                int username = atoi(token + 1);
+                query_1(gestorsis, username, line_number, 0);
                 g_free(token);
             }
         }
@@ -89,7 +90,8 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                query_1(gestorsis, token, line_number, 1);
+                int username = atoi(token + 1);
+                query_1(gestorsis, username, line_number, 1);
                 g_free(token);
             }
         }
@@ -111,7 +113,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 country = g_strdup(token);
                 g_free(token);
             }
-            query_2(gestorsis, num, country, line_number,0);
+            query_2(gestorsis, num, country, line_number, 0);
             if (country != NULL)
                 g_free(country);
         }
@@ -132,7 +134,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 country = g_strdup(token);
                 g_free(token);
             }
-            query_2(gestorsis, num, country, line_number,1);
+            query_2(gestorsis, num, country, line_number, 1);
             if (country != NULL)
                 g_free(country);
         }
@@ -153,7 +155,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                     max_age = atoi(token);
                     g_free(token);
                 }
-                query_3(min_age, max_age, gestorsis, line_number,0);
+                query_3(min_age, max_age, gestorsis, line_number, 0);
             }
         }
         else if (strcmp(token, "3S") == 0)
@@ -172,24 +174,25 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                     max_age = atoi(token);
                     g_free(token);
                 }
-                query_3(min_age, max_age, gestorsis, line_number,1);
+                query_3(min_age, max_age, gestorsis, line_number, 1);
             }
         }
         else if (strcmp(token, "6") == 0)
         {
-            g_free(token); 
-            token = procura_espaço2(buffer); 
+            g_free(token);
+            token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                char *user_id = g_strdup(token);
-                g_free(token); 
+                char *user_id_str = g_strdup(token);
+                int user_id = atoi(user_id_str);
+                g_free(token);
                 token = procura_espaço3(buffer);
                 int year = 0, N = 0;
 
                 if (token != NULL)
                 {
                     year = atoi(token);
-                    g_free(token); 
+                    g_free(token);
                     token = procura_espaço4(buffer);
 
                     if (token != NULL)
@@ -198,25 +201,26 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                         g_free(token);
                     }
                 }
-                query_6(user_id, year, N, gestorsis, line_number, 0); 
-                g_free(user_id);
+                query_6(user_id, year, N, gestorsis, line_number, 0);
+                // g_free(user_id);
             }
         }
         else if (strcmp(token, "6S") == 0)
         {
-            g_free(token); 
-            token = procura_espaço2(buffer); 
+            g_free(token);
+            token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                char *user_id = g_strdup(token);
-                g_free(token); 
+                char *user_id_str = g_strdup(token);
+                int user_id = atoi(user_id_str);
+                g_free(token);
                 token = procura_espaço3(buffer);
                 int year = 0, N = 0;
 
                 if (token != NULL)
                 {
                     year = atoi(token);
-                    g_free(token); 
+                    g_free(token);
                     token = procura_espaço4(buffer);
 
                     if (token != NULL)
@@ -225,8 +229,8 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                         g_free(token);
                     }
                 }
-                query_6(user_id, year, N, gestorsis, line_number, 1); 
-                g_free(user_id);
+                query_6(user_id, year, N, gestorsis, line_number, 1);
+                // g_free(user_id);
             }
         }
         else

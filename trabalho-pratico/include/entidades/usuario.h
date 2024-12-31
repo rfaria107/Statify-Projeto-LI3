@@ -7,7 +7,7 @@ typedef struct Usuario Usuario;
 
 // Funções para manipulação de usuários
 Usuario* inicializar_usuario();
-Usuario* create_usuario(char* username, char* email, char* first_name, 
+Usuario* create_usuario(int username, char* email, char* first_name, 
                         char* last_name, char* birth_date, 
                         char* country, char* subscription_type, 
                         char** liked_musics_id);
@@ -16,7 +16,7 @@ void free_usuario(Usuario* usuario);
 int calcularIdade(Usuario *usuario);
 
 // Funções de acesso aos atributos do usuário
-gchar* user_get_id(Usuario* user);
+int user_get_id(Usuario* user);
 gchar* user_get_email(Usuario* user);
 gchar* user_get_first_name(Usuario* user);
 gchar* user_get_last_name(Usuario* user);
