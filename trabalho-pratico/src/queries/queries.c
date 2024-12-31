@@ -350,7 +350,7 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
     RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
     // Configura os nomes e formatos dos campos
-    char *field_names[] = {"Total Time", "Music Count", "Top Artist ID", "Top Day","Top Genre", "Top Album","Top Hour"};
+    char *field_names[] = {"Total Time", "Music Count", "Top Artist ID", "Top Day", "Top Genre", "Top Album", "Top Hour"};
     char *formatting[] = {"%s", "%d", "%s", "%s", "%s", "%s", "%s"};
     row_writer_set_field_names(writer, field_names, 7);
     row_writer_set_formatting(writer, formatting);
@@ -393,10 +393,12 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
                 strncpy(hour, timestamp + 11, 2);
                 hour[2] = '\0';
 
+                // Contabiliza o número de músicas por dia, incluindo as repetidas
                 gpointer current_day_count = g_hash_table_lookup(day_count, date);
                 int day_total = current_day_count ? GPOINTER_TO_INT(current_day_count) + 1 : 1;
                 g_hash_table_insert(day_count, g_strdup(date), GINT_TO_POINTER(day_total));
 
+                // Contabiliza o tempo por hora (isso não altera, pois você ainda precisa disso)
                 gpointer current_hour_time = g_hash_table_lookup(hour_time, hour);
                 int hour_total = current_hour_time ? GPOINTER_TO_INT(current_hour_time) + duration : duration;
                 g_hash_table_insert(hour_time, g_strdup(hour), GINT_TO_POINTER(hour_total));
@@ -410,11 +412,11 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
                         // Atualiza gêneros
                         char *genre = get_music_genre(musica);
                         if (genre) {
-                        // Incrementa a contagem de execuções do gênero
-                        gpointer current_genre_time = g_hash_table_lookup(genre_popularity, genre);
-                        int genre_total_time = current_genre_time ? GPOINTER_TO_INT(current_genre_time) + duration : duration;
-                        g_hash_table_insert(genre_popularity, g_strdup(genre), GINT_TO_POINTER(genre_total_time));
-                        g_free(genre);
+                            // Incrementa a contagem de execuções do gênero
+                            gpointer current_genre_time = g_hash_table_lookup(genre_popularity, genre);
+                            int genre_total_time = current_genre_time ? GPOINTER_TO_INT(current_genre_time) + duration : duration;
+                            g_hash_table_insert(genre_popularity, g_strdup(genre), GINT_TO_POINTER(genre_total_time));
+                            g_free(genre);
                         }
 
                         // Atualiza artistas
@@ -466,7 +468,24 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
 
     // Encontrar os mais populares
     gchar *top_artist_id = find_top_entry_with_tiebreaker(artist_time, FALSE, TRUE); // Alfabético (ID menor)
-    gchar *top_day = find_top_entry_with_tiebreaker(day_count, FALSE, FALSE);        // Mais recente
+    gchar *top_day = NULL;
+    int max_music_count = -1;
+
+    // Itera sobre os dias e verifica qual tem o maior número de músicas, com desempate por data
+    GList *days_sorted = g_hash_table_get_keys(day_count);
+    for (GList *iter = days_sorted; iter != NULL; iter = iter->next) {
+        gchar *date = (gchar *)iter->data;
+        int music_count_for_day = GPOINTER_TO_INT(g_hash_table_lookup(day_count, date));
+
+        // Se encontrar um dia com mais músicas, ou um empate com a data mais recente
+        if (music_count_for_day > max_music_count || 
+            (music_count_for_day == max_music_count && g_strcmp0(date, top_day) > 0)) {
+            max_music_count = music_count_for_day;
+            top_day = date;
+        }
+    }
+    g_list_free(days_sorted);
+
     gchar *top_hour = find_top_entry_with_tiebreaker(hour_time, TRUE, FALSE);        // Mais cedo
     gchar *top_genre = find_top_entry_with_tiebreaker(genre_popularity, FALSE, TRUE); // Alfabético
     gchar *top_album = find_top_entry_with_tiebreaker(album_time, FALSE, TRUE);      // Alfabético
