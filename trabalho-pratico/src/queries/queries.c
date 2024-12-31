@@ -404,18 +404,17 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
                 // Processa dados da música, artista, gênero e álbum
                 if (get_history_music_id(history)) {
                     GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
-
                     Musica *musica = buscar_musicas(gestormusicas, get_history_music_id(history));
+                    
                     if (musica) {
                         // Atualiza gêneros
                         char *genre = get_music_genre(musica);
                         if (genre) {
-                            // Incrementa a contagem de execuções do gênero
-                            gpointer current_genre_count = g_hash_table_lookup(genre_popularity, genre);
-                            int genre_total = current_genre_count ? GPOINTER_TO_INT(current_genre_count) + 1 : 1;
-                            g_hash_table_insert(genre_popularity, g_strdup(genre), GINT_TO_POINTER(genre_total));
-                            g_print("Genero encontrado: %s\n", genre);
-                            g_free(genre);
+                        // Incrementa a contagem de execuções do gênero
+                        gpointer current_genre_time = g_hash_table_lookup(genre_popularity, genre);
+                        int genre_total_time = current_genre_time ? GPOINTER_TO_INT(current_genre_time) + duration : duration;
+                        g_hash_table_insert(genre_popularity, g_strdup(genre), GINT_TO_POINTER(genre_total_time));
+                        g_free(genre);
                         }
 
                         // Atualiza artistas
@@ -431,6 +430,12 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
                             int music_total = current_music_count ? GPOINTER_TO_INT(current_music_count) + 1 : 1;
                             g_hash_table_insert(artist_music_count, g_strdup(artist_id), GINT_TO_POINTER(music_total));
                         }
+                        if (artist_ids) {
+                            for (int i = 0; artist_ids[i] != NULL; i++) {
+                                g_free(artist_ids[i]);
+                            }
+                            free(artist_ids);
+                        }
 
                         // Atualiza álbuns
                         gchar *album_id = get_music_album(musica);
@@ -438,6 +443,7 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
                             gpointer current_album_time = g_hash_table_lookup(album_time, album_id);
                             int album_total = current_album_time ? GPOINTER_TO_INT(current_album_time) + duration : duration;
                             g_hash_table_insert(album_time, g_strdup(album_id), GINT_TO_POINTER(album_total));
+                            g_free(album_id);
                         }
                     }
                 }
@@ -465,14 +471,27 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
     gchar *top_genre = find_top_entry_with_tiebreaker(genre_popularity, FALSE, TRUE); // Alfabético
     gchar *top_album = find_top_entry_with_tiebreaker(album_time, FALSE, TRUE);      // Alfabético
 
-    if (!top_artist_id || *top_artist_id == '\0'||!top_day || *top_day == '\0'||!top_hour || *top_hour == '\0'|| !top_genre || *top_genre == '\0'|| !top_genre ||!top_album || *top_album == '\0') {
+    if (!top_artist_id || *top_artist_id == '\0' ||
+    !top_day || *top_day == '\0' ||
+    !top_hour || *top_hour == '\0' ||
+    !top_genre || *top_genre == '\0' ||
+    !top_album || *top_album == '\0') {
+        // Libera as strings alocadas dinamicamente
         write_row(writer, ';', 1, "");
+        if (top_artist_id) g_free(top_artist_id);
+        if (top_day) g_free(top_day);
+        if (top_hour) g_free(top_hour);
+        if (top_genre) g_free(top_genre);
+        if (top_album) g_free(top_album);
+
+        // Libera os hash tables e termina a escrita
         g_hash_table_destroy(artist_time);
         g_hash_table_destroy(day_count);
         g_hash_table_destroy(hour_time);
         g_hash_table_destroy(genre_popularity);
         g_hash_table_destroy(album_time);
         g_hash_table_destroy(artist_music_count);
+
         free_and_finish_writing(writer);
         return;
     }
@@ -493,8 +512,15 @@ void query_6(char *user_id, int year, int N, GestorSistema *gestorsis, int line_
         displayed_artists++;
     }
     g_list_free(sorted_artists);
-    
-    // Limpeza
+
+    // Libera as strings alocadas
+    g_free(top_artist_id);
+    g_free(top_day);
+    g_free(top_hour);
+    g_free(top_genre);
+    g_free(top_album);
+
+    // Limpeza das tabelas hash
     g_hash_table_destroy(artist_time);
     g_hash_table_destroy(day_count);
     g_hash_table_destroy(hour_time);
