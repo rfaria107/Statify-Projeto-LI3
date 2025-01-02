@@ -56,6 +56,8 @@ gboolean validarDataFutura(gint ano, gint mes, gint dia)
 // Valida se a data de nascimento do usuário é válida
 gboolean validarDataUsuario(Usuario *usuario)
 {
+    if(usuario == NULL) return FALSE;
+    
     gchar *birth_date = user_get_birth_date(usuario);
 
     if (!validarFormatoData(birth_date))

@@ -7,7 +7,7 @@
 #include "../include/write/writer.h"
 
 // Funções de query
-void query_1(GestorSistema *gestorsis, int username, int line_number, int n);
+void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n);
 void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,int n);
 void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number,int n);
 void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_number, int n);

@@ -54,6 +54,7 @@ Usuario* create_usuario(int username, char* email, char* first_name, char* last_
 
     return usuario;
 }
+
 Usuario *inicializar_usuario()
 {
     Usuario *usuario = malloc(sizeof(Usuario)); // Aloca memória para o usuário

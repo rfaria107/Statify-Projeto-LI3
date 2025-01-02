@@ -20,6 +20,13 @@
 #include "../include/utils/string_utils.h"
 #include "../include/queries/queries_aux.h"
 
+struct UserData
+{
+    GHashTable *hash;
+    gboolean reverse;
+    gboolean alphabetical;
+};
+
 struct GenrePopularity
 {
     char *genre;
@@ -358,7 +365,31 @@ char **lista_user_ids(GestorUsuarios *gestorusers)
     return user_ids;
 }
 
-gchar *find_top_entry_with_tiebreaker(GHashTable *table, gboolean is_numeric, gboolean alphabetical)
+gint find_top_entry_with_tiebreaker(GHashTable *table, gboolean alphabetical)
+{
+    GHashTableIter iter;
+    gpointer key, value;
+    gint top_key = -1;
+    gint64 top_value = -1;
+
+    g_hash_table_iter_init(&iter, table);
+    while (g_hash_table_iter_next(&iter, &key, &value))
+    {
+
+        gint current_key = GPOINTER_TO_INT(key);
+        gint64 current_value = GPOINTER_TO_INT(value);
+
+        if (current_value > top_value ||
+            (current_value == top_value && alphabetical && current_key < top_key))
+        {
+            top_key = current_key;
+            top_value = current_value;
+        }
+    }
+    return top_key;
+}
+
+gchar *find_top_entry_with_tiebreaker_str(GHashTable *table, gboolean alphabetical)
 {
     GHashTableIter iter;
     gpointer key, value;
@@ -372,35 +403,47 @@ gchar *find_top_entry_with_tiebreaker(GHashTable *table, gboolean is_numeric, gb
         gint64 current_value = GPOINTER_TO_INT(value);
 
         if (current_value > top_value ||
-            (current_value == top_value &&
-             ((alphabetical && g_strcmp0(current_key, top_key) < 0) ||
-              (!alphabetical && is_numeric && g_ascii_strcasecmp(current_key, top_key) < 0))))
+            (current_value == top_value && alphabetical && g_strcmp0(current_key, top_key) < 0))
         {
-            top_key = current_key;
+            if (top_key)
+            {
+                g_free(top_key); // Free the previously allocated top_key
+            }
+            top_key = g_strdup(current_key); // Duplicate the new top_key
             top_value = current_value;
         }
     }
-    return top_key ? g_strdup(top_key) : NULL;
+    return top_key;
 }
 
-gint compare_by_value_with_tiebreaker(gconstpointer a, gconstpointer b, gpointer user_data) {
-    // Converte os ponteiros de valores (que são inteiros) para inteiros
-    gint value_a = GPOINTER_TO_INT(a);
-    gint value_b = GPOINTER_TO_INT(b);
+gint compare_by_value_with_tiebreaker(gconstpointer a, gconstpointer b, gpointer user_data)
+{
+    UserData *data = (UserData *)user_data;
+    GHashTable *table = data->hash;
+    gboolean reverse = data->reverse;
+    gboolean alphabetical = data->alphabetical;
 
-    gboolean reverse = GPOINTER_TO_INT(user_data);  // Se True, reverte a ordem
+    gint key_a = GPOINTER_TO_INT(a);
+    gint key_b = GPOINTER_TO_INT(b);
+    // Retrieve values associated with the keys
+    gint value_a = GPOINTER_TO_INT(g_hash_table_lookup(table, a));
+    gint value_b = GPOINTER_TO_INT(g_hash_table_lookup(table, b));
 
-    // Se os valores são diferentes, retorna a diferença para ordenar
-    if (value_a != value_b) {
+    // Compare values
+    if (value_a != value_b)
+    {
         return reverse ? value_b - value_a : value_a - value_b;
     }
 
-    // Caso os valores sejam iguais, a comparação será feita pela chave (ID do artista)
-    gint key_a = (gchar *)g_hash_table_lookup(user_data, a);
-    gint key_b = (gchar *)g_hash_table_lookup(user_data, b);
+    // If values are equal and alphabetical sorting is enabled
+    if (alphabetical)
+    {
+        // Compare keys as integers
+        return key_a - key_b;
+    }
 
-    // Para o desempate, caso seja alfabético
-    return key_a - key_b;
+    // Values and keys are equal
+    return 0;
 }
 
 // Função para ordenar a GHashTable por valor com desempate
@@ -409,15 +452,26 @@ GList *sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reve
     // Lista para armazenar as chaves da tabela
     GList *keys = g_hash_table_get_keys(table);
 
-    if(alphabetical){
-
-    }
-
-    // Criando um ponteiro para os dados do usuário
-    gpointer user_data = GINT_TO_POINTER(reverse);
+    // Criar pointer para os dados do usuário
+    UserData *user_data = create_user_data(table, reverse, alphabetical);
 
     // Ordena a lista de chaves
     keys = g_list_sort_with_data(keys, compare_by_value_with_tiebreaker, user_data);
-
+    free_user_data(user_data);
     return keys;
+}
+
+UserData *create_user_data(GHashTable *table, gboolean reverse, gboolean alphabetical)
+{
+    UserData *user_data = malloc(sizeof(UserData));
+    user_data->hash = table;
+    user_data->reverse = reverse;
+    user_data->alphabetical = alphabetical;
+    return user_data;
+}
+
+void free_user_data(UserData *user_data)
+{
+    g_free(user_data->hash);
+    free(user_data);
 }

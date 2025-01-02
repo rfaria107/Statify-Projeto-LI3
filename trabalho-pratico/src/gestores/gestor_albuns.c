@@ -40,7 +40,7 @@ void liberar_gestor_albuns(GestorAlbuns *gestor)
 
 void inserir_album(GestorAlbuns *gestor, Album *album)
 {
-    gchar *id = get_album_id(album);
+    gint id = get_album_id(album);
     g_hash_table_insert(gestor->albuns, GINT_TO_POINTER(id), album);
 }
 

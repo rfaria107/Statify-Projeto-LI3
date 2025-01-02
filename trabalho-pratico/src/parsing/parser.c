@@ -51,7 +51,7 @@ void parser_principal(FILE *file, GestorSistema *gestor, char tipo)
     }
     if (tipo == 'l')
     {
-        const char *error_file_album = "resultados/albums.csv";
+        const char *error_file_album = "resultados/albums_errors.csv";
         writer_error_album = initialize_error_writer(error_file_album);
         escrever_cabecalho_album_erro(writer_error_album);
     }
@@ -203,7 +203,7 @@ Artista *preenche_artista(GPtrArray *campostemp)
 {
 
     gchar *id_str = g_ptr_array_index(campostemp, 0);
-    char *parte_numerica = id_str+1;
+    char *parte_numerica = id_str + 1;
     int id = atoi(parte_numerica);
 
     gchar *name = g_ptr_array_index(campostemp, 1);
@@ -396,50 +396,49 @@ Usuario *preenche_usuario(GPtrArray *campostemp, GestorMusicas *gestormusicas)
 {
     // Recupera os valores de cada campo do GPtrArray
     gchar *username_str = g_ptr_array_index(campostemp, 0);
-    if (strncmp(username_str, "U", 1) == 0)
+    int username = atoi(username_str + 1);
+
+    gchar *email = g_ptr_array_index(campostemp, 1);
+    gchar *first_name = g_ptr_array_index(campostemp, 2);
+    gchar *last_name = g_ptr_array_index(campostemp, 3);
+    gchar *birth_date = g_ptr_array_index(campostemp, 4);
+    gchar *country = g_ptr_array_index(campostemp, 5);
+    gchar *subscription_type = g_ptr_array_index(campostemp, 6);
+    gchar *liked_musics_str = g_ptr_array_index(campostemp, 7);
+    if (valida_parenteses_lista(liked_musics_str) == 0)
     {
-        memmove(username_str, username_str + 1, strlen(username_str));
-        int username = atoi(username_str);
-
-        gchar *email = g_ptr_array_index(campostemp, 1);
-        gchar *first_name = g_ptr_array_index(campostemp, 2);
-        gchar *last_name = g_ptr_array_index(campostemp, 3);
-        gchar *birth_date = g_ptr_array_index(campostemp, 4);
-        gchar *country = g_ptr_array_index(campostemp, 5);
-        gchar *subscription_type = g_ptr_array_index(campostemp, 6);
-        gchar *liked_musics_str = g_ptr_array_index(campostemp, 7);
-        if (valida_parenteses_lista(liked_musics_str) == 0)
-        {
-            printf("erro nos []\n");
-            return NULL;
-        }
-        trim_parenteses_gchar(liked_musics_str);
-        gchar **liked_musics_id = g_strsplit(liked_musics_str, ",", -1);
-        for (int i = 0; liked_musics_id[i] != NULL; i++)
-        {
-            if (valida_single_quotes_lista_artistas(liked_musics_id[i]) == 0)
-            {
-                printf("erro nos ''\n");
-                g_strfreev(liked_musics_id);
-                return NULL;
-            }
-            trim_single_quotes_gchar(liked_musics_id[i]);
-        }
-
-        Usuario *usuario = create_usuario(username, email, first_name, last_name, birth_date, country, subscription_type, liked_musics_id);
-
-        g_strfreev(liked_musics_id);
-
-        if (valida_user(usuario, gestormusicas) == FALSE)
-        {
-            free_usuario(usuario);
-            return NULL;
-        }
-
-        return usuario;
-    }
-    else
+        printf("erro nos []\n");
         return NULL;
+    }
+    trim_parenteses_gchar(liked_musics_str);
+    gchar **liked_musics_id = g_strsplit(liked_musics_str, ",", -1);
+    for (int i = 0; liked_musics_id[i] != NULL; i++)
+    {
+        if (valida_single_quotes_lista_artistas(liked_musics_id[i]) == 0)
+        {
+            printf("erro nos ''\n");
+            g_strfreev(liked_musics_id);
+            return NULL;
+        }
+        trim_single_quotes_gchar(liked_musics_id[i]);
+    }
+
+    Usuario *usuario = create_usuario(username, email, first_name, last_name, birth_date, country, subscription_type, liked_musics_id);
+
+    g_strfreev(liked_musics_id);
+
+    if (usuario == NULL)
+    {
+        return NULL;
+    }
+
+    if (valida_user(usuario, gestormusicas) == FALSE)
+    {
+        free_usuario(usuario);
+        return NULL;
+    }
+
+    return usuario;
 }
 
 Album *parse_csv_line_album(gchar *line, GestorAlbuns *gestor_albuns)
@@ -486,8 +485,8 @@ Album *parse_csv_line_album(gchar *line, GestorAlbuns *gestor_albuns)
 Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
 {
     // Recupera os valores de cada campo do GPtrArray
-    gchar *id = g_ptr_array_index(campostemp, 0);
-
+    gchar *id_str = g_ptr_array_index(campostemp, 0);
+    int id = atoi(id_str+2);
     gchar *title = g_ptr_array_index(campostemp, 1);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
     if (valida_parenteses_lista(artist_ids_str) == 0)
@@ -587,44 +586,25 @@ History *preenche_history(GPtrArray *campostemp, GestorHistories *gestorhistory)
 {
     // Recupera os valores de cada campo do GPtrArray
     gchar *id_str = g_ptr_array_index(campostemp, 0);
-    if (strncmp(id_str, "H", 1) == 0)
+    int id = atoi(id_str + 1);
+
+    gchar *user_id_str = g_ptr_array_index(campostemp, 1);
+    int user_id = atoi(user_id_str + 1);
+
+    gchar *music_id_str = g_ptr_array_index(campostemp, 2);
+    int music_id = atoi(music_id_str + 1);
+
+    gchar *timestamp = g_ptr_array_index(campostemp, 3);
+    gchar *duration = g_ptr_array_index(campostemp, 4);
+    gchar *plataform = g_ptr_array_index(campostemp, 5);
+
+    History *history = create_history(id, user_id, music_id, timestamp, duration, plataform);
+
+    if (valida_plataforma(history) == FALSE)
     {
-        memmove(id_str, id_str + 1, strlen(id_str));
-        int id = atoi(id_str);
-
-        gchar *user_id_str = g_ptr_array_index(campostemp, 1);
-        if (strncmp(user_id_str, "U", 1) == 0)
-        {
-            memmove(user_id_str, user_id_str + 1, strlen(user_id_str));
-            int user_id = atoi(user_id_str);
-
-            gchar *music_id_str = g_ptr_array_index(campostemp, 2);
-            if (strncmp(music_id_str, "S", 1) == 0)
-            {
-                memmove(music_id_str, music_id_str + 1, strlen(music_id_str));
-                int music_id = atoi(music_id_str);
-
-                gchar *timestamp = g_ptr_array_index(campostemp, 3);
-                gchar *duration = g_ptr_array_index(campostemp, 4);
-                gchar *plataform = g_ptr_array_index(campostemp, 5);
-
-                History *history = create_history(id, user_id, music_id, timestamp, duration, plataform);
-
-                if (valida_plataforma(history) == FALSE)
-                {
-                    free_history(history);
-                    return NULL;
-                }
-                else
-                    return history;
-            }
-            else
-                return NULL;
-        }
-
-        else
-            return NULL;
+        free_history(history);
+        return NULL;
     }
     else
-        return NULL;
+        return history;
 }

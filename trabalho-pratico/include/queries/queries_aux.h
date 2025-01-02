@@ -7,8 +7,9 @@
 #include "../include/write/writer.h"
 
 // Estrutura para representar a popularidade de um gênero
+typedef struct UserData UserData;
 typedef struct GenrePopularity GenrePopularity;
-typedef struct Semana Semana ;
+typedef struct Semana Semana;
 
 // Funções para gerenciamento de GenrePopularity
 GenrePopularity *create_genre_popularity(const char *genre);
@@ -27,7 +28,11 @@ int get_artist_num_albuns_individual(Artista *artista, GestorAlbuns *gestor_albu
 void calcula_streams(GestorSistema *gestorsis);
 double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorartistas, GestorMusicas *gestormusicas);
 int get_num_constituents(Artista *artista);
-gchar *find_top_entry_with_tiebreaker(GHashTable *table, gboolean is_numeric, gboolean alphabetical);
-GList* sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reverse, gboolean alphabetical);
+
+gchar *find_top_entry_with_tiebreaker_str(GHashTable *table, gboolean alphabetical);
+gint find_top_entry_with_tiebreaker(GHashTable *table, gboolean alphabetical);
+GList *sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reverse, gboolean alphabetical);
+UserData *create_user_data(GHashTable *table, gboolean reverse, gboolean alphabetical);
+void free_user_data(UserData *user_data);
 
 #endif

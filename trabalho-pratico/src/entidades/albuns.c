@@ -5,14 +5,14 @@
 
 struct Album
 {
-    gchar *id;                 // Identificador único do album (inteiro)
+    gint id;                 // Identificador único do album (inteiro)
     gchar *title;              // Nome do album (string dinâmica)
     gchar **artist_ids;        // Lista de IDs dos artistas (array dinâmico de strings)
     gint year;                 // Ano de lançamento
     gchar **producers;         // Lista de produtores (array dinâmico de strings)
 };
 
-gchar *get_album_id (Album *album) { return (g_strdup(album->id));}
+gint get_album_id (Album *album) { return (album->id);}
 
 gchar *get_album_title (Album *album) { return (g_strdup(album->title));}
 
@@ -61,12 +61,12 @@ gchar **get_album_producers(Album *album)
 }
 
 
-Album *create_album(char *id, char *title, char **artist_ids, int year, char **producers)
+Album *create_album(int id, char *title, char **artist_ids, int year, char **producers)
 {
     Album *album = inicializar_album();
 
     // Define os atributos da album;
-    album->id = g_strdup(id);
+    album->id = id;
     album->year = year;
     album->title = g_strdup(title);
 
@@ -121,7 +121,7 @@ Album *inicializar_album()
         return NULL;
     }
 
-    album->id = NULL;
+    album->id = 0;
     album->title = NULL;
     album->artist_ids = NULL;
     album->year = 0;
@@ -134,7 +134,7 @@ void free_album(Album *album)
 {
     if (album)
     {
-        g_free(album->id);
+        //g_free(album->id);
         g_free(album->title);
 
         if (album->artist_ids)

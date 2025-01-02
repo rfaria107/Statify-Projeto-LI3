@@ -71,6 +71,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             continue; // Skipar linhas vazias
 
         char *token = procura_espaço(buffer);
+
         // query 1
         if (strcmp(token, "1") == 0)
         {
@@ -78,8 +79,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                int username = atoi(token + 1);
-                query_1(gestorsis, username, line_number, 0);
+                query_1(gestorsis, token, line_number, 0);
                 g_free(token);
             }
         }
@@ -90,8 +90,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                int username = atoi(token + 1);
-                query_1(gestorsis, username, line_number, 1);
+                query_1(gestorsis, token, line_number, 1);
                 g_free(token);
             }
         }
@@ -184,7 +183,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             if (token != NULL)
             {
                 char *user_id_str = g_strdup(token);
-                int user_id = atoi(user_id_str);
+                int user_id = atoi(user_id_str+1);
                 g_free(token);
                 token = procura_espaço3(buffer);
                 int year = 0, N = 0;
@@ -212,7 +211,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             if (token != NULL)
             {
                 char *user_id_str = g_strdup(token);
-                int user_id = atoi(user_id_str);
+                int user_id = atoi(user_id_str+1);
                 g_free(token);
                 token = procura_espaço3(buffer);
                 int year = 0, N = 0;
