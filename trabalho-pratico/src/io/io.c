@@ -189,7 +189,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 g_free(token);
                 token = procura_espaço3(buffer);
             }
-\
+
             char *data_final = NULL; // Supondo que DATA_FINAL_DEFAULT seja uma string
             if (token != NULL)
             {
@@ -199,7 +199,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             }
             
 
-    querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number,0);
+           querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number,0);
 
             g_free(data_inicial);
             g_free(data_final);
@@ -218,7 +218,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 g_free(token);
                 token = procura_espaço3(buffer);
             }
-\
+
             char *data_final = NULL; // Supondo que DATA_FINAL_DEFAULT seja uma string
             if (token != NULL)
             {

@@ -355,10 +355,6 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
 
 
 void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number,int n) {
-    if (!gestor_sistema) {
-        fprintf(stderr, "Erro: GestorSistema é NULL.\n");
-        return;
-    }
 
     // Se data_final for NULL, chama a função para histórico sem intervalo de datas
     if (data_final == NULL) {

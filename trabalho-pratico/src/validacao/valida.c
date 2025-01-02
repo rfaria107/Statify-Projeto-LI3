@@ -260,6 +260,16 @@ int valida_single_quotes_lista_artistas(gchar *artista)
     return 1;
 }
 
+// valida se o album tem ''
+int valida_single_quotes_lista_album(gchar *album)
+{
+    g_strstrip(album);
+    int len = strlen(album);
+    if (album == NULL || len == 0 || album[0] != '\'' || album[len - 1] != '\'')
+        return 0;
+    return 1;
+}
+
 gboolean valida_artista_individual(Artista *artista)
 {
     if (artista == NULL)

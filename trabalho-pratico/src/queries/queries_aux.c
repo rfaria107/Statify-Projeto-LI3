@@ -652,7 +652,6 @@ gint comparar_datas(const char *data1, const char *data2) {
 // Atualiza os top artistas na semana
 void atualizar_top_artistas_na_semana(Semana *semana) {
     if (!semana || !semana->artistas) {
-        fprintf(stderr, "Erro: semana ou tabela de artistas não inicializada.\n");
         return;
     }
 
@@ -687,7 +686,6 @@ void atualizar_top_artistas_na_semana(Semana *semana) {
         if (count < 10) {
             top_artistas = g_list_append(top_artistas, g_strdup(popularity->id));
         }
-        printf("Posição %d: Artista %s - Duração: %d minutos\n", count + 1, popularity->id, popularity->total_vezes_no_top);
     }
 
     // Substitui a lista de top_artistas na semana
@@ -772,22 +770,12 @@ gint get_duracao_artista_na_semana(Semana *semana, const char *artist_id) {
     return duracao ? *duracao : 0;
 }
 
-
-void processar_historico (char* data_incial, char* data_final, GestorSistema *gestorsis, int line_number,int n) {
-    if (!gestorsis) {
-        fprintf(stderr, "Erro: GestorSistema é NULL.\n");
-        return;
-    }
+void processar_historico (char* data_incial, char* data_final, GestorSistema *gestorsis, int line_number, int n) {
 
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
     RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
-    if (!writer) {
-        fprintf(stderr, "Erro: Não foi possível criar o arquivo %s.\n", output_file_name);
-        free(output_file_name);
-        return;
-    }
 
     // Inicializa a tabela de semanas
     GHashTable *semanas = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)destruir_semana);
@@ -800,7 +788,6 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
     gpointer key, value;
     g_hash_table_iter_init(&iter, historicos);
 
-
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         History *history = (History *)value;
 
@@ -808,7 +795,6 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
 
         char *domingo = calcular_domingo(data);
         if (domingo == NULL) {
-            fprintf(stderr, "Erro ao calcular o domingo correspondente para a data %s.\n", data);
         } else {
 
             // Duplica o valor de domingo para uso como chave na tabela hash
@@ -826,11 +812,11 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
             free(domingo);  // Libera o valor original de domingo
 
             // Processamento da música
-            char *musica_id = get_history_music_id(history);
+            int musica_id = get_history_music_id(history);
             GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
             GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
 
-            Musica *musica = g_hash_table_lookup(hashmusicas, musica_id);
+            Musica *musica = g_hash_table_lookup(hashmusicas, GINT_TO_POINTER(musica_id));
             if (musica) {
                 gchar **artist_ids = get_music_artist_ids(musica);
                 gchar *duration = get_history_duration(history);
@@ -846,9 +832,7 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
         }
     }
 
-
     // Agora, calcula o top 10 de artistas
-
     GHashTable *top_10_count = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     GHashTableIter semanas_iter;
     gpointer semana_key, semana_value;
@@ -879,9 +863,7 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
             }
         }
     }
-
     // Procura o artista com mais aparições
-
     char *top_artist_id = NULL;
     int max_count = 0;
 
@@ -892,7 +874,6 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
     while (g_hash_table_iter_next(&count_iter, &count_key, &count_value)) {
         char *artist_id = (char *)count_key;
         int count = *(int *)count_value;
-
 
         if (count > max_count) {
             max_count = count;
@@ -908,18 +889,14 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
         Artista *artista = g_hash_table_lookup(get_hash_artistas(get_gestor_artistas(gestorsis)), top_artist_id);
         if (artista) {
             char *artist_type = get_artist_type(artista);
-            printf("[DEBUG] Top artist ID: %s, Type: %s, Count: %d\n", top_artist_id, artist_type, max_count);
             char *field_names[] = {"Artist_Id", "Type", "Count"};
-            char *formatting[] = {"%s", "%s", "%d"};
+            char *formatting[] = {"%s", "%s", "%d"};  // Aqui o %d para o count que é um inteiro
             row_writer_set_field_names(writer, field_names, 3);
             row_writer_set_formatting(writer, formatting);
-            if (n==0) {
-            write_row(writer, ';', 3, top_artist_id, artist_type, max_count);
-            }
-            else {
-             write_row(writer, ';', 3, top_artist_id, artist_type, max_count);
 
-            }
+            // Escreve a linha no arquivo
+            write_row(writer, ';', 3, top_artist_id, artist_type, max_count);
+
             free(artist_type);
         }
         free(top_artist_id);
@@ -932,21 +909,14 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
     g_hash_table_destroy(top_10_count);
 }
 
-void processar_historico_intervalo_de_datas (char* data_inicial, char* data_final, GestorSistema *gestor_sistema,int line_number,int n){
-    if (!gestor_sistema) {
-        fprintf(stderr, "Erro: GestorSistema é NULL.\n");
-        return;
-    }
+void processar_historico_intervalo_de_datas (char* data_inicial, char* data_final, GestorSistema *gestor_sistema, int line_number, int n) {
+
     // Arquivo de saída
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
     RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
-    if (!writer) {
-        fprintf(stderr, "Erro: Não foi possível criar o arquivo %s.\n", output_file_name);
-        free(output_file_name);
-        return;
-    }
+
 
     // HashTable para armazenar semanas criadas
     GHashTable *semanas = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)destruir_semana);
@@ -958,42 +928,41 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
     gpointer key, value;
     g_hash_table_iter_init(&iter, historicos);
 
-
     while (g_hash_table_iter_next(&iter, &key, &value)) {
         History *history = (History *)value;
 
         char *data = get_history_date(history);
-           // Cálculo dos limites de data inicial e final
-    char *domingo_inicial = calcular_domingo(data_inicial);
-    char *sabado_final = calcular_sabado_seguinte(data_final);
 
-    if (domingo_inicial == NULL || sabado_final == NULL) {
-        fprintf(stderr, "Erro ao calcular os limites de datas.\n");
+        // Cálculo dos limites de data inicial e final
+        char *domingo_inicial = calcular_domingo(data_inicial);
+        char *sabado_final = calcular_sabado_seguinte(data_final);
+
+        if (domingo_inicial == NULL || sabado_final == NULL) {
+            free(domingo_inicial);
+            free(sabado_final);
+            return;  // Encerra o processamento devido ao erro
+        }
+
+        // Comparação com data inicial
+        if (data_inicial && comparar_datas(data, domingo_inicial) < 0) {
+            free(domingo_inicial);
+            free(sabado_final);
+            continue;
+        }
+
+        // Comparação com data final
+        if (data_final && comparar_datas(data, sabado_final) > 0) {
+            free(domingo_inicial);
+            free(sabado_final);
+            continue;
+        }
+
+        // Liberação de memória após uso
         free(domingo_inicial);
         free(sabado_final);
-        return;  // Encerra o processamento devido ao erro
-    }
 
-    // Comparação com data inicial
-    if (data_inicial && comparar_datas(data, domingo_inicial) < 0) {
-        free(domingo_inicial);
-        free(sabado_final);
-        continue;
-    }
-
-    // Comparação com data final
-    if (data_final && comparar_datas(data, sabado_final) > 0) {
-        free(domingo_inicial);
-        free(sabado_final);
-        continue;
-    }
-
-    // Liberação de memória após uso
-    free(domingo_inicial);
-    free(sabado_final);
-
-// Cálculo do domingo correspondente à data
- char *domingo = calcular_domingo(data);
+        // Cálculo do domingo correspondente à data
+        char *domingo = calcular_domingo(data);
         if (domingo == NULL) {
             fprintf(stderr, "Erro ao calcular o domingo correspondente para a data %s.\n", data);
         } else {
@@ -1013,11 +982,11 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
             free(domingo);  // Libera o valor original de domingo
 
             // Processamento da música
-            char *musica_id = get_history_music_id(history);
+            int musica_id = get_history_music_id(history);
             GestorMusicas *gestormusicas = get_gestor_musicas(gestor_sistema);
             GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
 
-            Musica *musica = g_hash_table_lookup(hashmusicas, musica_id);
+            Musica *musica = g_hash_table_lookup(hashmusicas, GINT_TO_POINTER(musica_id));
             if (musica) {
                 gchar **artist_ids = get_music_artist_ids(musica);
                 gchar *duration = get_history_duration(history);
@@ -1032,8 +1001,6 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
             }
         }
     }
-
-
 
     GHashTableIter semanas_iter;
     gpointer semana_key, semana_value;
@@ -1066,7 +1033,7 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
         }
     }
 
-
+    // Encontrar o artista com mais aparições
     char *top_artist_id = NULL;
     int max_count = 0;
 
@@ -1078,7 +1045,6 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
         char *artist_id = (char *)count_key;
         int count = *(int *)count_value;
 
-
         if (count > max_count) {
             max_count = count;
             if (top_artist_id) {
@@ -1088,26 +1054,25 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
         }
     }
 
+    // Registra o artista mais aparições
     if (top_artist_id) {
         Artista *artista = g_hash_table_lookup(get_hash_artistas(get_gestor_artistas(gestor_sistema)), top_artist_id);
         if (artista) {
             char *artist_type = get_artist_type(artista);
             char *field_names[] = {"Artist_Id", "Type", "Count"};
-            char *formatting[] = {"%s", "%s", "%d"};
+            char *formatting[] = {"%s", "%s", "%d"};  // Aqui o %d para o count que é um inteiro
             row_writer_set_field_names(writer, field_names, 3);
             row_writer_set_formatting(writer, formatting);
-            if (n==0){
-            write_row(writer, ';', 3, top_artist_id, artist_type, max_count);
-            }
-            else {
-             write_row(writer, '=', 3, top_artist_id, artist_type, max_count);
 
-            }
+            // Escreve a linha no arquivo
+            write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);
+
             free(artist_type);
         }
         free(top_artist_id);
     }
 
+    // Finaliza o processo
     free_and_finish_writing(writer);
     free(output_file_name);
     g_hash_table_destroy(semanas);
