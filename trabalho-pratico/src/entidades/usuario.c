@@ -7,7 +7,7 @@
 
 struct Usuario
 {
-    gchar *username;
+    int username;
     gchar *email;
     gchar *first_name;
     gchar *last_name;
@@ -18,7 +18,7 @@ struct Usuario
 };
 
 // Função para criar um usuário
-Usuario* create_usuario(char* username, char* email, char* first_name, char* last_name, char* birth_date, 
+Usuario* create_usuario(int username, char* email, char* first_name, char* last_name, char* birth_date, 
                         char* country, char* subscription_type, char** liked_musics) {
     Usuario* usuario = (Usuario*)malloc(sizeof(Usuario));
     if (!usuario) {
@@ -26,7 +26,7 @@ Usuario* create_usuario(char* username, char* email, char* first_name, char* las
         return NULL;
     }
 
-    usuario->username = strdup(username);
+    usuario->username = username;
     usuario->email = strdup(email);
     usuario->first_name = strdup(first_name);
     usuario->last_name = strdup(last_name);
@@ -63,7 +63,7 @@ Usuario *inicializar_usuario()
     }
 
     // Inicializa os campos do usuário
-    usuario->username = NULL;
+    usuario->username = 0;
     usuario->email = NULL;
     usuario->first_name = NULL;
     usuario->last_name = NULL;
@@ -79,7 +79,7 @@ void free_usuario(Usuario *usuario)
 {
     if (usuario)
     {
-        g_free(usuario->username);
+        //g_free(usuario->username);
         g_free(usuario->email);
         g_free(usuario->first_name);
         g_free(usuario->last_name);
@@ -101,7 +101,7 @@ void free_usuario(Usuario *usuario)
     }
 }
 
-gchar *user_get_id(Usuario *user) { return g_strdup(user->username); }
+int user_get_id(Usuario *user) { return user->username; }
 
 gchar *user_get_email(Usuario *user) { return g_strdup(user->email); }
 

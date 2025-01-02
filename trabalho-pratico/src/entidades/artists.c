@@ -5,19 +5,16 @@
 
 struct Artista
 {
-    gchar *id;                 // Identificador único do artista (inteiro)
+    gint id;                   // Identificador único do artista (inteiro)
     gchar *name;               // Nome do artista (string dinâmica)
     gdouble recipe_per_stream; // Receita por stream (valor em double)
     gchar **id_constituent;    // Lista de IDs de membros (para grupos musicais), array dinâmico de strings
     gchar *country;            // País de origem (string dinâmica)
     gchar *type;               // Tipo de artista: "individual" ou "grupo musical" (string dinâmica)
-    gint duracao_discografia;   // Duração da discografia em segundos
+    guint duracao_discografia; // Duração da discografia em segundos
 };
 
-gchar *get_artist_id(Artista *artista)
-{
-    return (g_strdup(artista->id));
-}
+int get_artist_id(Artista *artista) { return artista->id; }
 
 gchar *get_artist_name(Artista *artista) { return (g_strdup(artista->name)); }
 
@@ -69,7 +66,7 @@ Artista *inicializar_artista()
     }
 
     // Inicializa os campos do artista
-    artista->id = NULL;
+    artista->id = 0;
     artista->name = NULL;
     artista->recipe_per_stream = 0.0;
     artista->id_constituent = NULL;
@@ -84,7 +81,7 @@ void free_artista(Artista *artista)
     if (!artista)
         return;
 
-    g_free(artista->id);
+    // g_free(artista->id);
     g_free(artista->name);
     // recipe per stream é um double
     if (artista->id_constituent)
@@ -100,7 +97,7 @@ void free_artista(Artista *artista)
     g_free(artista);
 }
 
-Artista *create_artista(gchar *id, gchar *name, gdouble recipe_per_stream, gchar **id_constituent, gchar *country, gchar *type)
+Artista *create_artista(int id, gchar *name, gdouble recipe_per_stream, gchar **id_constituent, gchar *country, gchar *type)
 {
     Artista *artista = inicializar_artista(); // Aloca e inicializa o artista
     if (!artista)
@@ -109,12 +106,12 @@ Artista *create_artista(gchar *id, gchar *name, gdouble recipe_per_stream, gchar
     }
 
     // Define os atributos do artista, copiando as strings dinamicamente
-    artista->id = g_strdup(id);
+    artista->id = id;
     artista->name = g_strdup(name);
     artista->recipe_per_stream = recipe_per_stream;
     artista->country = g_strdup(country);
     artista->type = g_strdup(type);
-    
+
     // Inicializa a lista de IDs de membros, se fornecida
     if (id_constituent)
     {

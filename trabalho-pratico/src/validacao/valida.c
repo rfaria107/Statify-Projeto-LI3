@@ -165,11 +165,10 @@ gboolean valida_liked_musics_id(Usuario *usuario, GestorMusicas *gestor_musicas)
         return TRUE;
     }
 
-    GHashTable *hash_musicas = get_hash_musicas(gestor_musicas);
-
     for (gint i = 0; liked_musics_copy[i] != NULL; i++)
     {
-        Musica *musica_encontrada = (Musica *)g_hash_table_lookup(hash_musicas, liked_musics_copy[i]);
+        int liked_music_int = atoi(liked_musics_copy[i] + 1);
+        Musica *musica_encontrada = buscar_musicas(gestor_musicas, liked_music_int);
 
         if (musica_encontrada == NULL)
         {
@@ -302,7 +301,8 @@ int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas)
     gchar **artist_ids = get_music_artist_ids(musica);
     for (int i = 0; artist_ids[i] != NULL; i++)
     {
-        if (buscar_artista(gestorartistas, artist_ids[i]) == NULL)
+        int artist_id_int = atoi(artist_ids[i] + 1);
+        if (buscar_artista(gestorartistas, artist_id_int) == NULL)
         {
             g_strfreev(artist_ids);
             return 0;
@@ -327,10 +327,9 @@ gboolean valida_album(Musica *musica, GestorAlbuns *gestor_albuns)
         g_free(album_copy);
         return FALSE;
     }
+    int album_copy_int = atoi(album_copy + 2);
 
-    GHashTable *hash_albuns = get_hash_albuns(gestor_albuns);
-
-    Album *album_encontrado = (Album *)g_hash_table_lookup(hash_albuns, album_copy);
+    Album *album_encontrado = buscar_album(gestor_albuns, album_copy_int);
 
     if (album_encontrado == NULL)
     {

@@ -33,7 +33,7 @@ GestorUsuarios *criar_gestor_usuarios()
 // Inicializa o Gestor de Usuarios
 void inicializar_gestor_usuarios(GestorUsuarios *gestor)
 {
-    gestor->usuarios = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, free_usuario_value);
+    gestor->usuarios = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free_usuario_value);
 }
 
 // Libera os recursos do Gestor de Usuarios
@@ -48,11 +48,11 @@ Usuario *buscar_usuario(GestorUsuarios *gestor, Usuario *usuario)
 {
     if (gestor && gestor->usuarios && usuario)
     {
-        gchar *id_usuario = user_get_id(usuario); // Obtenha o ID através de user_get_id()
+        int id_usuario = user_get_id(usuario); // Obtenha o ID através de user_get_id()
         if (id_usuario)
         {
-            Usuario *resultado = (Usuario *)g_hash_table_lookup(gestor->usuarios, id_usuario);
-            g_free(id_usuario); // Libere a cópia do ID gerada por user_get_id()
+            Usuario *resultado = (Usuario *)g_hash_table_lookup(gestor->usuarios, GINT_TO_POINTER(id_usuario));
+            //g_free(id_usuario); // Libere a cópia do ID gerada por user_get_id()
             return resultado;
         }
         else
@@ -63,11 +63,11 @@ Usuario *buscar_usuario(GestorUsuarios *gestor, Usuario *usuario)
     return NULL;
 }
 
-Usuario *buscar_usuario_id(GestorUsuarios *gestor, gchar *id_usuario)
+Usuario *buscar_usuario_id(GestorUsuarios *gestor, int id_usuario)
 {
     if (gestor)
     {
-        Usuario *usuario = (Usuario *)g_hash_table_lookup(gestor->usuarios, id_usuario);
+        Usuario *usuario = (Usuario *)g_hash_table_lookup(gestor->usuarios, GINT_TO_POINTER(id_usuario));
         return usuario;
     }
     return NULL;
@@ -78,11 +78,11 @@ void inserir_usuario(GestorUsuarios *gestor, Usuario *user)
 {
     if (gestor && gestor->usuarios && user)
     {
-        gchar *id = user_get_id(user);
+        int id = user_get_id(user);
         if (id)
         {
-            g_hash_table_insert(gestor->usuarios, g_strdup(id), user);
-            g_free(id); // Libere o ID temporário após duplicação
+            g_hash_table_insert(gestor->usuarios, GINT_TO_POINTER(id), user);
+            //g_free(id); // Libere o ID temporário após duplicação
         }
     }
 }
