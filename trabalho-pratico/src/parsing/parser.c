@@ -318,7 +318,10 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas, G
             trim_single_quotes_gchar(artist_ids[i]);
         }
         gchar *album_id = g_ptr_array_index(campostemp, 3);
-
+        if (valida_parenteses_lista(album_id) == 0)
+        {
+            return NULL;
+        }
         gchar *duration = g_ptr_array_index(campostemp, 4);
 
         gchar *genre = g_ptr_array_index(campostemp, 5);

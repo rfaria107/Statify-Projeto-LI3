@@ -361,7 +361,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
 
     // Configura os nomes e formatos dos campos
     char *field_names[] = {"Total Time", "Music Count", "Top Artist ID", "Top Day", "Top Genre", "Top Album", "Top Hour"};
-    char *formatting[] = {"%s", "%d", "A%07d", "%s", "%s", "AL%07d", "%s"};
+    char *formatting[] = {"%s", "%d", "A%07d", "%s", "%s", "AL%06d", "%s"};
     row_writer_set_field_names(writer, field_names, 7);
     row_writer_set_formatting(writer, formatting);
 
@@ -390,7 +390,6 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
         if (history_user_id == user_id)
         {
             user_found = TRUE;
-            // free(history_user_id);
 
             char year_str[5];
             snprintf(year_str, sizeof(year_str), "%d", year);
@@ -399,7 +398,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
             {
                 gchar *history_duration = get_history_duration(history);
                 int duration = duracao_para_segundos(history_duration);
-                free(history_duration);
+                g_free(history_duration);
                 total_time += duration;
                 music_count++;
 
@@ -410,7 +409,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 strncpy(hour, timestamp + 11, 2);
                 hour[2] = '\0';
 
-                free(timestamp);
+                g_free(timestamp);
 
                 // Contabiliza o número de músicas por dia, incluindo as repetidas
                 gpointer current_day_count = g_hash_table_lookup(day_count, date);
@@ -429,7 +428,6 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                     GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
 
                     Musica *musica = buscar_musicas(gestormusicas, history_music_id);
-                    // free(history_music_id);
 
                     if (musica)
                     {
@@ -477,10 +475,8 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 }
             }
             else
-                free(timestamp);
+                g_free(timestamp);
         }
-        // else
-        // free(history_user_id);
     }
 
     if (!user_found)
@@ -500,51 +496,24 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     // Encontrar os mais populares
     gint top_artist_id = find_top_entry_with_tiebreaker(artist_time, TRUE); // Alfabético (ID menor)
     gchar *top_day = find_top_entry_with_tiebreaker_str(day_count, FALSE);
-    /*
-    int max_music_count = -1;
-
-    // Itera sobre os dias e verifica qual tem o maior número de músicas, com desempate por data
-    GList *days_sorted = g_hash_table_get_keys(day_count);
-    for (GList *iter = days_sorted; iter != NULL; iter = iter->next)
-    {
-        gchar *date = (gchar *)iter->data;
-        int music_count_for_day = GPOINTER_TO_INT(g_hash_table_lookup(day_count, date));
-
-        // Se encontrar um dia com mais músicas, ou um empate com a data mais recente
-        if (music_count_for_day > max_music_count ||
-            (music_count_for_day == max_music_count && g_strcmp0(date, top_day) > 0))
-        {
-            max_music_count = music_count_for_day;
-            top_day = date;
-        }
-    }
-    g_list_free(days_sorted);
-    */
-
     gchar *top_hour = find_top_entry_with_tiebreaker_str(hour_time, FALSE);        // Mais cedo
     gchar *top_genre = find_top_entry_with_tiebreaker_str(genre_popularity, TRUE); // Alfabético
     gint top_album = find_top_entry_with_tiebreaker(album_time, TRUE);             // Alfabético
-    /*
-    if (!top_artist_id || *top_artist_id == -1 ||
-        !top_day || *top_day == -1 ||
-        !top_hour || *top_hour == -1 ||
-        !top_genre || *top_genre == -1 ||
-        !top_album || *top_album == -1)
+    
+    if (top_artist_id == -1 || !top_day || !top_hour || !top_genre || top_album == -1)
     {
-        // Libera as strings alocadas dinamicamente
+        // Caso algum dos valores seja inválido, escreve linha vazia no arquivo
         write_row(writer, ';', 1, "");
-        if (top_artist_id)
-            g_free(top_artist_id);
+
+        // Libera as strings e recursos alocados dinamicamente
         if (top_day)
             g_free(top_day);
         if (top_hour)
             g_free(top_hour);
         if (top_genre)
             g_free(top_genre);
-        if (top_album)
-            g_free(top_album);
 
-        // Libera os hash tables e termina a escrita
+        // Libera as hash tables usadas
         g_hash_table_destroy(artist_time);
         g_hash_table_destroy(day_count);
         g_hash_table_destroy(hour_time);
@@ -552,10 +521,10 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
         g_hash_table_destroy(album_time);
         g_hash_table_destroy(artist_music_count);
 
+        // Finaliza a escrita do arquivo
         free_and_finish_writing(writer);
         return;
     }
-    */
 
     gchar *total_time_duracao = segundos_para_duracao(total_time);
     // Escrever os resultados no arquivo
@@ -565,34 +534,51 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     // Ordena os artistas e exibe os N mais ouvidos
     GList *sorted_artists = sort_hash_table_by_value_with_tiebreaker(artist_time, FALSE, TRUE);
     int displayed_artists = 0;
-    for (GList *iter = sorted_artists; iter && displayed_artists < N; iter = iter->next)
-    {
-        gint artist_id = GPOINTER_TO_INT(iter->data);
-        //printf("%d", artist_id);
-/*
-        int duration = GPOINTER_TO_INT(g_hash_table_lookup(artist_time, GINT_TO_POINTER(artist_id)));
-        int distinct_musics = GPOINTER_TO_INT(g_hash_table_lookup(artist_music_count, GINT_TO_POINTER(artist_id)));
-        gchar *duration_string = segundos_para_duracao(duration);
-        char *field_names[] = {"Artist_ID", "Music Count", "Duration"};
-        char *formatting[] = {"A%07d", "%d", "%s", "%s"};
-        row_writer_set_field_names(writer, field_names, 3);
-        row_writer_set_formatting(writer, formatting);
-        write_row(writer, ';', 3, artist_id, distinct_musics, duration_string);
-        g_free(duration_string);
-        displayed_artists++;*/
+
+    if (sorted_artists != NULL) {
+        for (GList *iter = sorted_artists; iter && displayed_artists < N; iter = iter->next) {
+            gint artist_id = GPOINTER_TO_INT(iter->data);
+
+            // Verifica se o artist_id existe nas tabelas de hash
+            gpointer duration_ptr = g_hash_table_lookup(artist_time, GINT_TO_POINTER(artist_id));
+            gpointer distinct_musics_ptr = g_hash_table_lookup(artist_music_count, GINT_TO_POINTER(artist_id));
+
+            // Se algum valor for NULL, saltamos este artista
+            if (duration_ptr != NULL && distinct_musics_ptr != NULL) {
+                int duration = GPOINTER_TO_INT(duration_ptr);
+                int distinct_musics = GPOINTER_TO_INT(distinct_musics_ptr);
+                gchar *duration_string = segundos_para_duracao(duration);
+
+                // Chama write_row com os parâmetros necessários
+            char *field_names[] = {"Top Artist ID", "Music Count","Top Hour"};
+            char *formatting[] = {"A%07d","%d", "%s"};
+            row_writer_set_field_names(writer, field_names, 3);
+            row_writer_set_formatting(writer, formatting);
+                write_row(writer, ';', 3, artist_id, distinct_musics, duration_string);
+
+                // Libera a memória alocada para duration_string
+                g_free(duration_string);
+
+                displayed_artists++;
+            }
+        }
     }
+
+    // Libera a lista de artistas ordenados após o uso
+
     g_list_free(sorted_artists);
+
 
     // Limpeza
     free(top_day);
     free(top_genre);
 
-    //    g_hash_table_destroy(artist_time);
-    // g_hash_table_destroy(day_count);
-    //    g_hash_table_destroy(hour_time);
-    //    g_hash_table_destroy(genre_popularity);
-    //    g_hash_table_destroy(album_time);
-    //    g_hash_table_destroy(artist_music_count);
+    g_hash_table_destroy(artist_time);
+    g_hash_table_destroy(day_count);
+    g_hash_table_destroy(hour_time);
+    g_hash_table_destroy(genre_popularity);
+    g_hash_table_destroy(album_time);
+    g_hash_table_destroy(artist_music_count);
 
     free_and_finish_writing(writer);
 }

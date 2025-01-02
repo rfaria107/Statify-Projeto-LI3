@@ -34,5 +34,5 @@ gint find_top_entry_with_tiebreaker(GHashTable *table, gboolean alphabetical);
 GList *sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reverse, gboolean alphabetical);
 UserData *create_user_data(GHashTable *table, gboolean reverse, gboolean alphabetical);
 void free_user_data(UserData *user_data);
-
+void process_top_artists(GHashTable *artist_time, GHashTable *artist_music_count, RowWriter *writer, int N);
 #endif

@@ -271,7 +271,6 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
     if (g_strcmp0(artist_type, "individual") != 0)
     {
         free(artist_type);
-        // free(artist_id);
         return receita_artista;
     }
 
@@ -304,7 +303,7 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
                 if (is_member)
                 {
                     int stream_count = get_music_streams(musica);
-                    receita_participacao += (stream_count * get_artist_recipe_per_stream(grupo)) / get_num_constituents(grupo);
+                    receita_participacao += round((stream_count * get_artist_recipe_per_stream(grupo)) / get_num_constituents(grupo));
                 }
                 g_strfreev(constituents);
             }
@@ -312,7 +311,6 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
         g_strfreev(artist_ids);
     }
     free(artist_type);
-    // free(artist_id);
     //  Soma as receitas diretas e de participação
     return (receita_artista + receita_participacao);
 }
@@ -425,38 +423,53 @@ gint compare_by_value_with_tiebreaker(gconstpointer a, gconstpointer b, gpointer
 
     gint key_a = GPOINTER_TO_INT(a);
     gint key_b = GPOINTER_TO_INT(b);
-    // Retrieve values associated with the keys
-    gint value_a = GPOINTER_TO_INT(g_hash_table_lookup(table, a));
-    gint value_b = GPOINTER_TO_INT(g_hash_table_lookup(table, b));
 
-    // Compare values
+    // Verificando se as chaves existem na tabela
+    gpointer value_a_ptr = g_hash_table_lookup(table, GINT_TO_POINTER(key_a));
+    gpointer value_b_ptr = g_hash_table_lookup(table, GINT_TO_POINTER(key_b));
+
+    // Se algum valor for NULL, retornamos que a comparação não é válida
+    if (value_a_ptr == NULL || value_b_ptr == NULL) {
+        return 0;  // Ignoramos chaves ausentes
+    }
+
+    gint value_a = GPOINTER_TO_INT(value_a_ptr);
+    gint value_b = GPOINTER_TO_INT(value_b_ptr);
+
+    // Comparação dos valores
     if (value_a != value_b)
     {
         return reverse ? value_b - value_a : value_a - value_b;
     }
 
-    // If values are equal and alphabetical sorting is enabled
+    // Se os valores forem iguais, realiza-se a ordenação alfabética
     if (alphabetical)
     {
-        // Compare keys as integers
         return key_a - key_b;
     }
 
-    // Values and keys are equal
-    return 0;
+    return 0; // Caso contrário, valores e chaves são iguais
 }
+
 
 // Função para ordenar a GHashTable por valor com desempate
 GList *sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reverse, gboolean alphabetical)
 {
-    // Lista para armazenar as chaves da tabela
+    // Obtém as chaves da tabela de hash
     GList *keys = g_hash_table_get_keys(table);
 
-    // Criar pointer para os dados do usuário
+    // Verifica se a lista de chaves não está vazia
+    if (keys == NULL) {
+        return NULL; // Se a lista de chaves for NULL, não há nada a ordenar
+    }
+
+    // Cria o usuário de dados com a tabela e os parâmetros de ordenação
     UserData *user_data = create_user_data(table, reverse, alphabetical);
 
-    // Ordena a lista de chaves
+    // Ordena as chaves pela função de comparação
     keys = g_list_sort_with_data(keys, compare_by_value_with_tiebreaker, user_data);
+
+    // Libera os dados do usuário após a ordenação
     free_user_data(user_data);
     return keys;
 }
@@ -464,6 +477,9 @@ GList *sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reve
 UserData *create_user_data(GHashTable *table, gboolean reverse, gboolean alphabetical)
 {
     UserData *user_data = malloc(sizeof(UserData));
+    if (user_data == NULL) {
+        return NULL;  // Se a alocação falhar, retornamos NULL
+    }
     user_data->hash = table;
     user_data->reverse = reverse;
     user_data->alphabetical = alphabetical;
@@ -472,6 +488,7 @@ UserData *create_user_data(GHashTable *table, gboolean reverse, gboolean alphabe
 
 void free_user_data(UserData *user_data)
 {
-    g_free(user_data->hash);
-    free(user_data);
+    if (user_data != NULL) {
+        free(user_data);
+    }
 }
