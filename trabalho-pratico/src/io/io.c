@@ -176,6 +176,64 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 query_3(min_age, max_age, gestorsis, line_number, 1);
             }
         }
+         else if (strcmp(token, "4") == 0)
+        {
+            g_free(token);
+            token = procura_espaço2(buffer);
+
+            char *data_inicial = NULL; // Supondo que DATA_INICIAL_DEFAULT seja uma string
+            if (token != NULL)
+            {
+                g_free(data_inicial);
+                data_inicial = g_strdup(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+            }
+\
+            char *data_final = NULL; // Supondo que DATA_FINAL_DEFAULT seja uma string
+            if (token != NULL)
+            {
+                g_free(data_final);
+                data_final = g_strdup(token);
+                g_free(token);
+            }
+            
+
+    querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number,0);
+
+            g_free(data_inicial);
+            g_free(data_final);
+        }
+
+ else if (strcmp(token, "4S") == 0)
+        {
+            g_free(token);
+            token = procura_espaço2(buffer);
+
+            char *data_inicial = NULL; // Supondo que DATA_INICIAL_DEFAULT seja uma string
+            if (token != NULL)
+            {
+                g_free(data_inicial);
+                data_inicial = g_strdup(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+            }
+\
+            char *data_final = NULL; // Supondo que DATA_FINAL_DEFAULT seja uma string
+            if (token != NULL)
+            {
+                g_free(data_final);
+                data_final = g_strdup(token);
+                g_free(token);
+            }
+            
+
+    querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number,1);
+
+            g_free(data_inicial);
+            g_free(data_final);
+        }
+
         else if (strcmp(token, "6") == 0)
         {
             g_free(token);

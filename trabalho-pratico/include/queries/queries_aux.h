@@ -10,6 +10,7 @@
 typedef struct UserData UserData;
 typedef struct GenrePopularity GenrePopularity;
 typedef struct Semana Semana;
+typedef struct ArtistPopularity ArtistPopularity;
 
 // Funções para gerenciamento de GenrePopularity
 GenrePopularity *create_genre_popularity(const char *genre);
@@ -35,4 +36,23 @@ GList *sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reve
 UserData *create_user_data(GHashTable *table, gboolean reverse, gboolean alphabetical);
 void free_user_data(UserData *user_data);
 void process_top_artists(GHashTable *artist_time, GHashTable *artist_music_count, RowWriter *writer, int N);
+
+void processar_historico (char* data_incial, char* data_final, GestorSistema *gestorsis, int line_number,int n);
+void processar_historico_intervalo_de_datas (char* data_inicial, char* data_final, GestorSistema *gestor_sistema,int line_number,int n);
+gint get_duracao_artista_na_semana(Semana *semana, const char *artist_id);
+GList* get_top_artistas_na_semana(Semana *semana);
+void adicionar_artista_na_semana(Semana *semana, const char *artist_id, int duracao);
+void free_popularity(ArtistPopularity *popularity);
+void liberar_popularidade(GList *popularity_list);
+gint comparar_popularidade(struct ArtistPopularity *a, struct ArtistPopularity *b);
+void atualizar_top_artistas_na_semana(Semana *semana);
+gint comparar_datas(const char *data1, const char *data2);
+time_t get_timestamp(const char *data);
+gchar* calcular_domingo(const char *data);
+gchar* calcular_sabado_seguinte(const gchar *data);
+Semana* criar_semana(const char *domingo);
+GHashTable *get_semanas_artistas(Semana *semana);
+void destruir_semana(Semana *semana);
+gint contar_aparicoes_artista(Semana *semana, const gchar *artist_id);
+
 #endif

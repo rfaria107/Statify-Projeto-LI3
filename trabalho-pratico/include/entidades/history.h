@@ -12,7 +12,7 @@ int get_history_music_id(History *history);
 gchar *get_history_timestamp(History *history);
 gchar *get_history_duration(History *history);
 gchar *get_history_platform(History *history);
-
+gchar *get_history_date (History *history);
 // Funções para manipulação de histories
 History *create_history(int id, int user_id, int music_id, char *timestamp, char *duration, char *platform);
 History *inicializar_history();

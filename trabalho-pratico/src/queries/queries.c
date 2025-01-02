@@ -353,6 +353,23 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_hash_table_destroy(generos_likes);
 }
 
+
+void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number,int n) {
+    if (!gestor_sistema) {
+        fprintf(stderr, "Erro: GestorSistema é NULL.\n");
+        return;
+    }
+
+    // Se data_final for NULL, chama a função para histórico sem intervalo de datas
+    if (data_final == NULL) {
+        processar_historico(NULL, NULL, gestor_sistema, line_number, n);
+    } 
+    else {
+        // Caso contrário, chama a função para histórico com intervalo de datas
+        processar_historico_intervalo_de_datas(data_inicial, data_final, gestor_sistema, line_number,n);
+    }
+}
+   
 void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_number, int n)
 {
     char output_file_name[256];
@@ -554,6 +571,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
             char *formatting[] = {"A%07d","%d", "%s"};
             row_writer_set_field_names(writer, field_names, 3);
             row_writer_set_formatting(writer, formatting);
+            if (n==0){}
                 write_row(writer, ';', 3, artist_id, distinct_musics, duration_string);
 
                 // Libera a memória alocada para duration_string

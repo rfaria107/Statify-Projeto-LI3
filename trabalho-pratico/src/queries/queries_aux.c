@@ -33,13 +33,20 @@ struct GenrePopularity
     int total_likes;
 };
 
-struct Semana
-{
-    char *inicio;
-    char *fim;
-    GPtrArray *historico;
-    GHashTable *top10;
+ struct ArtistPopularity {
+    char *id;
+    char *type;
+    int total_vezes_no_top;
 };
+
+
+typedef struct Semana {
+    char domingo[11];      // Data do domingo no formato YYYY/MM/DD
+    char sabado[11];       // Data do sábado no formato YYYY/MM/DD
+    GHashTable *artistas;  // Hash table de artista_id -> duração total
+    GList *top_artistas;   // Lista dos IDs dos top 10 artistas
+} Semana;
+
 
 gint duracao_para_segundos(const gchar *duracao)
 {
@@ -491,4 +498,618 @@ void free_user_data(UserData *user_data)
     if (user_data != NULL) {
         free(user_data);
     }
+}
+
+// Função para converter string de data para timestamp
+time_t get_timestamp(const char *data) {
+    struct tm tm_data = {0};
+    if (sscanf(data, "%d/%d/%d", &tm_data.tm_year, &tm_data.tm_mon, &tm_data.tm_mday) != 3) {
+        fprintf(stderr, "Erro: Formato de data inválido.\n");
+        return -1;
+    }
+    tm_data.tm_year -= 1900;
+    tm_data.tm_mon -= 1;
+    return mktime(&tm_data);
+}
+
+// Calcula o domingo da semana de uma data
+gchar* calcular_domingo(const gchar *data) {
+    int ano, mes, dia;
+    if (sscanf(data, "%d/%d/%d", &ano, &mes, &dia) != 3) {
+        fprintf(stderr, "Erro ao fazer o parse da data.\n");
+        return NULL;
+    }
+
+    struct tm tm_data = {0};
+    tm_data.tm_year = ano - 1900;
+    tm_data.tm_mon = mes - 1;
+    tm_data.tm_mday = dia;
+    mktime(&tm_data);
+
+    int dias_para_domingo = tm_data.tm_wday;
+    tm_data.tm_mday -= dias_para_domingo;
+    mktime(&tm_data);
+
+    gchar *domingo = malloc(11 * sizeof(gchar));
+    if (domingo == NULL) {
+        fprintf(stderr, "Erro ao alocar memória para a data de domingo.\n");
+        return NULL;
+    }
+
+    strftime(domingo, 11, "%Y/%m/%d", &tm_data);
+    return domingo;
+}
+
+// Calcula o sábado seguinte de uma data
+gchar* calcular_sabado_seguinte(const gchar *data) {
+    int ano, mes, dia;
+    if (sscanf(data, "%d/%d/%d", &ano, &mes, &dia) != 3) {
+        fprintf(stderr, "Erro ao fazer o parse da data.\n");
+        return NULL;
+    }
+
+    struct tm tm_data = {0};
+    tm_data.tm_year = ano - 1900;
+    tm_data.tm_mon = mes - 1;
+    tm_data.tm_mday = dia;
+    mktime(&tm_data);
+
+    int dias_para_sabado = (6 - tm_data.tm_wday + 7) % 7;
+    tm_data.tm_mday += dias_para_sabado;
+    mktime(&tm_data);
+
+    gchar *sabado = malloc(11 * sizeof(gchar));
+    if (sabado == NULL) {
+        fprintf(stderr, "Erro ao alocar memória para a data de sábado.\n");
+        return NULL;
+    }
+
+    strftime(sabado, 11, "%Y/%m/%d", &tm_data);
+    return sabado;
+}
+
+
+// Cria uma semana com domingo e sábado
+Semana* criar_semana(const char *domingo) {
+    Semana *semana = g_malloc(sizeof(Semana));
+
+    g_strlcpy(semana->domingo, domingo, sizeof(semana->domingo));
+
+    struct tm tm_domingo = {0};
+    if (sscanf(domingo, "%d/%d/%d", &tm_domingo.tm_year, &tm_domingo.tm_mon, &tm_domingo.tm_mday) != 3) {
+        fprintf(stderr, "Erro ao analisar a data.\n");
+        g_free(semana);
+        return NULL;
+    }
+    tm_domingo.tm_year -= 1900;
+    tm_domingo.tm_mon -= 1;
+    
+    tm_domingo.tm_mday += 6;
+    mktime(&tm_domingo);
+    
+    strftime(semana->sabado, sizeof(semana->sabado), "%Y/%m/%d", &tm_domingo);
+    
+    semana->artistas = g_hash_table_new(g_str_hash, g_str_equal);
+    semana->top_artistas = NULL;
+
+    return semana;
+}
+
+
+GHashTable *get_semanas_artistas(Semana *semana) {
+    if (!semana) {
+        return NULL;
+    }
+    return semana->artistas;
+}
+
+
+void destruir_semana(Semana *semana) {
+    if (semana) {
+        free(semana);
+        semana = NULL;  // Evita um double free
+    }
+}
+
+
+
+gint contar_aparicoes_artista(Semana *semana, const gchar *artist_id) {
+    if (!semana || !artist_id) {
+        fprintf(stderr, "Erro: Semana ou artist_id inválido.\n");
+        return 0;
+    }
+
+    gint count = 0;
+    for (GList *node = semana->top_artistas; node != NULL; node = node->next) {
+        gchar *artist = (gchar *)node->data;
+        if (artist && g_strcmp0(artist, artist_id) == 0) {
+            count++;
+        }
+    }
+    return count;
+}
+
+
+// Função para comparar duas datas no formato "yyyy/mm/dd"
+gint comparar_datas(const char *data1, const char *data2) {
+    time_t timestamp1 = get_timestamp(data1);
+    time_t timestamp2 = get_timestamp(data2);
+
+    if (timestamp1 == (time_t)-1 || timestamp2 == (time_t)-1) {
+        return 0;  // Retorna 0 em caso de erro na conversão
+    }
+
+    if (timestamp1 < timestamp2) {
+        return -1;  // data1 é anterior a data2
+    } else if (timestamp1 > timestamp2) {
+        return 1;   // data1 é posterior a data2
+    }
+
+    return 0;  // datas são iguais
+}
+
+
+// Atualiza os top artistas na semana
+void atualizar_top_artistas_na_semana(Semana *semana) {
+    if (!semana || !semana->artistas) {
+        fprintf(stderr, "Erro: semana ou tabela de artistas não inicializada.\n");
+        return;
+    }
+
+    GList *artistas_populares = NULL;
+    GHashTableIter iter;
+    gpointer key, value;
+
+    // Cria lista de popularidade a partir da hash table
+    g_hash_table_iter_init(&iter, semana->artistas);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        const char *artist_id = (const char *)key;
+        int duracao_total_segundos = *(int *)value;
+
+        // Cria estrutura de popularidade
+        ArtistPopularity *popularity = malloc(sizeof(ArtistPopularity));
+        popularity->id = g_strdup(artist_id);
+        popularity->type = g_strdup("Desconhecido");
+        popularity->total_vezes_no_top = duracao_total_segundos;
+
+        // Adiciona à lista
+        artistas_populares = g_list_prepend(artistas_populares, popularity);
+    }
+
+    // Ordena lista de popularidade
+    artistas_populares = g_list_sort(artistas_populares, (GCompareFunc)comparar_popularidade);
+
+    // Atualiza os top artistas da semana
+    GList *top_artistas = NULL;
+    int count = 0;
+    for (GList *node = artistas_populares; node != NULL && count < 15; node = node->next, count++) {
+        ArtistPopularity *popularity = (ArtistPopularity *)node->data;
+        if (count < 10) {
+            top_artistas = g_list_append(top_artistas, g_strdup(popularity->id));
+        }
+        printf("Posição %d: Artista %s - Duração: %d minutos\n", count + 1, popularity->id, popularity->total_vezes_no_top);
+    }
+
+    // Substitui a lista de top_artistas na semana
+    if (semana->top_artistas) {
+        g_list_free_full(semana->top_artistas, g_free);
+    }
+    semana->top_artistas = top_artistas;
+
+    // Limpa lista de popularidade
+    liberar_popularidade(artistas_populares);
+}
+
+// Compara popularidade dos artistas
+gint comparar_popularidade(struct ArtistPopularity *a, struct ArtistPopularity *b) {
+    gint diff = b->total_vezes_no_top - a->total_vezes_no_top;
+
+    // Se as durações forem iguais, compara pelo ID
+    if (diff == 0) {
+        return g_strcmp0(a->id, b->id);
+    }
+
+    return diff;
+}
+
+
+// Libera a memória da lista de popularidade
+void liberar_popularidade(GList *popularity_list) {
+    g_list_free_full(popularity_list, (GDestroyNotify)free_popularity);
+}
+
+// Libera memória associada a um objeto de popularidade
+void free_popularity(ArtistPopularity *popularity) {
+    if (popularity) {
+        free(popularity->id);
+        free(popularity->type);
+        free(popularity);
+    }
+}
+
+// Adiciona um artista na semana, somando a duração
+void adicionar_artista_na_semana(Semana *semana, const char *artist_id, int duracao) {
+    if (!semana || !artist_id) {
+        fprintf(stderr, "Erro: Semana ou Artist ID é NULL.\n");
+        return;
+    }
+
+    // Verifica se o artista já existe na hash table
+    gpointer valor = g_hash_table_lookup(semana->artistas, artist_id);
+
+    int duracao_existente = valor ? *(int *)valor : 0; // Se existir, obtém a duração; caso contrário, 0
+
+    // Nova duração acumulada
+    int nova_duracao = duracao_existente + duracao;
+
+    if (valor) {
+        // Atualiza o valor existente
+        *(int *)valor = nova_duracao;
+    } else {
+        // Insere um novo valor
+        int *nova_duracao_ptr = malloc(sizeof(int));
+        *nova_duracao_ptr = nova_duracao;
+        g_hash_table_insert(semana->artistas, g_strdup(artist_id), nova_duracao_ptr);
+    }
+}
+
+// Retorna os top artistas da semana
+GList* get_top_artistas_na_semana(Semana *semana) {
+    if (!semana) {
+        fprintf(stderr, "Erro: Semana é NULL.\n");
+        return NULL;
+    }
+    return semana->top_artistas;
+}
+
+// Retorna a duração de um artista na semana
+gint get_duracao_artista_na_semana(Semana *semana, const char *artist_id) {
+    if (!semana || !semana->artistas || !artist_id) {
+        return 0;
+    }
+
+    gint *duracao = g_hash_table_lookup(semana->artistas, artist_id);
+    return duracao ? *duracao : 0;
+}
+
+
+void processar_historico (char* data_incial, char* data_final, GestorSistema *gestorsis, int line_number,int n) {
+    if (!gestorsis) {
+        fprintf(stderr, "Erro: GestorSistema é NULL.\n");
+        return;
+    }
+
+    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    if (!writer) {
+        fprintf(stderr, "Erro: Não foi possível criar o arquivo %s.\n", output_file_name);
+        free(output_file_name);
+        return;
+    }
+
+    // Inicializa a tabela de semanas
+    GHashTable *semanas = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)destruir_semana);
+
+    // Obtém os históricos
+    GestorHistories *gestorhistories = get_gestor_histories(gestorsis);
+    GHashTable *historicos = get_hash_histories(gestorhistories);
+
+    GHashTableIter iter;
+    gpointer key, value;
+    g_hash_table_iter_init(&iter, historicos);
+
+
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        History *history = (History *)value;
+
+        char *data = get_history_date(history);
+
+        char *domingo = calcular_domingo(data);
+        if (domingo == NULL) {
+            fprintf(stderr, "Erro ao calcular o domingo correspondente para a data %s.\n", data);
+        } else {
+
+            // Duplica o valor de domingo para uso como chave na tabela hash
+            char *domingo_key = g_strdup(domingo);
+
+            // Obtenção ou criação da semana correspondente
+            Semana *semana = g_hash_table_lookup(semanas, domingo_key);
+            if (!semana) {
+                semana = criar_semana(domingo);
+                g_hash_table_insert(semanas, domingo_key, semana);
+            } else {
+                free(domingo_key);  // Libera a cópia, pois já existe na tabela hash
+            }
+
+            free(domingo);  // Libera o valor original de domingo
+
+            // Processamento da música
+            char *musica_id = get_history_music_id(history);
+            GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
+            GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
+
+            Musica *musica = g_hash_table_lookup(hashmusicas, musica_id);
+            if (musica) {
+                gchar **artist_ids = get_music_artist_ids(musica);
+                gchar *duration = get_history_duration(history);
+                int duracao = duracao_para_segundos(duration);
+                free(duration);
+
+                // Adiciona os artistas na semana correspondente
+                for (int i = 0; artist_ids[i] != NULL; i++) {
+                    adicionar_artista_na_semana(semana, artist_ids[i], duracao);
+                }
+                g_strfreev(artist_ids);
+            }
+        }
+    }
+
+
+    // Agora, calcula o top 10 de artistas
+
+    GHashTable *top_10_count = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    GHashTableIter semanas_iter;
+    gpointer semana_key, semana_value;
+    g_hash_table_iter_init(&semanas_iter, semanas);
+
+    // Processa cada semana e calcula a contagem dos artistas
+    while (g_hash_table_iter_next(&semanas_iter, &semana_key, &semana_value)) {
+        Semana *semana = (Semana *)semana_value;
+
+        atualizar_top_artistas_na_semana(semana);
+
+        GList *top_artistas = get_top_artistas_na_semana(semana);
+        if (!top_artistas) {
+            continue;
+        }
+
+        // Conta as aparições dos artistas no top 10
+        for (GList *node = top_artistas; node != NULL; node = node->next) {
+            char *artist_id = (char *)node->data;
+
+            int *count = (int *)g_hash_table_lookup(top_10_count, artist_id);
+            if (!count) {
+                count = malloc(sizeof(int));
+                *count = 1;
+                g_hash_table_insert(top_10_count, g_strdup(artist_id), count);
+            } else {
+                (*count)++;
+            }
+        }
+    }
+
+    // Procura o artista com mais aparições
+
+    char *top_artist_id = NULL;
+    int max_count = 0;
+
+    GHashTableIter count_iter;
+    gpointer count_key, count_value;
+    g_hash_table_iter_init(&count_iter, top_10_count);
+
+    while (g_hash_table_iter_next(&count_iter, &count_key, &count_value)) {
+        char *artist_id = (char *)count_key;
+        int count = *(int *)count_value;
+
+
+        if (count > max_count) {
+            max_count = count;
+            if (top_artist_id) {
+                free(top_artist_id);
+            }
+            top_artist_id = g_strdup(artist_id);
+        }
+    }
+
+    // Registra o artista mais aparições
+    if (top_artist_id) {
+        Artista *artista = g_hash_table_lookup(get_hash_artistas(get_gestor_artistas(gestorsis)), top_artist_id);
+        if (artista) {
+            char *artist_type = get_artist_type(artista);
+            printf("[DEBUG] Top artist ID: %s, Type: %s, Count: %d\n", top_artist_id, artist_type, max_count);
+            char *field_names[] = {"Artist_Id", "Type", "Count"};
+            char *formatting[] = {"%s", "%s", "%d"};
+            row_writer_set_field_names(writer, field_names, 3);
+            row_writer_set_formatting(writer, formatting);
+            if (n==0) {
+            write_row(writer, ';', 3, top_artist_id, artist_type, max_count);
+            }
+            else {
+             write_row(writer, ';', 3, top_artist_id, artist_type, max_count);
+
+            }
+            free(artist_type);
+        }
+        free(top_artist_id);
+    }
+
+    // Finaliza o processo
+    free_and_finish_writing(writer);
+    free(output_file_name);
+    g_hash_table_destroy(semanas);
+    g_hash_table_destroy(top_10_count);
+}
+
+void processar_historico_intervalo_de_datas (char* data_inicial, char* data_final, GestorSistema *gestor_sistema,int line_number,int n){
+    if (!gestor_sistema) {
+        fprintf(stderr, "Erro: GestorSistema é NULL.\n");
+        return;
+    }
+    // Arquivo de saída
+    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    if (!writer) {
+        fprintf(stderr, "Erro: Não foi possível criar o arquivo %s.\n", output_file_name);
+        free(output_file_name);
+        return;
+    }
+
+    // HashTable para armazenar semanas criadas
+    GHashTable *semanas = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)destruir_semana);
+
+    GestorHistories *gestorhistories = get_gestor_histories(gestor_sistema);
+    GHashTable *historicos = get_hash_histories(gestorhistories);
+
+    GHashTableIter iter;
+    gpointer key, value;
+    g_hash_table_iter_init(&iter, historicos);
+
+
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        History *history = (History *)value;
+
+        char *data = get_history_date(history);
+           // Cálculo dos limites de data inicial e final
+    char *domingo_inicial = calcular_domingo(data_inicial);
+    char *sabado_final = calcular_sabado_seguinte(data_final);
+
+    if (domingo_inicial == NULL || sabado_final == NULL) {
+        fprintf(stderr, "Erro ao calcular os limites de datas.\n");
+        free(domingo_inicial);
+        free(sabado_final);
+        return;  // Encerra o processamento devido ao erro
+    }
+
+    // Comparação com data inicial
+    if (data_inicial && comparar_datas(data, domingo_inicial) < 0) {
+        free(domingo_inicial);
+        free(sabado_final);
+        continue;
+    }
+
+    // Comparação com data final
+    if (data_final && comparar_datas(data, sabado_final) > 0) {
+        free(domingo_inicial);
+        free(sabado_final);
+        continue;
+    }
+
+    // Liberação de memória após uso
+    free(domingo_inicial);
+    free(sabado_final);
+
+// Cálculo do domingo correspondente à data
+ char *domingo = calcular_domingo(data);
+        if (domingo == NULL) {
+            fprintf(stderr, "Erro ao calcular o domingo correspondente para a data %s.\n", data);
+        } else {
+
+            // Duplica o valor de domingo para uso como chave na tabela hash
+            char *domingo_key = g_strdup(domingo);
+
+            // Obtenção ou criação da semana correspondente
+            Semana *semana = g_hash_table_lookup(semanas, domingo_key);
+            if (!semana) {
+                semana = criar_semana(domingo);
+                g_hash_table_insert(semanas, domingo_key, semana);
+            } else {
+                free(domingo_key);  // Libera a cópia, pois já existe na tabela hash
+            }
+
+            free(domingo);  // Libera o valor original de domingo
+
+            // Processamento da música
+            char *musica_id = get_history_music_id(history);
+            GestorMusicas *gestormusicas = get_gestor_musicas(gestor_sistema);
+            GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
+
+            Musica *musica = g_hash_table_lookup(hashmusicas, musica_id);
+            if (musica) {
+                gchar **artist_ids = get_music_artist_ids(musica);
+                gchar *duration = get_history_duration(history);
+                int duracao = duracao_para_segundos(duration);
+                free(duration);
+
+                // Adiciona os artistas na semana correspondente
+                for (int i = 0; artist_ids[i] != NULL; i++) {
+                    adicionar_artista_na_semana(semana, artist_ids[i], duracao);
+                }
+                g_strfreev(artist_ids);
+            }
+        }
+    }
+
+
+
+    GHashTableIter semanas_iter;
+    gpointer semana_key, semana_value;
+    g_hash_table_iter_init(&semanas_iter, semanas);
+
+    GHashTable *top_10_count = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    g_hash_table_iter_init(&semanas_iter, semanas);
+
+    while (g_hash_table_iter_next(&semanas_iter, &semana_key, &semana_value)) {
+        Semana *semana = (Semana *)semana_value;
+
+        atualizar_top_artistas_na_semana(semana);
+
+        GList *top_artistas = get_top_artistas_na_semana(semana);
+        if (!top_artistas) {
+            continue;
+        }
+
+        for (GList *node = top_artistas; node != NULL; node = node->next) {
+            char *artist_id = (char *)node->data;
+
+            int *count = (int *)g_hash_table_lookup(top_10_count, artist_id);
+            if (!count) {
+                count = malloc(sizeof(int));
+                *count = 1;
+                g_hash_table_insert(top_10_count, g_strdup(artist_id), count);
+            } else {
+                (*count)++;
+            }
+        }
+    }
+
+
+    char *top_artist_id = NULL;
+    int max_count = 0;
+
+    GHashTableIter count_iter;
+    gpointer count_key, count_value;
+    g_hash_table_iter_init(&count_iter, top_10_count);
+
+    while (g_hash_table_iter_next(&count_iter, &count_key, &count_value)) {
+        char *artist_id = (char *)count_key;
+        int count = *(int *)count_value;
+
+
+        if (count > max_count) {
+            max_count = count;
+            if (top_artist_id) {
+                free(top_artist_id);
+            }
+            top_artist_id = g_strdup(artist_id);
+        }
+    }
+
+    if (top_artist_id) {
+        Artista *artista = g_hash_table_lookup(get_hash_artistas(get_gestor_artistas(gestor_sistema)), top_artist_id);
+        if (artista) {
+            char *artist_type = get_artist_type(artista);
+            char *field_names[] = {"Artist_Id", "Type", "Count"};
+            char *formatting[] = {"%s", "%s", "%d"};
+            row_writer_set_field_names(writer, field_names, 3);
+            row_writer_set_formatting(writer, formatting);
+            if (n==0){
+            write_row(writer, ';', 3, top_artist_id, artist_type, max_count);
+            }
+            else {
+             write_row(writer, '=', 3, top_artist_id, artist_type, max_count);
+
+            }
+            free(artist_type);
+        }
+        free(top_artist_id);
+    }
+
+    free_and_finish_writing(writer);
+    free(output_file_name);
+    g_hash_table_destroy(semanas);
+    g_hash_table_destroy(top_10_count);
 }
