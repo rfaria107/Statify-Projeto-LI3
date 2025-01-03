@@ -293,61 +293,61 @@ Musica *preenche_musica(GPtrArray *campostemp, GestorArtistas *gestorartistas, G
 {
 
     gchar *id_str = g_ptr_array_index(campostemp, 0);
-    if (strncmp(id_str, "S", 1) == 0)
+    int id = atoi(id_str + 1);
+
+    gchar *title = g_ptr_array_index(campostemp, 1);
+
+    gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
+    if (valida_parenteses_lista(artist_ids_str) == 0)
     {
-        memmove(id_str, id_str + 1, strlen(id_str));
-        int id = atoi(id_str);
-
-        gchar *title = g_ptr_array_index(campostemp, 1);
-
-        gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
-        if (valida_parenteses_lista(artist_ids_str) == 0)
-        {
-            return NULL;
-        }
-
-        trim_parenteses_gchar(artist_ids_str);
-        gchar **artist_ids = g_strsplit(artist_ids_str, ",", -1);
-        for (int i = 0; artist_ids[i] != NULL; i++)
-        {
-            if (valida_single_quotes_lista_artistas(artist_ids[i]) == 0)
-            {
-                g_strfreev(artist_ids);
-                return NULL;
-            }
-            trim_single_quotes_gchar(artist_ids[i]);
-        }
-        gchar *album_id = g_ptr_array_index(campostemp, 3);
-
-        gchar *duration = g_ptr_array_index(campostemp, 4);
-
-        gchar *genre = g_ptr_array_index(campostemp, 5);
-
-        gchar *year_str = g_ptr_array_index(campostemp, 6);
-
-        int year = atoi(year_str);
-
-        Musica *musica = create_musica(id, title, artist_ids, album_id, duration, genre, year, 0);
-
-        if (!musica)
-        {
-            free_musica(musica);
-            g_strfreev(artist_ids);
-            return NULL;
-        }
-
-        if (validaDuracao(musica) == FALSE || valida_ano_lançamento(musica) == 0 || valida_artistids_musica(musica, gestorartistas) == 0 || valida_album(musica, gestoralbuns))
-        {
-            free_musica(musica);
-            g_strfreev(artist_ids);
-            return NULL;
-        }
-
-        g_strfreev(artist_ids);
-        return musica;
-    }
-    else
         return NULL;
+    }
+
+    trim_parenteses_gchar(artist_ids_str);
+    gchar **artist_ids = g_strsplit(artist_ids_str, ",", -1);
+    for (int i = 0; artist_ids[i] != NULL; i++)
+    {
+        if (valida_single_quotes_lista_artistas(artist_ids[i]) == 0)
+        {
+            g_strfreev(artist_ids);
+            return NULL;
+        }
+        trim_single_quotes_gchar(artist_ids[i]);
+    }
+
+    gchar *album_id = g_ptr_array_index(campostemp, 3);
+    if (valida_parenteses_lista(album_id) == 1)
+    {
+        g_strfreev(artist_ids);
+        return NULL;
+    }
+
+    gchar *duration = g_ptr_array_index(campostemp, 4);
+
+    gchar *genre = g_ptr_array_index(campostemp, 5);
+
+    gchar *year_str = g_ptr_array_index(campostemp, 6);
+
+    int year = atoi(year_str);
+
+    Musica *musica = create_musica(id, title, artist_ids, album_id, duration, genre, year, 0);
+
+    if (!musica)
+    {
+        free_musica(musica);
+        g_strfreev(artist_ids);
+        return NULL;
+    }
+
+    if (validaDuracao(musica) == FALSE || valida_ano_lançamento(musica) == 0 || valida_artistids_musica(musica, gestorartistas) == 0 || valida_album(musica, gestoralbuns))
+    {
+        free_musica(musica);
+        g_strfreev(artist_ids);
+        return NULL;
+    }
+
+    g_strfreev(artist_ids);
+    return musica;
 }
 
 // Parser para usuarios
@@ -486,7 +486,7 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
 {
     // Recupera os valores de cada campo do GPtrArray
     gchar *id_str = g_ptr_array_index(campostemp, 0);
-    int id = atoi(id_str+2);
+    int id = atoi(id_str + 2);
     gchar *title = g_ptr_array_index(campostemp, 1);
     gchar *artist_ids_str = g_ptr_array_index(campostemp, 2);
     if (valida_parenteses_lista(artist_ids_str) == 0)

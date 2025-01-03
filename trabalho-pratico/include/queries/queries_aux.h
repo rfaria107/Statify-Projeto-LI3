@@ -1,5 +1,5 @@
 #ifndef QUERIES_AUX_H
-#define QUERIEES_AUX_H
+#define QUERIES_AUX_H
 
 #include <glib.h>
 #include <stdio.h>

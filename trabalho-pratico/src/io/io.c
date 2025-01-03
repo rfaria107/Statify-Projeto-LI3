@@ -3,6 +3,7 @@
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/queries/queries.h"
 #include "../include/queries/queries_aux.h"
+#include "../include/queries/query5_aux.h"
 #include "../include/parsing/parser.h"
 #include "../include/utils/string_utils.h"
 
@@ -60,10 +61,18 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
     char *buffer = "";
     size_t buffer_size = 0;
     int line_number = 1;
-    // necessário para a query 2 no entanto apenas deve executar uma vez
+    // funções de pre-processamento
     calcular_discografia_artistas(gestorsis);
     calcula_streams(gestorsis);
+    // pré-processeamento da query 5
+    int numUtilizadores = 0;
+    int numGeneros = 0;
+    char **idsUtilizadores = preprocessIdsUtilizadores(gestorsis, &numUtilizadores);
+    char **nomesGeneros = preprocessNomesGeneros(gestorsis, &numGeneros);
+    int **matriz = createMatrizClassificacaoMusicas(numUtilizadores, numGeneros);
+    calculaMatrizClassificacaoMusicas(matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, gestorsis);
 
+    // executar as queries
     while (getline(&buffer, &buffer_size, file) != -1)
     {
         g_strstrip(buffer);
@@ -176,7 +185,36 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 query_3(min_age, max_age, gestorsis, line_number, 1);
             }
         }
-         else if (strcmp(token, "4") == 0)
+        /*
+        else if (strcmp(token, "4") == 0)
+        {
+            g_free(token);
+            token = procura_espaço2(buffer);
+
+            char *data_inicial = NULL;
+            if (token != NULL)
+            {
+                g_free(data_inicial);
+                data_inicial = g_strdup(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+            }
+
+            char *data_final = NULL;
+            if (token != NULL)
+            {
+                g_free(data_final);
+                data_final = g_strdup(token);
+                g_free(token);
+            }
+
+            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 0);
+
+            g_free(data_inicial);
+            g_free(data_final);
+        }
+
+        else if (strcmp(token, "4S") == 0)
         {
             g_free(token);
             token = procura_espaço2(buffer);
@@ -197,43 +235,49 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 data_final = g_strdup(token);
                 g_free(token);
             }
-            
 
-           querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number,0);
+            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 1);
 
             g_free(data_inicial);
             g_free(data_final);
         }
-
- else if (strcmp(token, "4S") == 0)
+        */
+        else if (strcmp(token, "5") == 0)
         {
             g_free(token);
             token = procura_espaço2(buffer);
-
-            char *data_inicial = NULL; // Supondo que DATA_INICIAL_DEFAULT seja uma string
             if (token != NULL)
             {
-                g_free(data_inicial);
-                data_inicial = g_strdup(token);
+                char *user_id_str = g_strdup(token);
                 g_free(token);
                 token = procura_espaço3(buffer);
+                if (token != NULL)
+                {
+                    int numRecomendacoes = atoi(token);
+                    g_free(token);
+                    query_5(user_id_str, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numRecomendacoes, line_number, 0, gestorsis);
+                    g_free(user_id_str);
+                }
             }
-
-            char *data_final = NULL; // Supondo que DATA_FINAL_DEFAULT seja uma string
+        }
+        else if (strcmp(token, "5S") == 0)
+        {
+            g_free(token);
+            token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                g_free(data_final);
-                data_final = g_strdup(token);
+                char *user_id_str = g_strdup(token);
                 g_free(token);
+                token = procura_espaço3(buffer);
+                if (token != NULL)
+                {
+                    int numRecomendacoes = atoi(token);
+                    g_free(token);
+                    query_5(user_id_str, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numRecomendacoes, line_number, 1, gestorsis);
+                    g_free(user_id_str);
+                }
             }
-            
-
-    querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number,1);
-
-            g_free(data_inicial);
-            g_free(data_final);
         }
-
         else if (strcmp(token, "6") == 0)
         {
             g_free(token);
@@ -241,8 +285,9 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             if (token != NULL)
             {
                 char *user_id_str = g_strdup(token);
-                int user_id = atoi(user_id_str+1);
+                int user_id = atoi(user_id_str + 1);
                 g_free(token);
+                g_free(user_id_str);
                 token = procura_espaço3(buffer);
                 int year = 0, N = 0;
 
@@ -269,8 +314,9 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             if (token != NULL)
             {
                 char *user_id_str = g_strdup(token);
-                int user_id = atoi(user_id_str+1);
+                int user_id = atoi(user_id_str + 1);
                 g_free(token);
+                g_free(user_id_str);
                 token = procura_espaço3(buffer);
                 int year = 0, N = 0;
 
@@ -294,5 +340,8 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             g_free(token);
         line_number++;
     }
+    g_strfreev(idsUtilizadores);
+    g_strfreev(nomesGeneros);
+    freeMatrizClassificacaoMusicas(matriz, numUtilizadores);
     g_free(buffer);
 }

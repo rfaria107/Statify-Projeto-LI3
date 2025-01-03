@@ -1,4 +1,3 @@
-// Função para converter "HH:MM:SS" para segundos
 #include <stdio.h>
 #include <stdlib.h>
 #include <glib.h>
@@ -340,7 +339,7 @@ int get_num_constituents(Artista *artista)
 
     return num_constituents;
 }
-
+/*
 char **lista_user_ids(GestorUsuarios *gestorusers)
 {
     GHashTable *hashusers = get_hash_usuarios(gestorusers);
@@ -369,7 +368,7 @@ char **lista_user_ids(GestorUsuarios *gestorusers)
 
     return user_ids;
 }
-
+*/
 gint find_top_entry_with_tiebreaker(GHashTable *table, gboolean alphabetical)
 {
     GHashTableIter iter;
@@ -814,9 +813,8 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
             // Processamento da música
             int musica_id = get_history_music_id(history);
             GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
-            GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
 
-            Musica *musica = g_hash_table_lookup(hashmusicas, GINT_TO_POINTER(musica_id));
+            Musica *musica = buscar_musicas(gestormusicas, musica_id);
             if (musica) {
                 gchar **artist_ids = get_music_artist_ids(musica);
                 gchar *duration = get_history_duration(history);
@@ -886,7 +884,9 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
 
     // Registra o artista mais aparições
     if (top_artist_id) {
-        Artista *artista = g_hash_table_lookup(get_hash_artistas(get_gestor_artistas(gestorsis)), top_artist_id);
+        int top_artist_int = atoi(top_artist_id+1);
+        GestorArtistas *gestorartistas = get_gestor_artistas(gestorsis);
+        Artista *artista = buscar_artista(gestorartistas,top_artist_int);
         if (artista) {
             char *artist_type = get_artist_type(artista);
             char *field_names[] = {"Artist_Id", "Type", "Count"};
@@ -984,9 +984,8 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
             // Processamento da música
             int musica_id = get_history_music_id(history);
             GestorMusicas *gestormusicas = get_gestor_musicas(gestor_sistema);
-            GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
 
-            Musica *musica = g_hash_table_lookup(hashmusicas, GINT_TO_POINTER(musica_id));
+            Musica *musica = buscar_musicas(gestormusicas,musica_id);
             if (musica) {
                 gchar **artist_ids = get_music_artist_ids(musica);
                 gchar *duration = get_history_duration(history);
@@ -1056,7 +1055,9 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
 
     // Registra o artista mais aparições
     if (top_artist_id) {
-        Artista *artista = g_hash_table_lookup(get_hash_artistas(get_gestor_artistas(gestor_sistema)), top_artist_id);
+        int top_artist_int = atoi(top_artist_id+1);
+        GestorArtistas *gestorartistas = get_gestor_artistas(gestor_sistema);
+        Artista *artista = buscar_artista(gestorartistas,top_artist_int);
         if (artista) {
             char *artist_type = get_artist_type(artista);
             char *field_names[] = {"Artist_Id", "Type", "Count"};

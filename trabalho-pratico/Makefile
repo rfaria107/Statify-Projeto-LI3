@@ -4,6 +4,8 @@ CFLAGS = -Wall -g `pkg-config --cflags glib-2.0` -I$(INC_DIR)
 SRC_DIR = src
 INC_DIR = include
 
+RECOMENDADOR_OBJ = $(SRC_DIR)/recomendador/recomendador-linux-x86_64.o
+
 # Objetos principais (para o executável principal)
 OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/entidades/usuario.o \
@@ -25,7 +27,8 @@ OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/validacao/valida.o \
            $(SRC_DIR)/queries/queries.o \
            $(SRC_DIR)/queries/queries_aux.o \
-
+           $(SRC_DIR)/queries/query5_aux.o \
+           $(RECOMENDADOR_OBJ)
 
 # Objetos de teste (para o executável de testes)
 OBJ_TEST = $(SRC_DIR)/testes.o \
@@ -48,7 +51,8 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/validacao/valida.o \
            $(SRC_DIR)/queries/queries.o \
            $(SRC_DIR)/queries/queries_aux.o \
-
+           $(SRC_DIR)/queries/query5_aux.o \
+           $(RECOMENDADOR_OBJ)
 
 # Alvos (executáveis)
 TARGET = programa-principal
@@ -132,4 +136,4 @@ valgrind: $(TARGET)
 
 # Limpar arquivos gerados
 clean:
-	rm -f $(OBJ_MAIN) $(OBJ_TEST) $(TARGET) $(TEST_TARGET)
+	rm -f $(filter-out $(RECOMENDADOR_OBJ), $(OBJ_MAIN) $(OBJ_TEST)) $(TARGET) $(TEST_TARGET)

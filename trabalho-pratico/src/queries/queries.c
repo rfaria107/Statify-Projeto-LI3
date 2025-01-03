@@ -17,6 +17,7 @@
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/utils/string_utils.h"
 #include "../include/queries/queries_aux.h"
+#include "../include/recomendador/recomendador.h"
 
 struct GenrePopularity
 {
@@ -352,20 +353,78 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_list_free(generos_lista);
     g_hash_table_destroy(generos_likes);
 }
-
-
-void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number,int n) {
+/*
+void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n)
+{
 
     // Se data_final for NULL, chama a função para histórico sem intervalo de datas
-    if (data_final == NULL) {
+    if (data_final == NULL)
+    {
         processar_historico(NULL, NULL, gestor_sistema, line_number, n);
-    } 
-    else {
+    }
+    else
+    {
         // Caso contrário, chama a função para histórico com intervalo de datas
-        processar_historico_intervalo_de_datas(data_inicial, data_final, gestor_sistema, line_number,n);
+        processar_historico_intervalo_de_datas(data_inicial, data_final, gestor_sistema, line_number, n);
     }
 }
-   
+*/
+void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizadores, char **nomesGeneros,
+             int numUtilizadores, int numGeneros, int numRecomendacoes, int line_number, int n, GestorSistema *gestorsis)
+{
+
+    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    GestorUsuarios *gestoruser = get_gestor_usuarios(gestorsis);
+    int user_id_int = atoi(user_id + 1);
+    Usuario *user = buscar_usuario_id(gestoruser, user_id_int);
+
+    if (numRecomendacoes > 0 && user != NULL)
+    {
+        char **utilizadores = recomendaUtilizadores(user_id, matrizClassificacaoMusicas, idsUtilizadores, nomesGeneros,
+                                                    numUtilizadores, numGeneros, numRecomendacoes);
+
+        // Define nomes e formatos dos campos para o RowWriter
+
+        char *field_names[] = {"Utilizador recomendado"};
+        char *formatting[] = {"%s"};
+        row_writer_set_field_names(writer, field_names, 1);
+        row_writer_set_formatting(writer, formatting);
+
+        for (int i = 0; i < numRecomendacoes; i++)
+        {
+            if (n == 0)
+            {
+                write_row(writer, ';', 1, utilizadores[i]);
+            }
+            if (n == 1)
+            {
+                write_row(writer, '=', 1, utilizadores[i]);
+            }
+        }
+        free(utilizadores);
+    }
+    else
+    {
+        char *field_names_empty[] = {""};
+        char *formatting_empty[] = {"%s"};
+        row_writer_set_field_names(writer, field_names_empty, 1);
+        row_writer_set_formatting(writer, formatting_empty);
+        if (n == 0)
+        {
+            write_row(writer, ';', 1, "");
+        }
+        if (n == 1)
+        {
+            write_row(writer, '=', 1, "");
+        }
+    }
+    free_and_finish_writing(writer);
+    free(output_file_name);
+}
+
 void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_number, int n)
 {
     char output_file_name[256];
@@ -512,7 +571,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     gchar *top_hour = find_top_entry_with_tiebreaker_str(hour_time, FALSE);        // Mais cedo
     gchar *top_genre = find_top_entry_with_tiebreaker_str(genre_popularity, TRUE); // Alfabético
     gint top_album = find_top_entry_with_tiebreaker(album_time, TRUE);             // Alfabético
-    
+
     if (top_artist_id == -1 || !top_day || !top_hour || !top_genre || top_album == -1)
     {
         // Caso algum dos valores seja inválido, escreve linha vazia no arquivo
@@ -548,8 +607,10 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     GList *sorted_artists = sort_hash_table_by_value_with_tiebreaker(artist_time, FALSE, TRUE);
     int displayed_artists = 0;
 
-    if (sorted_artists != NULL) {
-        for (GList *iter = sorted_artists; iter && displayed_artists < N; iter = iter->next) {
+    if (sorted_artists != NULL)
+    {
+        for (GList *iter = sorted_artists; iter && displayed_artists < N; iter = iter->next)
+        {
             gint artist_id = GPOINTER_TO_INT(iter->data);
 
             // Verifica se o artist_id existe nas tabelas de hash
@@ -557,17 +618,20 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
             gpointer distinct_musics_ptr = g_hash_table_lookup(artist_music_count, GINT_TO_POINTER(artist_id));
 
             // Se algum valor for NULL, saltamos este artista
-            if (duration_ptr != NULL && distinct_musics_ptr != NULL) {
+            if (duration_ptr != NULL && distinct_musics_ptr != NULL)
+            {
                 int duration = GPOINTER_TO_INT(duration_ptr);
                 int distinct_musics = GPOINTER_TO_INT(distinct_musics_ptr);
                 gchar *duration_string = segundos_para_duracao(duration);
 
                 // Chama write_row com os parâmetros necessários
-            char *field_names[] = {"Top Artist ID", "Music Count","Top Hour"};
-            char *formatting[] = {"A%07d","%d", "%s"};
-            row_writer_set_field_names(writer, field_names, 3);
-            row_writer_set_formatting(writer, formatting);
-            if (n==0){}
+                char *field_names[] = {"Top Artist ID", "Music Count", "Top Hour"};
+                char *formatting[] = {"A%07d", "%d", "%s"};
+                row_writer_set_field_names(writer, field_names, 3);
+                row_writer_set_formatting(writer, formatting);
+                if (n == 0)
+                {
+                }
                 write_row(writer, ';', 3, artist_id, distinct_musics, duration_string);
 
                 // Libera a memória alocada para duration_string
@@ -582,11 +646,10 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
 
     g_list_free(sorted_artists);
 
-
     // Limpeza
     free(top_day);
     free(top_genre);
-
+    free(top_hour);
     g_hash_table_destroy(artist_time);
     g_hash_table_destroy(day_count);
     g_hash_table_destroy(hour_time);
