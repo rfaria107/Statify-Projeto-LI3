@@ -2,7 +2,6 @@
 *.d
 
 # Object files
-*.o !src/recomendador/recomendador-linux-x86_64.o
 *.ko
 *.obj
 *.elf

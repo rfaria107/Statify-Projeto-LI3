@@ -309,7 +309,7 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
                 if (is_member)
                 {
                     int stream_count = get_music_streams(musica);
-                    receita_participacao += round((stream_count * get_artist_recipe_per_stream(grupo)) / get_num_constituents(grupo));
+                    receita_participacao += (stream_count * get_artist_recipe_per_stream(grupo)) / get_num_constituents(grupo);
                 }
                 g_strfreev(constituents);
             }
