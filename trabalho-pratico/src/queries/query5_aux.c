@@ -40,7 +40,7 @@ char **preprocessNomesGeneros(GestorSistema *gestorsis, int *numGeneros)
     GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
     GHashTable *hashmusicas = get_hash_musicas(gestormusicas);
     // usar uma hashtable para não copiar generos ja existentes
-    GHashTable *uniqueGenres = g_hash_table_new(g_str_hash, g_str_equal);
+    GHashTable *uniqueGenres = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 
     GHashTableIter iter;
     gpointer key, value;
@@ -56,6 +56,7 @@ char **preprocessNomesGeneros(GestorSistema *gestorsis, int *numGeneros)
             g_hash_table_add(uniqueGenres, g_strdup(genre));
             free(genre);
         }
+        else free(genre);
     }
 
     // calcular numero de generos únicos
