@@ -4,31 +4,32 @@ CFLAGS = -Wall -g `pkg-config --cflags glib-2.0` -I$(INC_DIR)
 SRC_DIR = src
 INC_DIR = include
 
-RECOMENDADOR_OBJ = $(SRC_DIR)/recomendador/recomendador-linux-x86_64.o
+# Objeto do recomendador
+RECOMENDADOR_OBJ = $(SRC_DIR)/recomendador/recomendador.o
 
 # Objetos principais (para o executável principal)
-OBJ_MAIN = $(SRC_DIR)/main.o \
-           $(SRC_DIR)/entidades/usuario.o \
-           $(SRC_DIR)/entidades/musica.o \
-           $(SRC_DIR)/entidades/artists.o \
-           $(SRC_DIR)/entidades/albuns.o \
-           $(SRC_DIR)/entidades/history.o \
-           $(SRC_DIR)/gestores/gestor_usuarios.o \
-           $(SRC_DIR)/gestores/gestor_musicas.o \
-           $(SRC_DIR)/gestores/gestor_artistas.o \
-           $(SRC_DIR)/gestores/gestor_albuns.o \
-           $(SRC_DIR)/gestores/gestor_histories.o \
-           $(SRC_DIR)/gestores/gestor_sistemas.o \
-           $(SRC_DIR)/io/io.o \
-           $(SRC_DIR)/parsing/parser.o \
-           $(SRC_DIR)/utils/string_utils.o \
-           $(SRC_DIR)/write/writer.o \
-           $(SRC_DIR)/write/file.o \
-           $(SRC_DIR)/validacao/valida.o \
-           $(SRC_DIR)/queries/queries.o \
-           $(SRC_DIR)/queries/queries_aux.o \
-           $(SRC_DIR)/queries/query5_aux.o \
-           $(RECOMENDADOR_OBJ)
+OBJ_MAIN = src/main.o \
+           src/entidades/usuario.o \
+           src/entidades/musica.o \
+           src/entidades/artists.o \
+           src/entidades/albuns.o \
+           src/entidades/history.o \
+           src/gestores/gestor_usuarios.o \
+           src/gestores/gestor_musicas.o \
+           src/gestores/gestor_artistas.o \
+           src/gestores/gestor_albuns.o \
+           src/gestores/gestor_histories.o \
+           src/gestores/gestor_sistemas.o \
+           src/io/io.o \
+           src/parsing/parser.o \
+           src/utils/string_utils.o \
+           src/write/writer.o \
+           src/write/file.o \
+           src/validacao/valida.o \
+           src/queries/queries.o \
+           src/recomendador/recomendador.o \
+           src/queries/queries_aux.o \
+           src/queries/query5_aux.o
 
 # Objetos de teste (para o executável de testes)
 OBJ_TEST = $(SRC_DIR)/testes.o \
@@ -71,6 +72,9 @@ $(TEST_TARGET): $(OBJ_TEST)
 
 # Regras para compilar os arquivos .o
 $(SRC_DIR)/main.o: $(SRC_DIR)/main.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/recomendador/recomendador.o: $(SRC_DIR)/recomendador/recomendador.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/entidades/usuario.o: $(SRC_DIR)/entidades/usuario.c
@@ -136,4 +140,4 @@ valgrind: $(TARGET)
 
 # Limpar arquivos gerados
 clean:
-	rm -f $(filter-out $(RECOMENDADOR_OBJ), $(OBJ_MAIN) $(OBJ_TEST)) $(TARGET) $(TEST_TARGET)
+	rm -f $(OBJ_MAIN) $(OBJ_TEST) $(RECOMENDADOR_OBJ) $(TARGET) $(TEST_TARGET)

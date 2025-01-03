@@ -186,7 +186,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             }
         }
         /*
-        else if (strcmp(token, "4") == 0)
+                else if (strcmp(token, "4") == 0)
         {
             g_free(token);
             token = procura_espaço2(buffer);
@@ -241,7 +241,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             g_free(data_inicial);
             g_free(data_final);
         }
-        */
+        
         else if (strcmp(token, "5") == 0)
         {
             g_free(token);
@@ -278,6 +278,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 }
             }
         }
+        */
         else if (strcmp(token, "6") == 0)
         {
             g_free(token);

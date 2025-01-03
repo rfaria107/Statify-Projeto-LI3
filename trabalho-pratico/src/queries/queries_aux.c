@@ -895,7 +895,7 @@ void processar_historico (char* data_incial, char* data_final, GestorSistema *ge
             row_writer_set_formatting(writer, formatting);
 
             // Escreve a linha no arquivo
-            write_row(writer, ';', 3, top_artist_id, artist_type, max_count);
+            write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);
 
             free(artist_type);
         }

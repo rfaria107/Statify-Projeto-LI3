@@ -353,7 +353,7 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_list_free(generos_lista);
     g_hash_table_destroy(generos_likes);
 }
-/*
+
 void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n)
 {
 
@@ -368,7 +368,7 @@ void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistem
         processar_historico_intervalo_de_datas(data_inicial, data_final, gestor_sistema, line_number, n);
     }
 }
-*/
+
 void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizadores, char **nomesGeneros,
              int numUtilizadores, int numGeneros, int numRecomendacoes, int line_number, int n, GestorSistema *gestorsis)
 {
