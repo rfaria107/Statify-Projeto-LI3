@@ -5,17 +5,15 @@
 #include <dirent.h>
 #include <sys/resource.h>
 #include <time.h>
-#include "../include/entidades/artists.h"
-#include "../include/entidades/musica.h"
-#include "../include/entidades/usuario.h"
-#include "../include/gestores/gestor_artistas.h"
-#include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_sistemas.h"
-#include "../include/gestores/gestor_usuarios.h"
+#include "../include/queries/queries.h"
+#include "../include/queries/queries_aux.h"
+#include "../include/queries/query5_aux.h"
 #include "../include/parsing/parser.h"
 #include "../include/utils/string_utils.h"
-#include "../include/validacao/valida.h"
-#include "../include/queries/queries.h"
+#include "../include/io/io.h"
+
+#define MAX_PATH 1024
 
 // Função para medir o uso de memória (em megabytes)
 long get_memory_usage_mb() {
@@ -24,8 +22,8 @@ long get_memory_usage_mb() {
     return usage.ru_maxrss / 1024;  // Convertendo para megabytes
 }
 
-// Função para comparar dois arquivos .txt
-int compare_txt_files(const char *file1, const char *file2) {
+// Função para comparar os arquivos
+int compare_txt_files(const char *file1, const char *file2, GList **discrepancies) {
     FILE *f1 = fopen(file1, "r");
     FILE *f2 = fopen(file2, "r");
 
@@ -36,181 +34,462 @@ int compare_txt_files(const char *file1, const char *file2) {
         return -1;
     }
 
-    int ch1 = 0, ch2 = 0;
-    // Ignorar linhas vazias
-    while (1) {
-        // Pular linhas vazias no arquivo 1
-        do {
-            ch1 = fgetc(f1);
-        } while (ch1 == '\n' || ch1 == ' ' || ch1 == '\t');  // Pula '\n' ou espaços
+    int line_number = 1;
+    char line1[1024], line2[1024];
 
-        // Pular linhas vazias no arquivo 2
-        do {
-            ch2 = fgetc(f2);
-        } while (ch2 == '\n' || ch2 == ' ' || ch2 == '\t');  // Pula '\n' ou espaços
+    // Comparar linha por linha
+    while (fgets(line1, sizeof(line1), f1) != NULL && fgets(line2, sizeof(line2), f2) != NULL) {
+        // Remover novas linhas e espaços extras nas extremidades
+        line1[strcspn(line1, "\n")] = 0;
+        line2[strcspn(line2, "\n")] = 0;
 
-        // Se ambos arquivos chegaram ao fim, são iguais
-        if (ch1 == EOF && ch2 == EOF) {
+        if (strcmp(line1, line2) != 0) {
+            // Se as linhas são diferentes, registra a discrepância
+            char *discrepancy = g_strdup_printf("Descrepância na query: linha %d de \"%s\"", line_number, file1);
+            *discrepancies = g_list_append(*discrepancies, discrepancy);
             fclose(f1);
             fclose(f2);
-            return 1;  // Arquivos iguais
+            return 0;
         }
 
-        // Se um arquivo terminou mas o outro não, são diferentes
-        if (ch1 == EOF || ch2 == EOF) {
-            fclose(f1);
-            fclose(f2);
-            return 0;  // Arquivos diferentes
-        }
-
-        // Se os caracteres não são iguais
-        if (ch1 != ch2) {
-            fclose(f1);
-            fclose(f2);
-            return 0;  // Arquivos diferentes
-        }
+        line_number++;
     }
 
     fclose(f1);
     fclose(f2);
-    return 1;  // Arquivos iguais
+    return 1;
 }
 
-// Função para comparar todos os arquivos nas pastas e calcular tempo e memória
-void compare_all_files(const char *dir1, const char *dir2) {
-    struct dirent *entry;
-    DIR *dp1 = opendir(dir1);
-    DIR *dp2 = opendir(dir2);
+// Função para imprimir os resultados da comparação
+void print_discrepancies(GList *discrepancies) {
+    GList *node = discrepancies;
+    while (node != NULL) {
+        printf("%s\n", (char *)node->data);
+        node = node->next;
+    }
+}
 
-    if (!dp1 || !dp2) {
-        perror("Erro ao abrir os diretórios");
+// Função para comparar todos os arquivos e reportar as discrepâncias
+void compare_all_files(const char *dir1, const char *dir2) {
+    struct dirent *entry1;
+    DIR *dp1 = opendir(dir1);
+
+    if (!dp1) {
+        perror("Erro ao abrir o diretório");
         exit(1);
     }
 
+    GList *discrepancies = NULL;
     int total_files = 0;
-    int matching_files = 0;
-    int missing_files_in_dir2 = 0;
-    int total_expected_files = 0;
+    int differing_files = 0;
 
-    GHashTable *expected_files = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-    
-    // Adicionar todos os arquivos do diretório `resultados-esperados` a uma hash table
-    while ((entry = readdir(dp2)) != NULL) {
-        if (entry->d_type == DT_REG) {  // Apenas arquivos regulares
-            const char *extension = strrchr(entry->d_name, '.');
-            if (extension && strcmp(extension, ".txt") == 0) {
-                g_hash_table_insert(expected_files, g_strdup(entry->d_name), NULL);
-                total_expected_files++;
-            }
-        }
-    }
-
-    // Para cada arquivo no diretório `resultados`, verificamos se ele existe em `resultados-esperados`
-    rewinddir(dp1); // Reiniciar a leitura do diretório `resultados`
-
-    while ((entry = readdir(dp1)) != NULL) {
-        if (entry->d_type == DT_REG) {  // Apenas arquivos regulares
-            const char *extension = strrchr(entry->d_name, '.');
+    // Iterar sobre os arquivos no diretório "resultados"
+    while ((entry1 = readdir(dp1)) != NULL) {
+        if (entry1->d_type == DT_REG) {  // Verifica se é um arquivo regular
+            const char *extension = strrchr(entry1->d_name, '.');
             if (extension && strcmp(extension, ".txt") == 0) {
                 total_files++;
-                char path1[1024], path2[1024];
-                snprintf(path1, sizeof(path1), "%s/%s", dir1, entry->d_name);
-                snprintf(path2, sizeof(path2), "%s/%s", dir2, entry->d_name);
 
-                // Verificar se o arquivo existe em `resultados-esperados`
-                if (g_hash_table_contains(expected_files, entry->d_name)) {
-                    // Compara os arquivos .txt
-                    int result = compare_txt_files(path1, path2);
-                    if (result == 1) {
-                        matching_files++;
-                    } else if (result == 0) {
-                        printf("Os arquivos %s e %s são diferentes.\n", path1, path2);
-                    }
-                    g_hash_table_remove(expected_files, entry->d_name);
+                // Construir os caminhos dos arquivos a serem comparados
+                char path1[MAX_PATH], path2[MAX_PATH];
+                snprintf(path1, sizeof(path1), "%s/%s", dir1, entry1->d_name);
+                snprintf(path2, sizeof(path2), "%s/%s", dir2, entry1->d_name); // Mesmos nomes de arquivos em dir1 e dir2
+
+                // Comparar os arquivos
+                int result = compare_txt_files(path1, path2, &discrepancies);
+                if (result == 0) {
+                    differing_files++;
                 }
             }
         }
     }
 
-    // Arquivos faltando em `resultados`
-    missing_files_in_dir2 = total_expected_files - matching_files;
+    // Exibe o número total de arquivos e as discrepâncias
+    printf("%d de %d testes são diferentes!\n", differing_files, total_files);
+    if (discrepancies != NULL) {
+        print_discrepancies(discrepancies);
+    }
 
-    // Fechar os diretórios
     closedir(dp1);
-    closedir(dp2);
-
-    // Exibe os resultados
-    printf("Arquivos .txt corretos: %d de %d\n", matching_files, total_files);
-    printf("Arquivos .txt faltando em 'resultados': %d de %d\n", missing_files_in_dir2, total_expected_files);
-    g_hash_table_destroy(expected_files);
 }
 
-// Função principal
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        printf("Uso: %s <diretório de entrada> <diretório de resultados>\n", argv[0]);
-        return 1;
+void interpreter_inputs2(FILE *file, GestorSistema *gestorsis)
+{
+    char *buffer = NULL;
+    size_t buffer_size = 0;
+    int line_number = 1;
+
+    // Acumuladores para tempo e memória de cada query
+    double total_time[6] = {0};
+    long total_memory[6] = {0};
+    int query_counts[6]={0};
+    // Pré-processamento
+    calcular_discografia_artistas(gestorsis);
+    calcula_streams(gestorsis);
+
+    // Pré-processamento para Query 5
+    int numUtilizadores = 0;
+    int numGeneros = 0;
+    char **idsUtilizadores = preprocessIdsUtilizadores(gestorsis, &numUtilizadores);
+    char **nomesGeneros = preprocessNomesGeneros(gestorsis, &numGeneros);
+    int **matriz = createMatrizClassificacaoMusicas(numUtilizadores, numGeneros);
+    calculaMatrizClassificacaoMusicas(matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, gestorsis);
+
+    while (getline(&buffer, &buffer_size, file) != -1)
+    {
+        g_strstrip(buffer);
+        if (strlen(buffer) == 0)
+            continue; // Ignorar linhas vazias
+
+        char *token = procura_espaço(buffer);
+        clock_t query_start_time;
+        long query_initial_memory;
+
+        query_start_time = clock();
+        query_initial_memory = get_memory_usage_mb();
+
+        int query_index = -1; // Para determinar qual query foi executada
+
+        if (strcmp(token, "1") == 0)
+        {
+            g_free(token);
+            query_index = 0;
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                query_1(gestorsis, token, line_number, 0);
+                g_free(token);
+            }
+        }
+
+        else if (strcmp(token, "1S") == 0)
+        {
+            g_free(token);
+            query_index = 0;
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                query_1(gestorsis, token, line_number, 1);
+                g_free(token);
+            }
+        }
+        // query 2
+        else if (strcmp(token, "2") == 0)
+        {
+            g_free(token);
+            query_index = 1;
+            token = procura_espaço2(buffer);
+            int num = 0;
+            gchar *country = NULL;
+            if (token != NULL)
+            {
+                num = atoi(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+            }
+            if (token != NULL)
+            {
+                country = g_strdup(token);
+                g_free(token);
+            }
+            query_2(gestorsis, num, country, line_number, 0);
+            if (country != NULL)
+                g_free(country);
+        }
+        else if (strcmp(token, "2S") == 0)
+        {
+            g_free(token);
+            query_index = 1;
+            token = procura_espaço2(buffer);
+            int num = 0;
+            gchar *country = NULL;
+            if (token != NULL)
+            {
+                num = atoi(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+            }
+            if (token != NULL)
+            {
+                country = g_strdup(token);
+                g_free(token);
+            }
+            query_2(gestorsis, num, country, line_number, 1);
+            if (country != NULL)
+                g_free(country);
+        }
+        // query 3
+        else if (strcmp(token, "3") == 0)
+        {
+            g_free(token);
+            query_index = 2;
+            token = procura_espaço2(buffer);
+            int min_age = 0;
+            if (token != NULL)
+            {
+                min_age = atoi(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+                int max_age = 0;
+                if (token != NULL)
+                {
+                    max_age = atoi(token);
+                    g_free(token);
+                }
+                query_3(min_age, max_age, gestorsis, line_number, 0);
+            }
+        }
+        else if (strcmp(token, "3S") == 0)
+        {
+            g_free(token);
+            query_index = 2;
+            token = procura_espaço2(buffer);
+            int min_age = 0;
+            if (token != NULL)
+            {
+                min_age = atoi(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+                int max_age = 0;
+                if (token != NULL)
+                {
+                    max_age = atoi(token);
+                    g_free(token);
+                }
+                query_3(min_age, max_age, gestorsis, line_number, 1);
+            }
+        }
+        
+                else if (strcmp(token, "4") == 0)
+        {
+            g_free(token);
+            token = procura_espaço2(buffer);
+            query_index = 3;
+            char *data_inicial = NULL;
+            if (token != NULL)
+            {
+                g_free(data_inicial);
+                data_inicial = g_strdup(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+            }
+
+            char *data_final = NULL;
+            if (token != NULL)
+            {
+                g_free(data_final);
+                data_final = g_strdup(token);
+                g_free(token);
+            }
+
+            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 0);
+
+            g_free(data_inicial);
+            g_free(data_final);
+        }
+
+        else if (strcmp(token, "4S") == 0)
+        {
+            g_free(token);
+            query_index = 3;
+            token = procura_espaço2(buffer);
+
+            char *data_inicial = NULL; // Supondo que DATA_INICIAL_DEFAULT seja uma string
+            if (token != NULL)
+            {
+                g_free(data_inicial);
+                data_inicial = g_strdup(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+            }
+
+            char *data_final = NULL; // Supondo que DATA_FINAL_DEFAULT seja uma string
+            if (token != NULL)
+            {
+                g_free(data_final);
+                data_final = g_strdup(token);
+                g_free(token);
+            }
+
+            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 1);
+
+            g_free(data_inicial);
+            g_free(data_final);
+        }
+        
+        else if (strcmp(token, "5") == 0)
+        {
+            g_free(token);
+            query_index = 4;
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                char *user_id_str = g_strdup(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+                if (token != NULL)
+                {
+                    int numRecomendacoes = atoi(token);
+                    g_free(token);
+                    query_5(user_id_str, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numRecomendacoes, line_number, 0, gestorsis);
+                    g_free(user_id_str);
+                }
+            }
+        }
+        else if (strcmp(token, "5S") == 0)
+        {
+            g_free(token);
+            query_index = 4;
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                char *user_id_str = g_strdup(token);
+                g_free(token);
+                token = procura_espaço3(buffer);
+                if (token != NULL)
+                {
+                    int numRecomendacoes = atoi(token);
+                    g_free(token);
+                    query_5(user_id_str, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numRecomendacoes, line_number, 1, gestorsis);
+                    g_free(user_id_str);
+                }
+            }
+        }
+        
+        else if (strcmp(token, "6") == 0)
+        {
+            g_free(token);
+            query_index = 5;
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                char *user_id_str = g_strdup(token);
+                int user_id = atoi(user_id_str + 1);
+                g_free(token);
+                g_free(user_id_str);
+                token = procura_espaço3(buffer);
+                int year = 0, N = 0;
+
+                if (token != NULL)
+                {
+                    year = atoi(token);
+                    g_free(token);
+                    token = procura_espaço4(buffer);
+
+                    if (token != NULL)
+                    {
+                        N = atoi(token);
+                        g_free(token);
+                    }
+                }
+                query_6(user_id, year, N, gestorsis, line_number, 0);
+                // g_free(user_id);
+            }
+        }
+        else if (strcmp(token, "6S") == 0)
+        {
+            g_free(token);
+            query_index = 5;
+            token = procura_espaço2(buffer);
+            if (token != NULL)
+            {
+                char *user_id_str = g_strdup(token);
+                int user_id = atoi(user_id_str + 1);
+                g_free(token);
+                g_free(user_id_str);
+                token = procura_espaço3(buffer);
+                int year = 0, N = 0;
+
+                if (token != NULL)
+                {
+                    year = atoi(token);
+                    g_free(token);
+                    token = procura_espaço4(buffer);
+
+                    if (token != NULL)
+                    {
+                        N = atoi(token);
+                        g_free(token);
+                    }
+                }
+                query_6(user_id, year, N, gestorsis, line_number, 1);
+                // g_free(user_id);
+            }
+        }
+
+        clock_t query_end_time = clock();
+        long query_final_memory = get_memory_usage_mb();
+
+        double query_elapsed_time = ((double)(query_end_time - query_start_time)) / CLOCKS_PER_SEC;
+        long query_memory_used = query_final_memory - query_initial_memory;
+
+        if (query_index >= 0 && query_index < 6) {
+            total_time[query_index] += query_elapsed_time;
+            total_memory[query_index] += query_memory_used;
+            query_counts[query_index]++;
+        }
+
+        line_number++;
     }
 
-    // Inicia a medição de tempo e memória
-    clock_t start_time = clock();
-    long initial_memory = get_memory_usage_mb();
+    g_strfreev(idsUtilizadores);
+    g_strfreev(nomesGeneros);
+    freeMatrizClassificacaoMusicas(matriz, numUtilizadores);
+    g_free(buffer);
 
-    // Processo principal: parsing e execução
-    GestorSistema *gestor = criar_gestor_sistema();
+    // Exibir totais por query
+    for (int i = 0; i < 6; i++) {
+        printf("Query %d: Tempo: %.2f, Memória: %ld, Execuções: %d\n",
+               i + 1, total_time[i], total_memory[i], query_counts[i]);
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    GestorSistema *gestor = criar_gestor_sistema(); // Inicializa o gestor
     char *path = g_strdup(argv[1]);
 
-    // Parse dos arquivos de entrada
-    char *pathartistas = g_strconcat(path, "/artists.csv", NULL);
-    FILE *fileartistas = fopen(pathartistas, "r");
-    if (fileartistas) {
-        parser_principal(fileartistas, gestor, 'a');
-        fclose(fileartistas);
-    }
-    g_free(pathartistas);
+    clock_t total_start_time = clock();
+    long total_memory_start = get_memory_usage_mb();
 
-    char *pathmusicas = g_strconcat(path, "/musics.csv", NULL);
-    FILE *filemusicas = fopen(pathmusicas, "r");
-    if (filemusicas) {
-        parser_principal(filemusicas, gestor, 'm');
-        fclose(filemusicas);
-    }
-    g_free(pathmusicas);
+    // Processa os arquivos principais
+    process_file(path, "artists.csv", gestor, 'a');
+    process_file(path, "musics.csv", gestor, 'm');
+    process_file(path, "users.csv", gestor, 'u');
+    process_file(path, "history.csv", gestor, 'h');
+    process_file(path, "albums.csv", gestor, 'l');
 
-    char *pathusers = g_strconcat(path, "/users.csv", NULL);
-    FILE *fileusers = fopen(pathusers, "r");
-    if (fileusers) {
-        parser_principal(fileusers, gestor, 'u');
-        fclose(fileusers);
-    }
-    g_free(pathusers);
-
-    g_free(path);
-
+    // Processa o arquivo de inputs
     char *pathinputs = g_strdup(argv[2]);
     FILE *fileinputs = fopen(pathinputs, "r");
-    if (fileinputs) {
-        interpreter_inputs(fileinputs, gestor);
+    if (fileinputs)
+    {
+        interpreter_inputs2(fileinputs, gestor);
         fclose(fileinputs);
     }
-    g_free(pathinputs);
+    else
+    {
+        fprintf(stderr, "Error opening file: %s\n", pathinputs);
+    }
 
-    liberar_gestor_sistema(gestor);
+    // Calcular o tempo e a memória total
+    clock_t total_end_time = clock();
+    long total_memory_end = get_memory_usage_mb();
 
-    // Medição de tempo e memória após a execução
-    clock_t end_time = clock();
-    long final_memory = get_memory_usage_mb();
+    double total_time_elapsed = ((double)(total_end_time - total_start_time)) / CLOCKS_PER_SEC;
+    long total_memory_used = total_memory_end - total_memory_start;
 
-    // Calcula o tempo de execução e a memória utilizada
-    double elapsed_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-    long memory_used = final_memory - initial_memory;
+    // Exibir o tempo total e memória total
+    printf("\nTempo total: %.2f segundos\n", total_time_elapsed);
+    printf("Memória total: %ld MB\n", total_memory_used);
+    int query_counts2[] = {30, 10, 5, 10, 10, 10}; // Total de arquivos por query
 
-    // Exibe os resultados de tempo e memória
-    printf("Tempo de execução: %.2f segundos\n", elapsed_time);
-    printf("Memória utilizada: %ld MB\n", memory_used);
-
-    // Comparação dos arquivos
+    // Passa query_counts para compare_all_files
     compare_all_files("resultados", "resultados-esperados");
+    
+    g_free(pathinputs);
+    g_free(path);
+    liberar_gestor_sistema(gestor);
 
     return 0;
 }

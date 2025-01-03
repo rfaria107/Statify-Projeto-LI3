@@ -629,12 +629,9 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 char *formatting[] = {"A%07d", "%d", "%s"};
                 row_writer_set_field_names(writer, field_names, 3);
                 row_writer_set_formatting(writer, formatting);
-                if (n == 0)
-                {
-                    write_row(writer, ';', 3, artist_id, distinct_musics, duration_string);
-                }
-                else
-                    write_row(writer, '=', 3, artist_id, distinct_musics, duration_string);
+
+                write_row(writer, (n == 0 ? ';' : '='), 3, artist_id, distinct_musics, duration_string);
+
                 // Libera a memória alocada para duration_string
                 g_free(duration_string);
 
