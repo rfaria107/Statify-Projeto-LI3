@@ -242,8 +242,16 @@ void calcula_streams(GestorSistema *gestorsis)
     }
 }
 
-double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorartistas, GestorMusicas *gestormusicas)
-{
+
+// Função para arredondar para um número específico de casas decimais
+double arredondar_para_casas_decimais(double valor, int casas) {
+    double fator = pow(10, casas);
+    // Adiciona um pequeno valor antes de arredondar (ajuste para corrigir o arredondamento)
+    double ajuste = 1e-9; // Você pode experimentar com esse valor dependendo do erro que está ocorrendo
+    return round((valor + ajuste) * fator) / fator;
+}
+
+double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorartistas, GestorMusicas *gestormusicas) {
     GHashTable *hash_musicas = get_hash_musicas(gestormusicas);
     int artist_id = get_artist_id(artista);
 
@@ -253,17 +261,13 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
     GHashTableIter music_iter;
     gpointer music_key, music_value;
     g_hash_table_iter_init(&music_iter, hash_musicas);
-    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value))
-    {
+    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value)) {
         Musica *musica = (Musica *)music_value;
 
-        // Verifica se a música pertence ao artista
-        gchar **artist_ids = get_music_artist_ids(musica); // Obtém os IDs de artistas associados à música
-        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++)
-        {
+        gchar **artist_ids = get_music_artist_ids(musica);
+        for (int i = 0; artist_ids && artist_ids[i] != NULL; i++) {
             int artist_id_int = atoi(artist_ids[i] + 1);
-            if (artist_id_int == artist_id)
-            {
+            if (artist_id_int == artist_id) {
                 int stream_count = get_music_streams(musica);
                 receita_artista += stream_count * get_artist_recipe_per_stream(artista);
                 break;
@@ -271,55 +275,56 @@ double calcular_receita_total_artista(Artista *artista, GestorArtistas *gestorar
         }
         g_strfreev(artist_ids);
     }
+
     gchar *artist_type = get_artist_type(artista);
 
-    // Verifica se o artista é individual; caso contrário, retorna apenas receita direta
-    if (g_strcmp0(artist_type, "individual") != 0)
-    {
+    // Verifica se o artista é individual
+    if (g_strcmp0(artist_type, "individual") != 0) {
         free(artist_type);
+        // Arredondar o valor diretamente antes de retornar
         return receita_artista;
     }
 
-    // Calcular receita por participação em grupos
     double receita_participacao = 0.0;
     g_hash_table_iter_init(&music_iter, hash_musicas);
-    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value))
-    {
+    while (g_hash_table_iter_next(&music_iter, &music_key, &music_value)) {
         Musica *musica = (Musica *)music_value;
         gchar **artist_ids = get_music_artist_ids(musica);
 
-        for (int i = 0; artist_ids && artist_ids[i]; i++)
-        {
+        for (int i = 0; artist_ids && artist_ids[i]; i++) {
             int artist_id_int = atoi(artist_ids[i] + 1);
             Artista *grupo = buscar_artista(gestorartistas, artist_id_int);
-            if (grupo && grupo != artista)
-            {
+            if (grupo && grupo != artista) {
                 gchar **constituents = get_artist_id_constituent(grupo);
                 int is_member = 0;
-                for (int j = 0; constituents && constituents[j] != NULL; j++)
-                {
+                for (int j = 0; constituents && constituents[j] != NULL; j++) {
                     int constituent_int = atoi(constituents[j] + 1);
-                    if (constituent_int == artist_id)
-                    {
+                    if (constituent_int == artist_id) {
                         is_member = 1;
                         break;
                     }
                 }
 
-                if (is_member)
-                {
+                if (is_member) {
                     int stream_count = get_music_streams(musica);
-                    receita_participacao += round((stream_count * get_artist_recipe_per_stream(grupo)) / get_num_constituents(grupo) * 100) / 100.0;
+                    receita_participacao += (stream_count * get_artist_recipe_per_stream(grupo)) / get_num_constituents(grupo);
                 }
                 g_strfreev(constituents);
             }
         }
         g_strfreev(artist_ids);
     }
+
     free(artist_type);
-    //  Soma as receitas diretas e de participação
-    return (receita_artista + receita_participacao);
+
+    // Arredondando para duas casas decimais com o ajuste
+    receita_participacao = arredondar_para_casas_decimais(receita_participacao, 2);
+
+    double receita_total = receita_artista + receita_participacao;
+
+    return receita_total;
 }
+
 
 // Função para contar o número de constituintes (membros) de um artista/grupo
 int get_num_constituents(Artista *artista)
@@ -420,65 +425,42 @@ gchar *find_top_entry_with_tiebreaker_str(GHashTable *table, gboolean alphabetic
     return top_key;
 }
 
-gint compare_by_value_with_tiebreaker(gconstpointer a, gconstpointer b, gpointer user_data)
-{
-    UserData *data = (UserData *)user_data;
-    GHashTable *table = data->hash;
-    gboolean reverse = data->reverse;
-    gboolean alphabetical = data->alphabetical;
+gint compare_artist_values(gconstpointer a, gconstpointer b, gpointer user_data) {
+    gint artist_id_a = GPOINTER_TO_INT(a);
+    gint artist_id_b = GPOINTER_TO_INT(b);
 
-    gint key_a = GPOINTER_TO_INT(a);
-    gint key_b = GPOINTER_TO_INT(b);
+    // Pega os dados da tabela artist_time (tempo)
+    GHashTable *artist_time = (GHashTable *)user_data;
+    gint time_a = GPOINTER_TO_INT(g_hash_table_lookup(artist_time, GINT_TO_POINTER(artist_id_a)));
+    gint time_b = GPOINTER_TO_INT(g_hash_table_lookup(artist_time, GINT_TO_POINTER(artist_id_b)));
 
-    // Verificando se as chaves existem na tabela
-    gpointer value_a_ptr = g_hash_table_lookup(table, GINT_TO_POINTER(key_a));
-    gpointer value_b_ptr = g_hash_table_lookup(table, GINT_TO_POINTER(key_b));
-
-    // Se algum valor for NULL, retornamos que a comparação não é válida
-    if (value_a_ptr == NULL || value_b_ptr == NULL) {
-        return 0;  // Ignoramos chaves ausentes
+    if (time_a == time_b) {
+        // Se o tempo for o mesmo, compara os IDs de artistas (alfabeticamente).
+        return artist_id_a - artist_id_b;
     }
 
-    gint value_a = GPOINTER_TO_INT(value_a_ptr);
-    gint value_b = GPOINTER_TO_INT(value_b_ptr);
-
-    // Comparação dos valores
-    if (value_a != value_b)
-    {
-        return reverse ? value_b - value_a : value_a - value_b;
-    }
-
-    // Se os valores forem iguais, realiza-se a ordenação alfabética
-    if (alphabetical)
-    {
-        return key_a - key_b;
-    }
-
-    return 0; // Caso contrário, valores e chaves são iguais
+    // Caso contrário, ordena pelo tempo (do maior para o menor).
+    return time_b - time_a;
 }
 
 
-// Função para ordenar a GHashTable por valor com desempate
-GList *sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reverse, gboolean alphabetical)
-{
-    // Obtém as chaves da tabela de hash
-    GList *keys = g_hash_table_get_keys(table);
+GList* sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean ascending, gboolean tie_breaker, GHashTable *artist_time) {
+    GList *sorted_list = NULL;
 
-    // Verifica se a lista de chaves não está vazia
-    if (keys == NULL) {
-        return NULL; // Se a lista de chaves for NULL, não há nada a ordenar
+    GHashTableIter iter;
+    gpointer key, value;
+
+    g_hash_table_iter_init(&iter, table);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        sorted_list = g_list_append(sorted_list, GINT_TO_POINTER(GPOINTER_TO_INT(key)));
     }
 
-    // Cria o usuário de dados com a tabela e os parâmetros de ordenação
-    UserData *user_data = create_user_data(table, reverse, alphabetical);
+    // Ordena a lista com a função de comparação que usa a tabela artist_time como dados adicionais
+    sorted_list = g_list_sort_with_data(sorted_list, (GCompareDataFunc)compare_artist_values, artist_time);
 
-    // Ordena as chaves pela função de comparação
-    keys = g_list_sort_with_data(keys, compare_by_value_with_tiebreaker, user_data);
-
-    // Libera os dados do usuário após a ordenação
-    free_user_data(user_data);
-    return keys;
+    return sorted_list;
 }
+
 
 UserData *create_user_data(GHashTable *table, gboolean reverse, gboolean alphabetical)
 {
@@ -1078,4 +1060,30 @@ void processar_historico_intervalo_de_datas (char* data_inicial, char* data_fina
     free(output_file_name);
     g_hash_table_destroy(semanas);
     g_hash_table_destroy(top_10_count);
+}
+
+gchar* find_top_day_with_tiebreaker(GHashTable *day_count) {
+    GHashTableIter iter;
+    gpointer key, value;
+    gchar *top_day = NULL;
+    int max_count = 0;
+
+    g_hash_table_iter_init(&iter, day_count);
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        gchar *current_day = (gchar *)key;
+        int current_count = GPOINTER_TO_INT(value);
+
+        if (current_count > max_count) {
+            // Novo top day encontrado
+            top_day = g_strdup(current_day);
+            max_count = current_count;
+        } else if (current_count == max_count) {
+            // Empate: escolher o mais recente (alfabeticamente maior)
+            if (g_strcmp0(current_day, top_day) > 0) {
+                g_free(top_day);
+                top_day = g_strdup(current_day);
+            }
+        }
+    }
+    return top_day;
 }

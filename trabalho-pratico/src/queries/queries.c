@@ -440,7 +440,6 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     // Obtém o gestor de históricos
     GestorHistories *gestorhistories = get_gestor_histories(gestorsis);
     GHashTable *hash_histories = get_hash_histories(gestorhistories);
-    // Inicializa iterador para percorrer a hash table
     GHashTableIter iter;
     gpointer key, value;
     gboolean user_found = FALSE;
@@ -483,12 +482,12 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
 
                 g_free(timestamp);
 
-                // Contabiliza o número de músicas por dia, incluindo as repetidas
+                // Contabiliza o número de músicas por dia
                 gpointer current_day_count = g_hash_table_lookup(day_count, date);
                 int day_total = current_day_count ? GPOINTER_TO_INT(current_day_count) + 1 : 1;
                 g_hash_table_insert(day_count, g_strdup(date), GINT_TO_POINTER(day_total));
 
-                // Contabiliza o tempo por hora (isso não altera, pois você ainda precisa disso)
+                // Contabiliza o tempo por hora
                 gpointer current_hour_time = g_hash_table_lookup(hour_time, hour);
                 int hour_total = current_hour_time ? GPOINTER_TO_INT(current_hour_time) + duration : duration;
                 g_hash_table_insert(hour_time, g_strdup(hour), GINT_TO_POINTER(hour_total));
@@ -498,9 +497,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 if (history_music_id)
                 {
                     GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
-
                     Musica *musica = buscar_musicas(gestormusicas, history_music_id);
-
                     if (musica)
                     {
                         // Atualiza gêneros
@@ -513,6 +510,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                             g_hash_table_insert(genre_popularity, g_strdup(genre), GINT_TO_POINTER(genre_total_time));
                             g_free(genre);
                         }
+
                         // Atualiza artistas
                         gchar **artist_ids = get_music_artist_ids(musica);
                         for (int i = 0; artist_ids && artist_ids[i] != NULL; i++)
@@ -567,7 +565,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
 
     // Encontrar os mais populares
     gint top_artist_id = find_top_entry_with_tiebreaker(artist_time, TRUE); // Alfabético (ID menor)
-    gchar *top_day = find_top_entry_with_tiebreaker_str(day_count, FALSE);
+    gchar *top_day = find_top_day_with_tiebreaker(day_count);
     gchar *top_hour = find_top_entry_with_tiebreaker_str(hour_time, FALSE);        // Mais cedo
     gchar *top_genre = find_top_entry_with_tiebreaker_str(genre_popularity, TRUE); // Alfabético
     gint top_album = find_top_entry_with_tiebreaker(album_time, TRUE);             // Alfabético
@@ -604,12 +602,14 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     free(total_time_duracao);
 
     // Ordena os artistas e exibe os N mais ouvidos
-    GList *sorted_artists = sort_hash_table_by_value_with_tiebreaker(artist_time, FALSE, TRUE);
+    GList *sorted_list = NULL;
+    sorted_list = g_list_sort_with_data(sorted_list, (GCompareDataFunc)compare_artist_values, artist_time);
+
     int displayed_artists = 0;
 
-    if (sorted_artists != NULL)
+    if (sorted_list != NULL)  // Alterado para 'sorted_list'
     {
-        for (GList *iter = sorted_artists; iter && displayed_artists < N; iter = iter->next)
+        for (GList *iter = sorted_list; iter && displayed_artists < N; iter = iter->next)
         {
             gint artist_id = GPOINTER_TO_INT(iter->data);
 
@@ -620,8 +620,11 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
             // Se algum valor for NULL, saltamos este artista
             if (duration_ptr != NULL && distinct_musics_ptr != NULL)
             {
+                // Converte os ponteiros para inteiros de forma segura
                 int duration = GPOINTER_TO_INT(duration_ptr);
                 int distinct_musics = GPOINTER_TO_INT(distinct_musics_ptr);
+
+                // Converte o tempo total (em segundos) para o formato de duração
                 gchar *duration_string = segundos_para_duracao(duration);
 
                 // Chama write_row com os parâmetros necessários
@@ -630,19 +633,20 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 row_writer_set_field_names(writer, field_names, 3);
                 row_writer_set_formatting(writer, formatting);
 
+                // Escreve os dados no arquivo
                 write_row(writer, (n == 0 ? ';' : '='), 3, artist_id, distinct_musics, duration_string);
 
                 // Libera a memória alocada para duration_string
                 g_free(duration_string);
 
+                // Contabiliza os artistas exibidos
                 displayed_artists++;
             }
         }
     }
 
     // Libera a lista de artistas ordenados após o uso
-
-    g_list_free(sorted_artists);
+    g_list_free(sorted_list);  // Alterado para 'sorted_list'
 
     // Limpeza
     free(top_day);

@@ -259,7 +259,7 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis)
                 query_3(min_age, max_age, gestorsis, line_number, 1);
             }
         }
-        
+        /*
                 else if (strcmp(token, "4") == 0)
         {
             g_free(token);
@@ -316,6 +316,7 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis)
             g_free(data_inicial);
             g_free(data_final);
         }
+        */
         
         else if (strcmp(token, "5") == 0)
         {

@@ -32,7 +32,8 @@ int get_num_constituents(Artista *artista);
 
 gchar *find_top_entry_with_tiebreaker_str(GHashTable *table, gboolean alphabetical);
 gint find_top_entry_with_tiebreaker(GHashTable *table, gboolean alphabetical);
-GList *sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean reverse, gboolean alphabetical);
+GList* sort_hash_table_by_value_with_tiebreaker(GHashTable *table, gboolean ascending, gboolean tie_breaker, GHashTable *artist_time);
+gint compare_artist_values(gconstpointer a, gconstpointer b, gpointer user_data);
 UserData *create_user_data(GHashTable *table, gboolean reverse, gboolean alphabetical);
 void free_user_data(UserData *user_data);
 void process_top_artists(GHashTable *artist_time, GHashTable *artist_music_count, RowWriter *writer, int N);
@@ -54,5 +55,5 @@ Semana* criar_semana(const char *domingo);
 GHashTable *get_semanas_artistas(Semana *semana);
 void destruir_semana(Semana *semana);
 gint contar_aparicoes_artista(Semana *semana, const gchar *artist_id);
-
+gchar* find_top_day_with_tiebreaker(GHashTable *day_count);
 #endif
