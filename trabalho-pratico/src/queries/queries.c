@@ -25,6 +25,12 @@ struct GenrePopularity
     int total_likes;
 };
 
+
+struct ResultadoProcessamento {
+    GHashTable *semanas;
+    GHashTable *top_10_count;
+};
+
 void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n)
 {
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
@@ -353,22 +359,21 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_list_free(generos_lista);
     g_hash_table_destroy(generos_likes);
 }
-
-void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n)
-{
-
-    // Se data_final for NULL, chama a função para histórico sem intervalo de datas
-    if (data_final == NULL)
-    {
-        processar_historico(NULL, NULL, gestor_sistema, line_number, n);
+void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n, ResultadoProcessamento *resultado) {
+    // Certifique-se de que o resultado foi passado corretamente
+    if (!resultado || !resultado->top_10_count) {
+        printf("Erro: ResultadoProcessamento ou top_10_count é NULL.\n");
+        return;
     }
-    else
-    {
-        // Caso contrário, chama a função para histórico com intervalo de datas
-        processar_historico_intervalo_de_datas(data_inicial, data_final, gestor_sistema, line_number, n);
+
+    if (data_final == NULL) {
+        // Se data_final for NULL, chama a função para processar todo o histórico
+        all_historico(gestor_sistema, line_number, n, resultado);
+    } else {
+        // Caso contrário, chama a função para processar o intervalo de datas
+        intervalos_historico(gestor_sistema, line_number, n, data_inicial, data_final, resultado);
     }
 }
-
 void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizadores, char **nomesGeneros,
              int numUtilizadores, int numGeneros, int numRecomendacoes, int line_number, int n, GestorSistema *gestorsis)
 {

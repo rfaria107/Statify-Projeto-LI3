@@ -11,7 +11,7 @@ typedef struct UserData UserData;
 typedef struct GenrePopularity GenrePopularity;
 typedef struct Semana Semana;
 typedef struct ArtistPopularity ArtistPopularity;
-
+typedef struct ResultadoProcessamento ResultadoProcessamento;
 // Funções para gerenciamento de GenrePopularity
 GenrePopularity *create_genre_popularity(const char *genre);
 void free_genre_popularity(GenrePopularity *gp);
@@ -56,4 +56,15 @@ GHashTable *get_semanas_artistas(Semana *semana);
 void destruir_semana(Semana *semana);
 gint contar_aparicoes_artista(Semana *semana, const gchar *artist_id);
 gchar* find_top_day_with_tiebreaker(GHashTable *day_count);
+
+
+void calcular_domingos_inicial_e_final(char *data_inicial, char *data_final, char **domingo_inicial, char **domingo_final);
+void calcular_artista_mais_apareceu(GestorSistema *gestor_sistema, char *data_inicial, char *data_final, int line_number);
+ResultadoProcessamento* processar_semanas_e_contar_artistas(GestorSistema *gestor_sistema);
+void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char *data_inicial, char *data_final, ResultadoProcessamento *resultado);
+int parse_data(const char *data_str, struct tm *tm);
+void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoProcessamento *resultado);
+int calcular_domingo_anterior(const char *data_str, struct tm *domingo_tm);
+void destruir_resultado_processamento(ResultadoProcessamento *resultado);
+
 #endif

@@ -71,7 +71,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
     char **nomesGeneros = preprocessNomesGeneros(gestorsis, &numGeneros);
     int **matriz = createMatrizClassificacaoMusicas(numUtilizadores, numGeneros);
     calculaMatrizClassificacaoMusicas(matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, gestorsis);
-
+    ResultadoProcessamento *resultado = processar_semanas_e_contar_artistas (gestorsis);
     // executar as queries
     while (getline(&buffer, &buffer_size, file) != -1)
     {
@@ -185,7 +185,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 query_3(min_age, max_age, gestorsis, line_number, 1);
             }
         }
-        /*
+        
                 else if (strcmp(token, "4") == 0)
         {
             g_free(token);
@@ -208,7 +208,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 g_free(token);
             }
 
-            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 0);
+            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 0,resultado);
 
             g_free(data_inicial);
             g_free(data_final);
@@ -236,12 +236,12 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 g_free(token);
             }
 
-            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 1);
+            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 1,resultado);
 
             g_free(data_inicial);
             g_free(data_final);
         }
-        */
+        
         else if (strcmp(token, "5") == 0)
         {
             g_free(token);

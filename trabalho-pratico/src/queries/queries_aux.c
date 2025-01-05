@@ -46,7 +46,10 @@ typedef struct Semana {
     GList *top_artistas;   // Lista dos IDs dos top 10 artistas
 } Semana;
 
-
+struct ResultadoProcessamento {
+    GHashTable *semanas;
+    GHashTable *top_10_count;
+};
 gint duracao_para_segundos(const gchar *duracao)
 {
     gint horas, minutos, segundos;
@@ -1087,3 +1090,405 @@ gchar* find_top_day_with_tiebreaker(GHashTable *day_count) {
     }
     return top_day;
 }
+
+
+ResultadoProcessamento *processar_semanas_e_contar_artistas(GestorSistema *gestor_sistema) {
+    // Inicializa a estrutura para os resultados
+    ResultadoProcessamento *resultado = malloc(sizeof(ResultadoProcessamento));
+    resultado->top_10_count = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    resultado->semanas = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)destruir_semana);
+
+    // Obtém os históricos
+    GestorHistories *gestorhistories = get_gestor_histories(gestor_sistema);
+    GHashTable *historicos = get_hash_histories(gestorhistories);
+
+    GHashTableIter iter;
+    gpointer key, value;
+    g_hash_table_iter_init(&iter, historicos);
+
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        History *history = (History *)value;
+
+        // Obtém a data do histórico
+        char *data = get_history_date(history);
+
+        // Calcula o "domingo" correspondente à data
+        char *domingo = calcular_domingo(data);
+        if (domingo == NULL) {
+            free(data);
+            continue;  // Se não for possível calcular o domingo, pula para o próximo histórico
+        }
+
+        // Duplica o valor de domingo para uso como chave na tabela hash
+        char *domingo_key = g_strdup(domingo);
+        free(domingo);  // Libera a memória do valor original de domingo
+
+        // Obtenção ou criação da semana correspondente
+        Semana *semana = g_hash_table_lookup(resultado->semanas, domingo_key);
+        if (!semana) {
+            semana = criar_semana(domingo_key);
+            g_hash_table_insert(resultado->semanas, domingo_key, semana);
+        } else {
+            free(domingo_key);  // Libera a cópia da chave, pois já existe na tabela hash
+        }
+
+        // Processamento da música
+        int musica_id = get_history_music_id(history);
+        GestorMusicas *gestormusicas = get_gestor_musicas(gestor_sistema);
+        Musica *musica = buscar_musicas(gestormusicas, musica_id);
+        if (musica) {
+            gchar **artist_ids = get_music_artist_ids(musica);
+            gchar *duration = get_history_duration(history);
+            int duracao = duracao_para_segundos(duration);
+            free(duration);
+
+            // Adiciona os artistas na semana correspondente
+            for (int i = 0; artist_ids[i] != NULL; i++) {
+                adicionar_artista_na_semana(semana, artist_ids[i], duracao);
+            }
+            g_strfreev(artist_ids);
+        }
+    }
+
+    // Processa cada semana e calcula a contagem dos artistas no top 10
+    GHashTableIter semanas_iter;
+    gpointer semana_key, semana_value;
+    g_hash_table_iter_init(&semanas_iter, resultado->semanas);
+
+    while (g_hash_table_iter_next(&semanas_iter, &semana_key, &semana_value)) {
+        Semana *semana = (Semana *)semana_value;
+
+        // Atualiza o top artistas para a semana
+        atualizar_top_artistas_na_semana(semana);
+
+        // Obtém a lista de top artistas da semana
+        GList *top_artistas = get_top_artistas_na_semana(semana);
+        if (!top_artistas) {
+            continue;  // Se não houver artistas na semana, pula para o próximo
+        }
+
+        // Conta as aparições dos artistas no top 10
+        for (GList *node = top_artistas; node != NULL; node = node->next) {
+            char *artist_id = (char *)node->data;
+
+            // Atualiza a contagem de aparições do artista
+            int *count = (int *)g_hash_table_lookup(resultado->top_10_count, artist_id);
+            if (!count) {
+                count = malloc(sizeof(int));
+                *count = 1;
+                g_hash_table_insert(resultado->top_10_count, g_strdup(artist_id), count);
+            } else {
+                (*count)++;
+            }
+        }
+    }
+
+    // Retorna a estrutura contendo as duas hash tables
+    return resultado;
+}
+
+
+// Função para calcular os domingos relativos à data inicial e final
+void calcular_domingos_inicial_e_final(char *data_inicial, char *data_final, char **domingo_inicial, char **domingo_final) {
+    *domingo_inicial = calcular_domingo(data_inicial);
+    *domingo_final = calcular_domingo(data_final);
+}
+
+void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoProcessamento *resultado) {
+    // Certifique-se de que a tabela está disponível
+    if (!resultado || !resultado->top_10_count) {
+        printf("Erro: ResultadoProcessamento ou semanas_top_10 é NULL\n");
+        return;
+    }
+
+    GHashTable *semanas_top_10 = resultado->top_10_count;
+
+    // Arquivo de saída
+    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+
+    char *top_artist_id = NULL;
+    int max_count = 0;
+
+    // Iterador sobre a tabela semanas_top_10
+    GHashTableIter iter;
+    gpointer key, value;
+    g_hash_table_iter_init(&iter, semanas_top_10);
+
+    while (g_hash_table_iter_next(&iter, &key, &value)) {
+        char *artist_id = (char *)key;        // ID do artista como chave
+        int count = *(int *)value;           // Contagem como valor
+
+        // Atualiza o artista com mais aparições
+        if (count > max_count || (count == max_count && atoi(artist_id + 1) < atoi(top_artist_id + 1))) {
+            max_count = count;
+            if (top_artist_id) {
+                free(top_artist_id);
+            }
+            top_artist_id = g_strdup(artist_id);
+        }
+    }
+
+    // Verifica se existe um artista mais frequente e registra no arquivo
+    if (top_artist_id) {
+        int top_artist_int = atoi(top_artist_id + 1); // Extrai o ID numérico do artista
+        GestorArtistas *gestorartistas = get_gestor_artistas(gestorsis);
+        Artista *artista = buscar_artista(gestorartistas, top_artist_int);
+        if (artista) {
+            char *artist_type = get_artist_type(artista);
+            char *field_names[] = {"Artist_Id", "Type", "Count"};
+            char *formatting[] = {"%s", "%s", "%d"};  // Formatação das colunas
+            row_writer_set_field_names(writer, field_names, 3);
+            row_writer_set_formatting(writer, formatting);
+
+            // Escreve a linha no arquivo
+            write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);
+
+            free(artist_type);
+        }
+        free(top_artist_id);
+    }
+
+    // Finaliza o processo
+    free_and_finish_writing(writer);
+    free(output_file_name);
+}
+
+void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char *data_inicial, char *data_final, ResultadoProcessamento *resultado) {
+
+    // Verifica se o ResultadoProcessamento está disponível
+    if (!resultado || !resultado->semanas) {
+        printf("[ERRO] ResultadoProcessamento ou semanas é NULL.\n");
+        return;
+    }
+
+    // Calcula os domingos associados às datas inicial e final
+    char *domingo_inicial = calcular_domingo(data_inicial);
+    char *domingo_final = calcular_domingo(data_final);
+    if (!domingo_inicial || !domingo_final) {
+        printf("[ERRO] Não foi possível calcular os domingos associados.\n");
+        free(domingo_inicial);
+        free(domingo_final);
+        return;
+    }
+
+    // Inicializa o arquivo de saída
+    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+
+    // Tabela temporária para contagem de aparições no intervalo
+    GHashTable *contagem_intervalo = g_hash_table_new(g_str_hash, g_str_equal);
+
+    // Itera pelas semanas no intervalo
+    GHashTableIter iter;
+    gpointer semana_key, semana_value;
+    g_hash_table_iter_init(&iter, resultado->semanas);
+
+    while (g_hash_table_iter_next(&iter, &semana_key, &semana_value)) {
+        char *domingo_key = (char *)semana_key;
+
+        // Verifica se a semana está dentro do intervalo
+        if (strcmp(domingo_key, domingo_inicial) >= 0 && strcmp(domingo_key, domingo_final) <= 0) {
+            Semana *semana = (Semana *)semana_value;
+
+            // Obtém os artistas do top 10 dessa semana
+            GList *top_artistas = get_top_artistas_na_semana(semana);
+
+            for (GList *node = top_artistas; node != NULL; node = node->next) {
+                char *artist_id = (char *)node->data;
+
+                // Atualiza a contagem do artista na tabela temporária
+                int *count_ptr = (int *)g_hash_table_lookup(contagem_intervalo, artist_id);
+                if (count_ptr) {
+                    (*count_ptr)++;
+                } else {
+                    int *new_count = malloc(sizeof(int));
+                    *new_count = 1;
+                    g_hash_table_insert(contagem_intervalo, g_strdup(artist_id), new_count);
+                }
+            }
+        }
+    }
+
+    // Determina o artista com mais aparições no intervalo
+    char *top_artist_id = NULL;
+    int max_count = 0;
+
+    GHashTableIter count_iter;
+    gpointer artist_key, artist_value;
+    g_hash_table_iter_init(&count_iter, contagem_intervalo);
+
+    while (g_hash_table_iter_next(&count_iter, &artist_key, &artist_value)) {
+        char *artist_id = (char *)artist_key;
+        int count = *(int *)artist_value;
+
+        if (count > max_count || (count == max_count && atoi(artist_id + 1) < atoi(top_artist_id + 1))) {
+            max_count = count;
+            free(top_artist_id);
+            top_artist_id = g_strdup(artist_id);
+        }
+    }
+
+    // Registra o artista com mais aparições no arquivo de saída
+    if (top_artist_id) {
+        GestorArtistas *gestorartistas = get_gestor_artistas(gestorsis);
+        int top_artist_int = atoi(top_artist_id + 1);
+        Artista *artista = buscar_artista(gestorartistas, top_artist_int);
+        if (artista) {
+            char *artist_type = get_artist_type(artista);
+            char *field_names[] = {"Artist_Id", "Type", "Count"};
+            char *formatting[] = {"%s", "%s", "%d"};
+            row_writer_set_field_names(writer, field_names, 3);
+            row_writer_set_formatting(writer, formatting);
+
+            // Escreve a linha no arquivo
+            write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);
+            free(artist_type);
+        }
+        free(top_artist_id);
+    } 
+
+    // Libera recursos
+    g_hash_table_destroy(contagem_intervalo);
+    free_and_finish_writing(writer);
+    free(output_file_name);
+    free(domingo_inicial);
+    free(domingo_final);
+}
+
+
+
+int parse_data(const char *data_str, struct tm *tm) {
+    if (data_str == NULL || tm == NULL) {
+        return -1; // Erro se os parâmetros forem inválidos
+    }
+
+    // A função sscanf divide a string em componentes de ano, mês e dia
+    int year, month, day;
+    if (sscanf(data_str, "%4d/%2d/%2d", &year, &month, &day) != 3) {
+        return -1; // Se o formato não for correto, retorna erro
+    }
+
+    // Preenche a estrutura tm com os valores de ano, mês e dia
+    tm->tm_year = year - 1900;  // O tm_year é contado a partir de 1900
+    tm->tm_mon = month - 1;     // O tm_mon é contado a partir de 0 (janeiro)
+    tm->tm_mday = day;          // O tm_mday já é o valor correto para o dia
+
+    // Inicializa as outras variáveis da estrutura tm com valores padrão
+    tm->tm_hour = 0;   // Define a hora como 00:00
+    tm->tm_min = 0;
+    tm->tm_sec = 0;
+    tm->tm_isdst = -1; // O mktime irá determinar automaticamente se é horário de verão
+
+    return 0; // Sucesso
+}
+
+int calcular_domingo_anterior(const char *data_str, struct tm *domingo_tm) {
+    if (!data_str || !domingo_tm) {
+        printf("Erro: parâmetros inválidos em calcular_domingo_anterior.\n");
+        return -1;  // Verifica se os parâmetros são válidos
+    }
+
+    // Variáveis para ano, mês e dia
+    int year, month, day;
+
+    // Converte a string de data manualmente
+    if (data_str[4] != '/' || data_str[7] != '/') {
+        printf("Erro: formato de data inválido. Esperado 'yyyy/mm/dd'.\n");
+        return -1; // Verifica se a string tem o formato esperado "yyyy/mm/dd"
+    }
+
+    // Extrai o ano, mês e dia
+    int parsed = sscanf(data_str, "%4d/%2d/%2d", &year, &month, &day);
+    if (parsed != 3) {
+        printf("Erro: falha ao fazer o parsing da data. Resultados de sscanf: %d\n", parsed);
+        return -1;  // Verifica se o parsing foi bem-sucedido
+    }
+
+    // Exibe os valores de ano, mês e dia extraídos
+    printf("Data extraída: Ano = %d, Mês = %d, Dia = %d\n", year, month, day);
+
+    // Verifica se a conversão foi bem-sucedida
+    if (year < 0 || month < 1 || month > 12 || day < 1 || day > 31) {
+        printf("Erro: valores inválidos de data. Ano: %d, Mês: %d, Dia: %d\n", year, month, day);
+        return -1;
+    }
+
+    // Preenche a estrutura tm com os valores de ano, mês e dia
+    domingo_tm->tm_year = year - 1900;  // O tm_year é contado a partir de 1900
+    domingo_tm->tm_mon = month - 1;     // O tm_mon é contado a partir de 0 (janeiro)
+    domingo_tm->tm_mday = day;          // O tm_mday já é o valor correto para o dia
+
+    // Inicializa as outras variáveis da estrutura tm com valores padrão
+    domingo_tm->tm_hour = 0;   // Define a hora como 00:00
+    domingo_tm->tm_min = 0;
+    domingo_tm->tm_sec = 0;
+    domingo_tm->tm_isdst = -1; // O mktime irá determinar automaticamente se é horário de verão
+
+    // Mostra a estrutura tm antes do mktime
+    printf("Antes de mktime: tm_year = %d, tm_mon = %d, tm_mday = %d\n",
+           domingo_tm->tm_year, domingo_tm->tm_mon, domingo_tm->tm_mday);
+
+    // Calcula a data de domingo (ajuste para o horário local e valida)
+    int res = mktime(domingo_tm);
+    if (res == -1) {
+        printf("Erro: falha ao calcular mktime.\n");
+        return -1;  // Verifica se houve erro no cálculo do mktime
+    }
+
+    // Mostra a estrutura tm após o mktime
+    printf("Após mktime: tm_year = %d, tm_mon = %d, tm_mday = %d, tm_wday = %d\n",
+           domingo_tm->tm_year, domingo_tm->tm_mon, domingo_tm->tm_mday, domingo_tm->tm_wday);
+
+    // Calcula os dias a serem subtraídos para chegar no domingo anterior
+    int days_to_sunday = domingo_tm->tm_wday;  // tm_wday é o dia da semana (0 = domingo)
+    if (days_to_sunday == 0) {
+        days_to_sunday = 7;  // Se for domingo, não subtraímos nenhum dia
+    }
+    
+    // Mostra a quantidade de dias a ser subtraída
+    printf("Número de dias para subtrair: %d\n", days_to_sunday);
+
+    domingo_tm->tm_mday -= days_to_sunday;  // Ajusta para o domingo anterior
+
+    // Recalcula a data após o ajuste
+    res = mktime(domingo_tm);
+    if (res == -1) {
+        printf("Erro: falha ao recalcular mktime após ajuste.\n");
+        return -1;  // Verifica se houve erro no recalculo do mktime
+    }
+
+    // Mostra a estrutura tm após o cálculo final
+    printf("Após ajuste de domingo: tm_year = %d, tm_mon = %d, tm_mday = %d\n",
+           domingo_tm->tm_year, domingo_tm->tm_mon, domingo_tm->tm_mday);
+
+    return 0;  // Sucesso
+}
+void destruir_resultado_processamento(ResultadoProcessamento *resultado) {
+    if (resultado == NULL) {
+        return; // Se o ponteiro for NULL, nada a fazer
+    }
+
+    // Libera a memória da tabela `top_10_count`
+    if (resultado->top_10_count != NULL) {
+        free(resultado->top_10_count);
+        resultado->top_10_count = NULL; // Evita uso posterior de memória desalocada
+    }
+
+    // Libera outros campos, se necessário, dependendo da estrutura completa
+    // Exemplo: Liberar `outros_campos` caso existam
+    // if (resultado->outros_campos != NULL) {
+    //     free(resultado->outros_campos);
+    //     resultado->outros_campos = NULL;
+    // }
+
+    // Finalmente, libera o próprio struct, caso tenha sido alocado dinamicamente
+    free(resultado);
+}
+
+
+
