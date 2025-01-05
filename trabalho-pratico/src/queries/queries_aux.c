@@ -1195,19 +1195,25 @@ void calcular_domingos_inicial_e_final(char *data_inicial, char *data_final, cha
 }
 
 void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoProcessamento *resultado) {
+    
+    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+
+    char *field_names[] = {"Artist_Id", "Type", "Count"};
+    char *formatting[] = {"%s", "%s", "%d"};  // Formatação das colunas
+    row_writer_set_field_names(writer, field_names, 3);
+    row_writer_set_formatting(writer, formatting);
     // Certifique-se de que a tabela está disponível
     if (!resultado || !resultado->top_10_count) {
-        printf("Erro: ResultadoProcessamento ou semanas_top_10 é NULL\n");
+        write_row(writer, ';', 1, "");
         return;
     }
 
     GHashTable *semanas_top_10 = resultado->top_10_count;
 
     // Arquivo de saída
-    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
-    char *output_file_name = malloc(size);
-    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
     char *top_artist_id = NULL;
     int max_count = 0;
@@ -1238,11 +1244,6 @@ void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoPr
         Artista *artista = buscar_artista(gestorartistas, top_artist_int);
         if (artista) {
             char *artist_type = get_artist_type(artista);
-            char *field_names[] = {"Artist_Id", "Type", "Count"};
-            char *formatting[] = {"%s", "%s", "%d"};  // Formatação das colunas
-            row_writer_set_field_names(writer, field_names, 3);
-            row_writer_set_formatting(writer, formatting);
-
             // Escreve a linha no arquivo
             write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);
 
@@ -1250,6 +1251,7 @@ void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoPr
         }
         free(top_artist_id);
     }
+    else write_row(writer, ';', 1, "");
 
     // Finaliza o processo
     free_and_finish_writing(writer);
@@ -1257,10 +1259,20 @@ void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoPr
 }
 
 void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char *data_inicial, char *data_final, ResultadoProcessamento *resultado) {
+    // Inicializa o arquivo de saída
+    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
+    char *output_file_name = malloc(size);
+    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
+    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+
+    char *field_names[] = {"Artist_Id", "Type", "Count"};
+    char *formatting[] = {"%s", "%s", "%d"};
+    row_writer_set_field_names(writer, field_names, 3);
+    row_writer_set_formatting(writer, formatting);
 
     // Verifica se o ResultadoProcessamento está disponível
     if (!resultado || !resultado->semanas) {
-        printf("[ERRO] ResultadoProcessamento ou semanas é NULL.\n");
+        write_row(writer, ';', 1, "");
         return;
     }
 
@@ -1268,17 +1280,12 @@ void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char
     char *domingo_inicial = calcular_domingo(data_inicial);
     char *domingo_final = calcular_domingo(data_final);
     if (!domingo_inicial || !domingo_final) {
-        printf("[ERRO] Não foi possível calcular os domingos associados.\n");
+        write_row(writer, ';', 1, "");
         free(domingo_inicial);
         free(domingo_final);
         return;
     }
 
-    // Inicializa o arquivo de saída
-    int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
-    char *output_file_name = malloc(size);
-    snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
 
     // Tabela temporária para contagem de aparições no intervalo
     GHashTable *contagem_intervalo = g_hash_table_new(g_str_hash, g_str_equal);
@@ -1340,17 +1347,13 @@ void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char
         Artista *artista = buscar_artista(gestorartistas, top_artist_int);
         if (artista) {
             char *artist_type = get_artist_type(artista);
-            char *field_names[] = {"Artist_Id", "Type", "Count"};
-            char *formatting[] = {"%s", "%s", "%d"};
-            row_writer_set_field_names(writer, field_names, 3);
-            row_writer_set_formatting(writer, formatting);
-
             // Escreve a linha no arquivo
             write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);
             free(artist_type);
         }
         free(top_artist_id);
-    } 
+    }
+    else write_row(writer, ';', 1, "");
 
     // Libera recursos
     g_hash_table_destroy(contagem_intervalo);
@@ -1468,6 +1471,7 @@ int calcular_domingo_anterior(const char *data_str, struct tm *domingo_tm) {
 
     return 0;  // Sucesso
 }
+
 void destruir_resultado_processamento(ResultadoProcessamento *resultado) {
     if (resultado == NULL) {
         return; // Se o ponteiro for NULL, nada a fazer

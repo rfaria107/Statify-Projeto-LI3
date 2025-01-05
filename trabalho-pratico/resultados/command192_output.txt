@@ -1,8 +1,0 @@
-MC Jonathan=individual=02:19:48=Burkina Faso
-MC William=individual=02:15:10=Burkina Faso
-Lil Aaron=individual=02:06:22=Burkina Faso
-Environmental Easy=individual=01:37:21=Burkina Faso
-DJ Anthony=individual=01:35:55=Burkina Faso
-Individual Others=individual=01:21:39=Burkina Faso
-Brother Offer=individual=01:18:36=Burkina Faso
-Dorothy Hunt=individual=01:06:48=Burkina Faso

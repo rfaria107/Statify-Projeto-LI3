@@ -1,9 +1,0 @@
-Brian Lynch;individual;01:52:10;San Marino
-True Police;individual;01:24:42;San Marino
-The car;group;01:19:53;San Marino
-DJ Ashley;individual;01:04:50;San Marino
-MediumSlateBlue Think;individual;01:01:40;San Marino
-Linen Note;individual;01:01:22;San Marino
-DJ Samantha;individual;00:50:59;San Marino
-HotPink Training;individual;00:35:57;San Marino
-LightBlue Watch;individual;00:35:30;San Marino

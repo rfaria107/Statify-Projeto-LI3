@@ -1,4 +1,0 @@
-Management Goal=group=02:42:38=Antigua and Barbuda
-LightSkyBlue Relationship=individual=02:27:31=Antigua and Barbuda
-DJ Rebecca=individual=02:13:24=Antigua and Barbuda
-Angela Clark=individual=01:50:32=Antigua and Barbuda

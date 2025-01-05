@@ -360,11 +360,6 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_hash_table_destroy(generos_likes);
 }
 void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n, ResultadoProcessamento *resultado) {
-    // Certifique-se de que o resultado foi passado corretamente
-    if (!resultado || !resultado->top_10_count) {
-        printf("Erro: ResultadoProcessamento ou top_10_count é NULL.\n");
-        return;
-    }
 
     if (data_final == NULL) {
         // Se data_final for NULL, chama a função para processar todo o histórico
@@ -605,9 +600,18 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     // Escrever os resultados no arquivo
     write_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
     free(total_time_duracao);
-
-    // Ordena os artistas e exibe os N mais ouvidos
+    
     GList *sorted_list = NULL;
+    GHashTableIter artist_iter;
+    gpointer key2, value2;
+
+    // Preenche a lista com os IDs dos artistas
+    g_hash_table_iter_init(&artist_iter, artist_time);
+    while (g_hash_table_iter_next(&artist_iter, &key2, &value2)) {
+        sorted_list = g_list_prepend(sorted_list, key2); // Adiciona os IDs na lista
+    }
+
+    // Ordena a lista com os artistas
     sorted_list = g_list_sort_with_data(sorted_list, (GCompareDataFunc)compare_artist_values, artist_time);
 
     int displayed_artists = 0;

@@ -1,7 +1,0 @@
-MC Adam=individual=02:09:10=Tajikistan
-DJ Alice=individual=02:04:39=Tajikistan
-Lil Brian=individual=01:59:46=Tajikistan
-MC Laura=individual=01:59:04=Tajikistan
-Lil Charles=individual=01:50:43=Tajikistan
-James Franklin=individual=01:36:06=Tajikistan
-Ashley Irwin=individual=01:28:14=Tajikistan

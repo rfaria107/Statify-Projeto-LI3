@@ -1,6 +1,0 @@
-LightGray Hand=individual=03:16:28=Malawi
-Treatment Gas=individual=02:06:16=Malawi
-Christopher=individual=01:45:53=Malawi
-LightYellow Difference=individual=01:38:53=Malawi
-DJ John=individual=01:30:04=Malawi
-Ryan Robertson=individual=01:29:49=Malawi
