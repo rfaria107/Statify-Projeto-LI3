@@ -27,7 +27,7 @@ struct ResultadoProcessamento
     GHashTable *top_10_count;
 };
 
-void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoProcessamento *resultado)
+void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoProcessamento *resultado, int t)
 {
 
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
@@ -80,7 +80,10 @@ void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoPr
         {
             char *artist_type = get_artist_type(artista);
             // Escreve a linha no arquivo
-            write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);
+             if (t==0){ // Escreve a linha no arquivo
+            write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);}
+            else if (t==1){
+            print_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);}
 
             free(artist_type);
         }
@@ -98,7 +101,7 @@ void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoPr
     free(output_file_name);
 }
 
-void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char *data_inicial, char *data_final, ResultadoProcessamento *resultado)
+void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char *data_inicial, char *data_final, ResultadoProcessamento *resultado, int t)
 {
     // Inicializa o arquivo de saída
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
@@ -198,7 +201,11 @@ void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char
         {
             char *artist_type = get_artist_type(artista);
             // Escreve a linha no arquivo
-            write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);
+            if (t==0){
+            write_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);}
+            if (t==1){           
+             print_row(writer, (n == 0) ? ';' : '=', 3, top_artist_id, artist_type, max_count);}
+
             free(artist_type);
         }
     }
@@ -217,7 +224,6 @@ void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char
     free(domingo_inicial);
     free(domingo_final);
 }
-
 ResultadoProcessamento *processar_semanas_e_contar_artistas(GestorSistema *gestor_sistema)
 {
     // Inicializa a estrutura para os resultados

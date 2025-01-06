@@ -30,5 +30,5 @@ void escrever_cabecalho_album_erro (RowWriter *error_writer);
 
 // Escreve o conteúdo do buffer no arquivo e libera o RowWriter
 void free_and_finish_writing(RowWriter *writer);
-
+void print_row(RowWriter *writer, char separator, int fields, ...);
 #endif
