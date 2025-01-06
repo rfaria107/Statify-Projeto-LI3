@@ -85,12 +85,13 @@ void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoPr
             free(artist_type);
         }
     }
-    else{
-            char *field_names[] = {"Nada"};
-            char *formatting[] = {""};
-            row_writer_set_field_names(writer, field_names, 1);
-            row_writer_set_formatting(writer, formatting);
-            write_row(writer, ';', 1, "");
+    else
+    {
+        char *field_names[] = {"Nada"};
+        char *formatting[] = {""};
+        row_writer_set_field_names(writer, field_names, 1);
+        row_writer_set_formatting(writer, formatting);
+        write_row(writer, ';', 1, "");
     }
 
     // Finaliza o processo
@@ -202,12 +203,13 @@ void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char
             free(artist_type);
         }
     }
-    else{
-            char *field_names[] = {"Nada"};
-            char *formatting[] = {""};
-            row_writer_set_field_names(writer, field_names, 1);
-            row_writer_set_formatting(writer, formatting);
-            write_row(writer, ';', 1, "");
+    else
+    {
+        char *field_names[] = {"Nada"};
+        char *formatting[] = {""};
+        row_writer_set_field_names(writer, field_names, 1);
+        row_writer_set_formatting(writer, formatting);
+        write_row(writer, ';', 1, "");
     }
 
     // Libera recursos
@@ -550,7 +552,7 @@ Semana *criar_semana(const char *domingo)
 
     strftime(semana->sabado, sizeof(semana->sabado), "%Y/%m/%d", &tm_domingo);
 
-    semana->artistas = g_hash_table_new(g_direct_hash, g_direct_equal);
+    semana->artistas = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, free);
     semana->top_artistas = NULL;
 
     return semana;

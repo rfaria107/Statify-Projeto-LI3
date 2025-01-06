@@ -123,6 +123,10 @@ int **createMatrizClassificacaoMusicas(int numUtilizadores, int numGeneros)
 void calculaMatrizClassificacaoMusicas(int **matriz, char **ids_utilizadores, char **nomes_generos,
                                        int num_utilizadores, int num_generos, GestorSistema *gestorsis)
 {
+    if (num_utilizadores <= 0 || num_generos <= 0)
+    {
+        return;
+    }
     GestorHistories *gestorhistories = get_gestor_histories(gestorsis);
     GestorMusicas *gestormusicas = get_gestor_musicas(gestorsis);
     GHashTable *hashhistory = get_hash_histories(gestorhistories);
@@ -179,7 +183,6 @@ void calculaMatrizClassificacaoMusicas(int **matriz, char **ids_utilizadores, ch
             continue;
         }
 
-        
         // incrementar a celula correta na matriz
         matriz[userIndex][genreIndex]++;
     }
