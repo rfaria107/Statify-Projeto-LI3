@@ -85,8 +85,13 @@ void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoPr
             free(artist_type);
         }
     }
-    else
-        write_row(writer, ';', 1, "");
+    else{
+            char *field_names[] = {"Nada"};
+            char *formatting[] = {""};
+            row_writer_set_field_names(writer, field_names, 1);
+            row_writer_set_formatting(writer, formatting);
+            write_row(writer, ';', 1, "");
+    }
 
     // Finaliza o processo
     free_and_finish_writing(writer);
@@ -197,8 +202,13 @@ void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char
             free(artist_type);
         }
     }
-    else
-        write_row(writer, ';', 1, "");
+    else{
+            char *field_names[] = {"Nada"};
+            char *formatting[] = {""};
+            row_writer_set_field_names(writer, field_names, 1);
+            row_writer_set_formatting(writer, formatting);
+            write_row(writer, ';', 1, "");
+    }
 
     // Libera recursos
     g_hash_table_destroy(contagem_intervalo);

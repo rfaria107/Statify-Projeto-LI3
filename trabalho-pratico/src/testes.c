@@ -5,12 +5,13 @@
 #include <dirent.h>
 #include <sys/resource.h>
 #include <time.h>
+#include "../include/io/io.h"
 #include "../include/gestores/gestor_sistemas.h"
-#include "../include/utils/string_utils.h"
-#include "../include/utils/stats/stats.h"
 #include "../include/queries/queries.h"
 #include "../include/queries/query5_aux.h"
-#include "../include/io/io.h"
+#include "../include/io/parser.h"
+#include "../include/utils/string_utils.h"
+#include "../include/utils/stats/stats.h"
 
 #define MAX_PATH 1024
 
