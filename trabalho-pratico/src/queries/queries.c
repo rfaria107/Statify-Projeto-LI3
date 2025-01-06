@@ -56,24 +56,28 @@ void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n, int
             char *country = user_get_country(usuario);
 
             // Escreve a linha com os dados do usuário no arquivo de saída
-             if (n == 0)
+            if (n == 0)
             {
-                if(t==0){
-                write_row(writer, ';', 5, mail, first_name, last_name, idade, country);
+                if (t == 0)
+                {
+                    write_row(writer, ';', 5, mail, first_name, last_name, idade, country);
                 }
-                else if (t==1){
-                 print_row (writer,';',5,mail,first_name,last_name,idade,country);
+                else if (t == 1)
+                {
+                    print_row(writer, ';', 5, mail, first_name, last_name, idade, country);
                 }
             }
             else if (n == 1)
-            { if (t==0){
-                write_row(writer, '=', 5, mail, first_name, last_name, idade, country);
+            {
+                if (t == 0)
+                {
+                    write_row(writer, '=', 5, mail, first_name, last_name, idade, country);
+                }
+                else if (t == 1)
+                {
+                    print_row(writer, '=', 5, mail, first_name, last_name, idade, country);
+                }
             }
-              else if (t==1) {
-                 print_row (writer,'=',5, mail,first_name,last_name,idade,country);
-              }
-            }
-            
 
             // Marca que algo foi escrito no arquivo
             has_written = 1;
@@ -110,24 +114,27 @@ void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n, int
             double total_recipe = calcular_receita_total_artista(artista, gestorartistas, gestormusicas);
 
             if (n == 0)
-            { 
-                if (t==0) {
-                write_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
+            {
+                if (t == 0)
+                {
+                    write_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
                 }
-                else if (t==1){
-                print_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
+                else if (t == 1)
+                {
+                    print_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
                 }
             }
             else if (n == 1)
             {
-                if (t==0){
-                write_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
+                if (t == 0)
+                {
+                    write_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
                 }
-                else if (t==1) {
-                print_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
+                else if (t == 1)
+                {
+                    print_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
                 }
             }
-            
 
             // Marca que algo foi escrito no arquivo
             has_written = 1;
@@ -234,22 +241,28 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,
         // Converter de volta para string
         gchar *duration_str = segundos_para_duracao(duracao_total);
         if (n == 0)
-        { if (t==0) {
-            write_row(writer, ';', 4, name, type, duration_str, country_artista);
-        }
-        else if (t==1){
-            print_row(writer, ';', 4, name, type, duration_str, country_artista);
-        }
+        {
+            if (t == 0)
+            {
+                write_row(writer, ';', 4, name, type, duration_str, country_artista);
+            }
+            else if (t == 1)
+            {
+                print_row(writer, ';', 4, name, type, duration_str, country_artista);
+            }
         }
         if (n == 1)
-        {if (t==0) {
-            write_row(writer, '=', 4, name, type, duration_str, country_artista);
+        {
+            if (t == 0)
+            {
+                write_row(writer, '=', 4, name, type, duration_str, country_artista);
+            }
+            else if (t == 1)
+            {
+                print_row(writer, '=', 4, name, type, duration_str, country_artista);
+            }
         }
-        else if (t==1){
-            print_row(writer, '=', 4, name, type, duration_str, country_artista);
-        }
-        }
-        
+
         g_free(name);
         g_free(type);
         g_free(duration_str);
@@ -320,7 +333,7 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
                     }
                     int total_likes = get_gp_total_likes(gp);
                     total_likes++;
-                    set_gp_total_likes(gp,total_likes);
+                    set_gp_total_likes(gp, total_likes);
                     g_free(genre);
                 }
             }
@@ -370,14 +383,18 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
             char *genre = get_gp_genre(gp);
             int total_likes = get_gp_total_likes(gp);
             if (n == 0)
-            { if (t==0){
-                write_row(writer, ';', 2, genre, total_likes);
-            }
+            {
+                if (t == 0)
+                {
+                    write_row(writer, ';', 2, genre, total_likes);
+                }
             }
             if (n == 1)
-            { if (t==1) {
-                write_row(writer, '=', 2, genre, total_likes);
-            }
+            {
+                if (t == 1)
+                {
+                    write_row(writer, '=', 2, genre, total_likes);
+                }
             }
             g_free(genre);
         }
@@ -389,18 +406,18 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_list_free(generos_lista);
     g_hash_table_destroy(generos_likes);
 }
-void query_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n, ResultadoProcessamento *resultado, int l )
+void query_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n, ResultadoProcessamento *resultado, int l)
 {
 
     if (data_final == NULL)
     {
         // Se data_final for NULL, chama a função para processar todo o histórico
-        all_historico(gestor_sistema, line_number, n, resultado,l);
+        all_historico(gestor_sistema, line_number, n, resultado, l);
     }
     else
     {
         // Caso contrário, chama a função para processar o intervalo de datas
-        intervalos_historico(gestor_sistema, line_number, n, data_inicial, data_final, resultado,  l);
+        intervalos_historico(gestor_sistema, line_number, n, data_inicial, data_final, resultado, l);
     }
 }
 
@@ -431,23 +448,26 @@ void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizad
         for (int i = 0; i < numRecomendacoes; i++)
         {
             if (n == 0)
-            {  if (t==0){
-                write_row(writer, ';', 1, utilizadores[i]);
-            }
-            else if (t==1){
-                print_row(writer, ';', 1, utilizadores[i]);
-
-            }
+            {
+                if (t == 0)
+                {
+                    write_row(writer, ';', 1, utilizadores[i]);
+                }
+                else if (t == 1)
+                {
+                    print_row(writer, ';', 1, utilizadores[i]);
+                }
             }
             if (n == 1)
             {
-                if (t==0){
-                write_row(writer, '=', 1, utilizadores[i]);
-            }
-            else if (t==1){
-                print_row(writer, '=', 1, utilizadores[i]);
-
-            }
+                if (t == 0)
+                {
+                    write_row(writer, '=', 1, utilizadores[i]);
+                }
+                else if (t == 1)
+                {
+                    print_row(writer, '=', 1, utilizadores[i]);
+                }
             }
         }
         free(utilizadores);
@@ -491,9 +511,9 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     gboolean user_found = FALSE;
 
     GHashTable *artist_time = g_hash_table_new(g_direct_hash, g_direct_equal);
-    GHashTable *day_count = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,NULL);
-    GHashTable *hour_time = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,NULL);
-    GHashTable *genre_popularity = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,NULL);
+    GHashTable *day_count = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    GHashTable *hour_time = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    GHashTable *genre_popularity = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     GHashTable *album_time = g_hash_table_new(g_direct_hash, g_direct_equal);
     GHashTable *artist_music_count = g_hash_table_new(g_direct_hash, g_direct_equal);
 
@@ -537,7 +557,6 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 gpointer current_hour_time = g_hash_table_lookup(hour_time, hour);
                 int hour_total = current_hour_time ? GPOINTER_TO_INT(current_hour_time) + duration : duration;
                 g_hash_table_insert(hour_time, g_strdup(hour), GINT_TO_POINTER(hour_total));
-
 
                 // Processa dados da música, artista, gênero e álbum
                 int history_music_id = get_history_music_id(history);
@@ -645,7 +664,15 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
 
     gchar *total_time_duracao = segundos_para_duracao(total_time);
     // Escrever os resultados no arquivo
-    write_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
+    if (t == 0)
+    {
+        // Escrever os resultados no arquivo
+        write_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
+    }
+    else if (t == 1)
+    {
+        print_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
+    }
     free(total_time_duracao);
 
     GList *sorted_list = NULL;
@@ -689,15 +716,18 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 char *formatting[] = {"A%07d", "%d", "%s"};
                 row_writer_set_field_names(writer, field_names, 3);
                 row_writer_set_formatting(writer, formatting);
-
+                
                 // Escreve os dados no arquivo
-        if(t==0){
-         // Escrever os resultados no arquivo
-        write_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
-        }
-        else if (t==1){
-        print_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);}
-    
+                if (t == 0)
+                {
+                    // Escrever os resultados no arquivo
+                    write_row(writer, (n == 0 ? ';' : '='), 3, artist_id, distinct_musics, duration_string);
+                }
+                else if (t == 1)
+                {
+                    print_row(writer, (n == 0 ? ';' : '='), 3, artist_id, distinct_musics, duration_string);
+                }
+
                 // Libera a memória alocada para duration_string
                 g_free(duration_string);
 
