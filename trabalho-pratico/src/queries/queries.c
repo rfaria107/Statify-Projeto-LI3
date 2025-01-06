@@ -382,19 +382,21 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
             GenrePopularity *gp = (GenrePopularity *)node->data;
             char *genre = get_gp_genre(gp);
             int total_likes = get_gp_total_likes(gp);
-            if (n == 0)
+            if (t == 0)
             {
-                if (t == 0)
+                if (n == 0)
                 {
                     write_row(writer, ';', 2, genre, total_likes);
                 }
-            }
-            if (n == 1)
-            {
-                if (t == 1)
+                if (n == 1)
                 {
                     write_row(writer, '=', 2, genre, total_likes);
                 }
+            }
+            else if (t == 1)
+            {
+
+                print_row(writer, '=', 2, genre, total_likes);
             }
             g_free(genre);
         }
@@ -716,7 +718,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 char *formatting[] = {"A%07d", "%d", "%s"};
                 row_writer_set_field_names(writer, field_names, 3);
                 row_writer_set_formatting(writer, formatting);
-                
+
                 // Escreve os dados no arquivo
                 if (t == 0)
                 {

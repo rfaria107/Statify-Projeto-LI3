@@ -92,7 +92,7 @@ OBJ_INTERACTIVE = $(SRC_DIR)/interativo.o \
 
 # Alvos (executáveis)
 TARGET = programa-principal
-INTERACTIVE_TARGET = programa-interativo
+#INTERACTIVE_TARGET = programa-interativo
 TEST_TARGET = programa-testes
 
 # Regra padrão
@@ -105,6 +105,9 @@ $(TARGET): $(OBJ_MAIN)
 # Regra para compilar o programa de testes
 $(TEST_TARGET): $(OBJ_TEST)
 	$(CC) -o $(TEST_TARGET) $(OBJ_TEST) `pkg-config --libs glib-2.0` -lm
+
+#$(INTERACTIVE_TARGET): $(OBJ_INTERACTIVE)
+#	$(CC) -o $(INTERACTIVE_TARGET) $(OBJ_INTERACTIVE) `pkg-config --libs glib-2.0` -lm
 
 # Regras para compilar os arquivos .o
 $(SRC_DIR)/main.o: $(SRC_DIR)/main.c
@@ -191,4 +194,5 @@ valgrind: $(TARGET)
 
 # Limpar arquivos gerados
 clean:
-	rm -f $(filter-out $(RECOMENDADOR_OBJ), $(OBJ_MAIN) $(OBJ_TEST)) $(TARGET) $(TEST_TARGET)
+	rm -f $(filter-out $(RECOMENDADOR_OBJ), $(OBJ_MAIN) $(OBJ_TEST)) $(TARGET) $(TEST_TARGET) 
+    #$(INTERACTIVE_TARGET)
