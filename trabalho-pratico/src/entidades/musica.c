@@ -9,7 +9,7 @@ struct Musica
     gint id;            // ID único da música
     gchar *title;       // Título da música (string dinâmica)
     gchar **artist_ids; // Lista de IDs dos artistas (array dinâmico de strings)
-    gchar *album_id;      // identificador do album a que a música pertence
+    gchar *album_id;    // identificador do album a que a música pertence
     gchar *duration;    // Duração da música em segundos
     gchar *genre;       // Gênero (string dinâmica)
     guint16 year;       // Ano de lançamento
@@ -115,7 +115,7 @@ void free_musica(Musica *musica)
     if (musica)
     {
         // Libera os campos dinâmicos da estrutura
-        //g_free(musica->id);
+        // g_free(musica->id);
         g_free(musica->title);
 
         // Libera cada string no array artist_ids

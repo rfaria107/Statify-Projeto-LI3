@@ -4,7 +4,7 @@ CFLAGS = -Wall -g `pkg-config --cflags glib-2.0` -I$(INC_DIR)
 SRC_DIR = src
 INC_DIR = include
 
-RECOMENDADOR_OBJ = $(SRC_DIR)/recomendador/recomendador-linux-x86_64.o
+RECOMENDADOR_OBJ = $(SRC_DIR)/utils/recomendador/recomendador-linux-x86_64.o
 
 # Objetos principais (para o executável principal)
 OBJ_MAIN = $(SRC_DIR)/main.o \
@@ -20,14 +20,18 @@ OBJ_MAIN = $(SRC_DIR)/main.o \
            $(SRC_DIR)/gestores/gestor_histories.o \
            $(SRC_DIR)/gestores/gestor_sistemas.o \
            $(SRC_DIR)/io/io.o \
-           $(SRC_DIR)/parsing/parser.o \
+           $(SRC_DIR)/io/parser.o \
            $(SRC_DIR)/utils/string_utils.o \
-           $(SRC_DIR)/write/writer.o \
-           $(SRC_DIR)/write/file.o \
+           $(SRC_DIR)/utils/utils.o \
+           $(SRC_DIR)/utils/stats/stats.o \
+           $(SRC_DIR)/io/write/writer.o \
+           $(SRC_DIR)/io/write/file.o \
            $(SRC_DIR)/validacao/valida.o \
            $(SRC_DIR)/queries/queries.o \
-           $(SRC_DIR)/queries/queries_aux.o \
+           $(SRC_DIR)/queries/query3_aux.o \
+           $(SRC_DIR)/queries/query4_aux.o \
            $(SRC_DIR)/queries/query5_aux.o \
+           $(SRC_DIR)/queries/query6_aux.o \
            $(RECOMENDADOR_OBJ)
 
 # Objetos de teste (para o executável de testes)
@@ -44,14 +48,18 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/gestores/gestor_albuns.o \
            $(SRC_DIR)/gestores/gestor_histories.o \
            $(SRC_DIR)/io/io.o \
-           $(SRC_DIR)/parsing/parser.o \
+           $(SRC_DIR)/io/parser.o \
            $(SRC_DIR)/utils/string_utils.o \
-           $(SRC_DIR)/write/writer.o \
-           $(SRC_DIR)/write/file.o \
+           $(SRC_DIR)/utils/utils.o \
+           $(SRC_DIR)/utils/stats/stats.o \
+           $(SRC_DIR)/io/write/writer.o \
+           $(SRC_DIR)/io/write/file.o \
            $(SRC_DIR)/validacao/valida.o \
            $(SRC_DIR)/queries/queries.o \
-           $(SRC_DIR)/queries/queries_aux.o \
+           $(SRC_DIR)/queries/query3_aux.o \
+           $(SRC_DIR)/queries/query4_aux.o \
            $(SRC_DIR)/queries/query5_aux.o \
+           $(SRC_DIR)/queries/query6_aux.o \
            $(RECOMENDADOR_OBJ)
 
 # Alvos (executáveis)
@@ -106,25 +114,43 @@ $(SRC_DIR)/gestores/gestor_histories.o: $(SRC_DIR)/gestores/gestor_histories.c
 $(SRC_DIR)/gestores/gestor_sistemas.o: $(SRC_DIR)/gestores/gestor_sistemas.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/parsing/parser.o: $(SRC_DIR)/parsing/parser.c
+$(SRC_DIR)/io/io.o: $(SRC_DIR)/io/io.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/parsing/string_utils.o: $(SRC_DIR)/parsing/string_utils.c   
+$(SRC_DIR)/io/parser.o: $(SRC_DIR)/io/parser.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/write/writer.o: $(SRC_DIR)/write/writer.c   
+$(SRC_DIR)/io/write/writer.o: $(SRC_DIR)/io/write/writer.c   
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/write/file.o: $(SRC_DIR)/write/file.c   
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(SRC_DIR)/validacao/valida.o: $(SRC_DIR)/validacao/valida.c  
+$(SRC_DIR)/io/write/file.o: $(SRC_DIR)/io/write/file.c   
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/queries/queries.o: $(SRC_DIR)/queries/queries.c  
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(SRC_DIR)/queries/queries_aux.o: $(SRC_DIR)/queries/queries_aux.c  
+$(SRC_DIR)/queries/query3_aux.o: $(SRC_DIR)/queries/query3_aux.c  
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/queries/query4_aux.o: $(SRC_DIR)/queries/query4_aux.c  
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/queries/query5_aux.o: $(SRC_DIR)/queries/query5_aux.c  
+	$(CC) $(CFLAGS) -c $< -o $@ 
+
+$(SRC_DIR)/queries/query6_aux.o: $(SRC_DIR)/queries/query6_aux.c  
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/utils/string_utils.o: $(SRC_DIR)/utils/string_utils.c   
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/utils/stats/stats.o: $(SRC_DIR)/utils/stats/stats.c   
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/utils/utils.o: $(SRC_DIR)/utils/utils.c   
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(SRC_DIR)/validacao/valida.o: $(SRC_DIR)/validacao/valida.c  
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(SRC_DIR)/testes.o: $(SRC_DIR)/testes.c  

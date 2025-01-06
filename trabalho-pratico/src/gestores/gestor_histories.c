@@ -7,17 +7,21 @@ struct GestorHistories
     GHashTable *histories; // Tabela hash de histories
 };
 
-void free_history_value(gpointer value) {
-    free_history((History *) value); // Assuming liberar_history frees the history struct
+void free_history_value(gpointer value)
+{
+    free_history((History *)value); // Assuming liberar_history frees the history struct
 }
 
-GHashTable *get_hash_histories(GestorHistories *gestor){
+GHashTable *get_hash_histories(GestorHistories *gestor)
+{
     return (gestor->histories);
 }
 
-GestorHistories* criar_gestor_histories() {
+GestorHistories *criar_gestor_histories()
+{
     GestorHistories *gestor = malloc(sizeof(GestorHistories));
-    if (gestor) {
+    if (gestor)
+    {
         inicializar_gestor_histories(gestor);
     }
     return gestor;
@@ -40,17 +44,20 @@ void inserir_history(GestorHistories *gestor, History *history)
     g_hash_table_insert(gestor->histories, GINT_TO_POINTER(id), history);
 }
 
-History* buscar_history(GestorHistories *gestor,int id) {
-    return (History*) g_hash_table_lookup(gestor->histories, GINT_TO_POINTER(id));
+History *buscar_history(GestorHistories *gestor, int id)
+{
+    return (History *)g_hash_table_lookup(gestor->histories, GINT_TO_POINTER(id));
 }
 
-History* buscar_history_por_user_id(GestorHistories *gestor, int user_id) {
+History *buscar_history_por_user_id(GestorHistories *gestor, int user_id)
+{
 
-    if (gestor == NULL || gestor->histories == NULL) {
+    if (gestor == NULL || gestor->histories == NULL)
+    {
         return NULL;
     }
 
-    History* history = (History*) g_hash_table_lookup(gestor->histories, GINT_TO_POINTER(user_id));
+    History *history = (History *)g_hash_table_lookup(gestor->histories, GINT_TO_POINTER(user_id));
 
     return history;
 }

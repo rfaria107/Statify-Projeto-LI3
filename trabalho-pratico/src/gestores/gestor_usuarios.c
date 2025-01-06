@@ -52,7 +52,7 @@ Usuario *buscar_usuario(GestorUsuarios *gestor, Usuario *usuario)
         if (id_usuario)
         {
             Usuario *resultado = (Usuario *)g_hash_table_lookup(gestor->usuarios, GINT_TO_POINTER(id_usuario));
-            //g_free(id_usuario); // Libere a cópia do ID gerada por user_get_id()
+            // g_free(id_usuario); // Libere a cópia do ID gerada por user_get_id()
             return resultado;
         }
         else
@@ -82,7 +82,7 @@ void inserir_usuario(GestorUsuarios *gestor, Usuario *user)
         if (id)
         {
             g_hash_table_insert(gestor->usuarios, GINT_TO_POINTER(id), user);
-            //g_free(id); // Libere o ID temporário após duplicação
+            // g_free(id); // Libere o ID temporário após duplicação
         }
     }
 }

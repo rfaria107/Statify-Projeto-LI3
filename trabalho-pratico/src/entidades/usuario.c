@@ -18,10 +18,12 @@ struct Usuario
 };
 
 // Função para criar um usuário
-Usuario* create_usuario(int username, char* email, char* first_name, char* last_name, char* birth_date, 
-                        char* country, char* subscription_type, char** liked_musics) {
-    Usuario* usuario = (Usuario*)malloc(sizeof(Usuario));
-    if (!usuario) {
+Usuario *create_usuario(int username, char *email, char *first_name, char *last_name, char *birth_date,
+                        char *country, char *subscription_type, char **liked_musics)
+{
+    Usuario *usuario = (Usuario *)malloc(sizeof(Usuario));
+    if (!usuario)
+    {
         fprintf(stderr, "Erro ao alocar memória para Usuario.\n");
         return NULL;
     }
@@ -36,18 +38,21 @@ Usuario* create_usuario(int username, char* email, char* first_name, char* last_
 
     // Alocar memória para liked_musics
     int num_musicas = 0;
-    while (liked_musics[num_musicas] != NULL) {
+    while (liked_musics[num_musicas] != NULL)
+    {
         num_musicas++;
     }
-    
-    usuario->liked_musics_id = (char**)malloc((num_musicas + 1) * sizeof(char*));
-    if (!usuario->liked_musics_id) {
+
+    usuario->liked_musics_id = (char **)malloc((num_musicas + 1) * sizeof(char *));
+    if (!usuario->liked_musics_id)
+    {
         fprintf(stderr, "Erro ao alocar memória para liked_musics.\n");
         free(usuario); // Liberar memória do usuário caso falhe
         return NULL;
     }
 
-    for (int i = 0; i < num_musicas; i++) {
+    for (int i = 0; i < num_musicas; i++)
+    {
         usuario->liked_musics_id[i] = strdup(liked_musics[i]);
     }
     usuario->liked_musics_id[num_musicas] = NULL; // Terminar com NULL
@@ -80,7 +85,7 @@ void free_usuario(Usuario *usuario)
 {
     if (usuario)
     {
-        //g_free(usuario->username);
+        // g_free(usuario->username);
         g_free(usuario->email);
         g_free(usuario->first_name);
         g_free(usuario->last_name);
@@ -150,6 +155,6 @@ int calcularIdade(Usuario *usuario)
     int idade = anoAtual - ano;
     if (mes > mesAtual || (mes == mesAtual && dia > diaAtual))
         idade--;
-    g_free(birth_date);    
+    g_free(birth_date);
     return idade;
 }

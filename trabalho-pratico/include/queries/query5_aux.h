@@ -1,9 +1,6 @@
 #ifndef QUERY5_AUX_H
 #define QUERY5_AUX_H
 
-#include <glib.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "../include/gestores/gestor_sistemas.h"
 
 char **preprocessNomesGeneros(GestorSistema *gestorsis, int *numGeneros);

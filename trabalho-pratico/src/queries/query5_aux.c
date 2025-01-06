@@ -8,7 +8,6 @@
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/queries/query5_aux.h"
 #include "../include/gestores/gestor_sistemas.h"
-// #include "../include/entidades/usuario.h"
 
 char **preprocessIdsUtilizadores(GestorSistema *gestorsis, int *numUtilizadores)
 {
@@ -17,7 +16,7 @@ char **preprocessIdsUtilizadores(GestorSistema *gestorsis, int *numUtilizadores)
     // encontrar o numero de utilizadores
     *numUtilizadores = g_hash_table_size(hashusers);
     // alocar e inicializar memoria com 0 g_malloc0
-    char **idsUtilizadores = g_malloc0(*numUtilizadores * sizeof(char *));
+    char **idsUtilizadores = g_malloc(*numUtilizadores * sizeof(char *));
 
     GHashTableIter iter;
     gpointer key, value;
@@ -56,14 +55,15 @@ char **preprocessNomesGeneros(GestorSistema *gestorsis, int *numGeneros)
             g_hash_table_add(uniqueGenres, g_strdup(genre));
             free(genre);
         }
-        else free(genre);
+        else
+            free(genre);
     }
 
     // calcular numero de generos únicos
     *numGeneros = g_hash_table_size(uniqueGenres);
 
     // alocar e inicializar o array dos nomes dos generos
-    char **nomesGeneros = g_malloc0(*numGeneros * sizeof(char *));
+    char **nomesGeneros = g_malloc(*numGeneros * sizeof(char *));
     int index = 0;
 
     GHashTableIter genreIter;
@@ -153,12 +153,12 @@ void calculaMatrizClassificacaoMusicas(int **matriz, char **ids_utilizadores, ch
 
         int history_music_id = get_history_music_id(history);
         Musica *musica = buscar_musicas(gestormusicas, history_music_id);
-        char *genre = get_music_genre(musica);
-
-        if (!musica || !genre)
+        if (!musica)
         {
             continue; // skip se nao encontrar musica ou genero
         }
+
+        char *genre = get_music_genre(musica);
 
         // encontrar a coluna onde incrementar (indice do genero no array nomesgeneros)
         int genreIndex = -1;
@@ -179,6 +179,7 @@ void calculaMatrizClassificacaoMusicas(int **matriz, char **ids_utilizadores, ch
             continue;
         }
 
+        
         // incrementar a celula correta na matriz
         matriz[userIndex][genreIndex]++;
     }

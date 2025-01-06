@@ -9,7 +9,6 @@ struct GestorSistema
     GestorMusicas *gestor_musicas;     // Gestor de músicas
     GestorAlbuns *gestor_albuns;       // Gestor de albuns
     GestorHistories *gestor_histories; // Gestor de albuns
-
 };
 
 GestorSistema *criar_gestor_sistema()

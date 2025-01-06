@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
-#include <ctype.h>
 
 #include "../include/entidades/artists.h"
 #include "../include/entidades/musica.h"
@@ -10,7 +9,6 @@
 #include "../include/gestores/gestor_musicas.h"
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/gestores/gestor_usuarios.h"
-#include "../include/parsing/parser.h"
 #include "../include/utils/string_utils.h"
 #include "../include/validacao/valida.h"
 #include "../include/gestores/gestor_albuns.h"
@@ -56,8 +54,9 @@ gboolean validarDataFutura(gint ano, gint mes, gint dia)
 // Valida se a data de nascimento do usuário é válida
 gboolean validarDataUsuario(Usuario *usuario)
 {
-    if(usuario == NULL) return FALSE;
-    
+    if (usuario == NULL)
+        return FALSE;
+
     gchar *birth_date = user_get_birth_date(usuario);
 
     if (!validarFormatoData(birth_date))

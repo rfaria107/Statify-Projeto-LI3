@@ -13,23 +13,16 @@
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/gestores/gestor_histories.h"
 #include "../include/gestores/gestor_albuns.h"
-#include "../include/write/writer.h"
+#include "../include/io/write/writer.h"
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/utils/string_utils.h"
-#include "../include/queries/queries_aux.h"
-#include "../include/recomendador/recomendador.h"
-
-struct GenrePopularity
-{
-    char *genre;
-    int total_likes;
-};
-
-
-struct ResultadoProcessamento {
-    GHashTable *semanas;
-    GHashTable *top_10_count;
-};
+#include "../include/utils/utils.h"
+#include "../include/utils/stats/stats.h"
+#include "../include/utils/recomendador/recomendador.h"
+#include "../include/queries/query3_aux.h"
+#include "../include/queries/query4_aux.h"
+#include "../include/queries/query5_aux.h"
+#include "../include/queries/query6_aux.h"
 
 void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n)
 {
@@ -103,7 +96,7 @@ void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n)
             char *name = get_artist_name(artista);
             char *type = get_artist_type(artista);
             char *country = get_artist_country(artista);
-            int num_albums = get_artist_num_albuns_individual(artista, gestoralbuns);
+            int num_albums = calcula_artista_num_albuns_individual(artista, gestoralbuns);
             double total_recipe = calcular_receita_total_artista(artista, gestorartistas, gestormusicas);
 
             if (n == 0)
@@ -295,7 +288,9 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
                         gp = create_genre_popularity(genre);
                         g_hash_table_insert(generos_likes, g_strdup(genre), gp);
                     }
-                    gp->total_likes++;
+                    int total_likes = get_gp_total_likes(gp);
+                    total_likes++;
+                    set_gp_total_likes(gp,total_likes);
                     g_free(genre);
                 }
             }
@@ -342,14 +337,17 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
         for (GList *node = generos_lista; node != NULL; node = node->next)
         {
             GenrePopularity *gp = (GenrePopularity *)node->data;
+            char *genre = get_gp_genre(gp);
+            int total_likes = get_gp_total_likes(gp);
             if (n == 0)
             {
-                write_row(writer, ';', 2, gp->genre, gp->total_likes);
+                write_row(writer, ';', 2, genre, total_likes);
             }
             if (n == 1)
             {
-                write_row(writer, '=', 2, gp->genre, gp->total_likes);
+                write_row(writer, '=', 2, genre, total_likes);
             }
+            g_free(genre);
         }
     }
 
@@ -359,16 +357,22 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_list_free(generos_lista);
     g_hash_table_destroy(generos_likes);
 }
-void querie_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n, ResultadoProcessamento *resultado) {
 
-    if (data_final == NULL) {
+void query_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n, ResultadoProcessamento *resultado)
+{
+
+    if (data_final == NULL)
+    {
         // Se data_final for NULL, chama a função para processar todo o histórico
         all_historico(gestor_sistema, line_number, n, resultado);
-    } else {
+    }
+    else
+    {
         // Caso contrário, chama a função para processar o intervalo de datas
         intervalos_historico(gestor_sistema, line_number, n, data_inicial, data_final, resultado);
     }
 }
+
 void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizadores, char **nomesGeneros,
              int numUtilizadores, int numGeneros, int numRecomendacoes, int line_number, int n, GestorSistema *gestorsis)
 {
@@ -445,9 +449,9 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     gboolean user_found = FALSE;
 
     GHashTable *artist_time = g_hash_table_new(g_direct_hash, g_direct_equal);
-    GHashTable *day_count = g_hash_table_new(g_str_hash, g_str_equal);
-    GHashTable *hour_time = g_hash_table_new(g_str_hash, g_str_equal);
-    GHashTable *genre_popularity = g_hash_table_new(g_str_hash, g_str_equal);
+    GHashTable *day_count = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,NULL);
+    GHashTable *hour_time = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,NULL);
+    GHashTable *genre_popularity = g_hash_table_new_full(g_str_hash, g_str_equal,g_free,NULL);
     GHashTable *album_time = g_hash_table_new(g_direct_hash, g_direct_equal);
     GHashTable *artist_music_count = g_hash_table_new(g_direct_hash, g_direct_equal);
 
@@ -491,6 +495,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 gpointer current_hour_time = g_hash_table_lookup(hour_time, hour);
                 int hour_total = current_hour_time ? GPOINTER_TO_INT(current_hour_time) + duration : duration;
                 g_hash_table_insert(hour_time, g_strdup(hour), GINT_TO_POINTER(hour_total));
+
 
                 // Processa dados da música, artista, gênero e álbum
                 int history_music_id = get_history_music_id(history);
@@ -600,14 +605,15 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     // Escrever os resultados no arquivo
     write_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
     free(total_time_duracao);
-    
+
     GList *sorted_list = NULL;
     GHashTableIter artist_iter;
     gpointer key2, value2;
 
     // Preenche a lista com os IDs dos artistas
     g_hash_table_iter_init(&artist_iter, artist_time);
-    while (g_hash_table_iter_next(&artist_iter, &key2, &value2)) {
+    while (g_hash_table_iter_next(&artist_iter, &key2, &value2))
+    {
         sorted_list = g_list_prepend(sorted_list, key2); // Adiciona os IDs na lista
     }
 
@@ -616,7 +622,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
 
     int displayed_artists = 0;
 
-    if (sorted_list != NULL)  // Alterado para 'sorted_list'
+    if (sorted_list != NULL) // Alterado para 'sorted_list'
     {
         for (GList *iter = sorted_list; iter && displayed_artists < N; iter = iter->next)
         {
@@ -655,7 +661,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
     }
 
     // Libera a lista de artistas ordenados após o uso
-    g_list_free(sorted_list);  // Alterado para 'sorted_list'
+    g_list_free(sorted_list); // Alterado para 'sorted_list'
 
     // Limpeza
     free(top_day);

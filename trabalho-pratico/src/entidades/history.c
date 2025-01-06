@@ -79,9 +79,9 @@ void free_history(History *history)
     if (history)
     {
         // Libera os campos dinâmicos
-        //g_free(history->id);
-        //g_free(history->user_id);
-        //g_free(history->music_id);
+        // g_free(history->id);
+        // g_free(history->user_id);
+        // g_free(history->music_id);
         g_free(history->timestamp);
         g_free(history->duration);
         g_free(history->platform);

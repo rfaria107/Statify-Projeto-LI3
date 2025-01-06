@@ -7,17 +7,21 @@ struct GestorArtistas
     GHashTable *artistas; // Tabela hash de artistas
 };
 
-void free_artista_value(gpointer value) {
-    free_artista((Artista *) value); // Assuming liberar_artista frees the Artista struct
+void free_artista_value(gpointer value)
+{
+    free_artista((Artista *)value); // Assuming liberar_artista frees the Artista struct
 }
 
-GHashTable *get_hash_artistas(GestorArtistas *gestor){
+GHashTable *get_hash_artistas(GestorArtistas *gestor)
+{
     return (gestor->artistas);
 }
 
-GestorArtistas* criar_gestor_artistas() {
+GestorArtistas *criar_gestor_artistas()
+{
     GestorArtistas *gestor = malloc(sizeof(GestorArtistas));
-    if (gestor) {
+    if (gestor)
+    {
         inicializar_gestor_artistas(gestor);
     }
     return gestor;
@@ -40,6 +44,7 @@ void inserir_artista(GestorArtistas *gestor, Artista *artista)
     g_hash_table_insert(gestor->artistas, GINT_TO_POINTER(id), artista);
 }
 
-Artista* buscar_artista(GestorArtistas *gestor, int id) {
-    return (Artista*) g_hash_table_lookup(gestor->artistas, GINT_TO_POINTER(id));
+Artista *buscar_artista(GestorArtistas *gestor, int id)
+{
+    return (Artista *)g_hash_table_lookup(gestor->artistas, GINT_TO_POINTER(id));
 }

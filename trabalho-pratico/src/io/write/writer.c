@@ -1,9 +1,10 @@
-#include "../include/write/writer.h"
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../include/write/file.h"
+#include <glib.h>
+#include "../include/io/write/writer.h"
+#include "../include/io/write/file.h"
 
 #define BUFFER_SIZE 1024
 #define VALUE_BUFFER_SIZE 128
@@ -40,6 +41,14 @@ RowWriter *initialize_error_writer(const char *error_file_name)
 // Define os nomes dos campos e a formatação
 void row_writer_set_field_names(RowWriter *writer, char **field_names, int fields)
 {
+    if (writer->field_names != NULL)
+    {
+        for (int i = 0; i < writer->fields && writer->field_names[i] != NULL; i++)
+        {
+            free(writer->field_names[i]);
+        }
+        free(writer->field_names);
+    }
     writer->field_names = malloc(fields * sizeof(char *));
     for (int i = 0; i < fields; i++)
     {
@@ -67,7 +76,7 @@ void write_row(RowWriter *writer, char separator, int fields, ...)
     // Adiciona os formatos para cada campo, separados por ponto e vírgula
     for (int i = 0; i < fields - 1; i++)
     {
-        
+
         strcat(formatting, writer->format[i]);
         char sep_str[2] = {separator, '\0'}; // Converte o separador para string
 
@@ -84,7 +93,6 @@ void write_row(RowWriter *writer, char separator, int fields, ...)
 
     va_end(args); // Finaliza a manipulação dos argumentos variáveis
 }
-
 
 // Escrever ficheiros de erro
 void log_error(RowWriter *error_writer, const char *error_line)
@@ -126,24 +134,24 @@ void escrever_cabecalho_users_erro(RowWriter *error_writer)
     row_writer_set_formatting(error_writer, formatting);
 
     // Escreve o cabeçalho no arquivo de erros com aspas ao redor de cada campo
-    write_row(error_writer, ';', 8, 
-        "\"username\"", "\"email\"", "\"first_name\"", "\"last_name\"", "\"birth_date\"", 
-        "\"country\"", "\"subscription_type\"", "\"liked_songs_id\"");
+    write_row(error_writer, ';', 8,
+              "\"username\"", "\"email\"", "\"first_name\"", "\"last_name\"", "\"birth_date\"",
+              "\"country\"", "\"subscription_type\"", "\"liked_songs_id\"");
 }
 
 void escrever_cabecalho_musics_erro(RowWriter *error_writer)
 {
     // "id";"title";"artist_id";"album_id";"duration";"genre";"year";"lyrics"
     char *field_names[] = {"id", "title", "artist_id", "album_id", "duration", "genre", "year", "lyrics"};
-    char *formatting[] = {"%s", "%s", "%s","%s", "%s", "%s", "%s", "%s"};
+    char *formatting[] = {"%s", "%s", "%s", "%s", "%s", "%s", "%s", "%s"};
 
     // Define os campos e formatação
     row_writer_set_field_names(error_writer, field_names, 8);
     row_writer_set_formatting(error_writer, formatting);
 
     // Escreve o cabeçalho com aspas ao redor de cada campo
-    write_row(error_writer, ';', 8, 
-        "\"id\"", "\"title\"", "\"artist_id\"", "\"album_id\"","\"duration\"", "\"genre\"", "\"year\"", "\"lyrics\"");
+    write_row(error_writer, ';', 8,
+              "\"id\"", "\"title\"", "\"artist_id\"", "\"album_id\"", "\"duration\"", "\"genre\"", "\"year\"", "\"lyrics\"");
 }
 
 void escrever_cabecalho_artists_erro(RowWriter *error_writer)
@@ -157,8 +165,8 @@ void escrever_cabecalho_artists_erro(RowWriter *error_writer)
     row_writer_set_formatting(error_writer, formatting);
 
     // Escreve o cabeçalho com aspas ao redor de cada campo
-    write_row(error_writer, ';', 7, 
-        "\"id\"", "\"name\"", "\"description\"", "\"recipe_per_stream\"", "\"id_constituent\"", "\"country\"", "\"type\"");
+    write_row(error_writer, ';', 7,
+              "\"id\"", "\"name\"", "\"description\"", "\"recipe_per_stream\"", "\"id_constituent\"", "\"country\"", "\"type\"");
 }
 
 void escrever_cabecalho_history_erro(RowWriter *error_writer)
@@ -172,8 +180,7 @@ void escrever_cabecalho_history_erro(RowWriter *error_writer)
     row_writer_set_formatting(error_writer, formatting);
 
     // Escreve o cabeçalho com aspas ao redor de cada campo
-    write_row(error_writer, ';', 6, 
-        "\"id\"", "\"user_id\"", "\"music_id\"", "\"timestamp\"", "\"duration\"", "\"platform\"");
+    write_row(error_writer, ';', 6, "\"id\"", "\"user_id\"", "\"music_id\"", "\"timestamp\"", "\"duration\"", "\"platform\"");
 }
 
 void escrever_cabecalho_album_erro(RowWriter *error_writer)
@@ -187,6 +194,5 @@ void escrever_cabecalho_album_erro(RowWriter *error_writer)
     row_writer_set_formatting(error_writer, formatting);
 
     // Escreve o cabeçalho com aspas ao redor de cada campo
-    write_row(error_writer, ';', 5, 
-        "\"id\"", "\"title\"", "\"artists_id\"", "\"year\"", "\"producers\"");
+    write_row(error_writer, ';', 5, "\"id\"", "\"title\"", "\"artists_id\"", "\"year\"", "\"producers\"");
 }

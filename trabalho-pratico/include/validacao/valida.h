@@ -2,9 +2,10 @@
 #define VALIDA_H
 
 #include <glib.h>
-#include "../../include/gestores/gestor_sistemas.h"
-#include "../../include/entidades/musica.h"
-#include "../../include/entidades/usuario.h"
+#include "../include/gestores/gestor_sistemas.h"
+#include "../include/gestores/gestor_musicas.h"
+#include "../include/entidades/musica.h"
+#include "../include/entidades/usuario.h"
 
 gboolean validarFormatoData(gchar *data);
 gboolean validarMesEDia(gint mes, gint dia);
@@ -22,9 +23,8 @@ int valida_single_quotes_lista_artistas(gchar *artista);
 int valida_single_quotes_lista_album(gchar *album);
 int valida_ano_lançamento(Musica *musica);
 int valida_artistids_musica(Musica *musica, GestorArtistas *gestorartistas);
-gboolean valida_album (Musica *musica, GestorAlbuns *gestor_albuns);
-gboolean valida_artista_tipo (Artista *artista);
-gboolean valida_plataforma (History *historico);
-
+gboolean valida_album(Musica *musica, GestorAlbuns *gestor_albuns);
+gboolean valida_artista_tipo(Artista *artista);
+gboolean valida_plataforma(History *historico);
 
 #endif

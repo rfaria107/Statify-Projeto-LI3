@@ -6,31 +6,35 @@
 #include <sys/resource.h>
 #include <time.h>
 #include "../include/gestores/gestor_sistemas.h"
-#include "../include/queries/queries.h"
-#include "../include/queries/queries_aux.h"
-#include "../include/queries/query5_aux.h"
-#include "../include/parsing/parser.h"
 #include "../include/utils/string_utils.h"
+#include "../include/utils/stats/stats.h"
+#include "../include/queries/queries.h"
+#include "../include/queries/query5_aux.h"
 #include "../include/io/io.h"
 
 #define MAX_PATH 1024
 
 // Função para medir o uso de memória (em megabytes)
-long get_memory_usage_mb() {
+long get_memory_usage_mb()
+{
     struct rusage usage;
     getrusage(RUSAGE_SELF, &usage);
-    return usage.ru_maxrss / 1024;  // Convertendo para megabytes
+    return usage.ru_maxrss / 1024; // Convertendo para megabytes
 }
 
 // Função para comparar arquivos de texto
-int compare_txt_files(const char *file1, const char *file2, GList **discrepancies, int query_num) {
+int compare_txt_files(const char *file1, const char *file2, GList **discrepancies, int query_num)
+{
     FILE *f1 = fopen(file1, "r");
     FILE *f2 = fopen(file2, "r");
 
-    if (!f1 || !f2) {
+    if (!f1 || !f2)
+    {
         perror("Erro ao abrir arquivos");
-        if (f1) fclose(f1);
-        if (f2) fclose(f2);
+        if (f1)
+            fclose(f1);
+        if (f2)
+            fclose(f2);
         return -1;
     }
 
@@ -41,7 +45,8 @@ int compare_txt_files(const char *file1, const char *file2, GList **discrepancie
     // Verificar se ambos os arquivos estão vazios
     fseek(f1, 0, SEEK_END);
     fseek(f2, 0, SEEK_END);
-    if (ftell(f1) == 0 && ftell(f2) == 0) {
+    if (ftell(f1) == 0 && ftell(f2) == 0)
+    {
         fclose(f1);
         fclose(f2);
         return result; // Ambos os arquivos estão vazios, não há discrepância
@@ -51,23 +56,25 @@ int compare_txt_files(const char *file1, const char *file2, GList **discrepancie
     rewind(f1);
     rewind(f2);
 
-    while (1) {
+    while (1)
+    {
         char *res1 = fgets(line1, sizeof(line1), f1);
         char *res2 = fgets(line2, sizeof(line2), f2);
 
-        if (res1 == NULL && res2 == NULL) {
+        if (res1 == NULL && res2 == NULL)
+        {
             // Ambos os arquivos terminaram, são iguais até este ponto
             break;
         }
 
-        if (res1 == NULL || res2 == NULL) {
+        if (res1 == NULL || res2 == NULL)
+        {
             // Um dos arquivos terminou antes do outro
             char *discrepancy = g_strdup_printf(
                 "Descrepância na query %d: linha %d de \"%s\"",
                 query_num,
                 line_number,
-                res1 ? file2 : file1
-            );
+                res1 ? file2 : file1);
             *discrepancies = g_list_append(*discrepancies, discrepancy);
             result = 0;
             break;
@@ -77,14 +84,14 @@ int compare_txt_files(const char *file1, const char *file2, GList **discrepancie
         line1[strcspn(line1, "\n")] = 0;
         line2[strcspn(line2, "\n")] = 0;
 
-        if (strcmp(line1, line2) != 0) {
+        if (strcmp(line1, line2) != 0)
+        {
             // Se as linhas são diferentes, registra a discrepância
             char *discrepancy = g_strdup_printf(
                 "Descrepância na query %d: linha %d de \"%s\"",
                 query_num,
                 line_number,
-                file1
-            );
+                file1);
             *discrepancies = g_list_append(*discrepancies, discrepancy);
             result = 0;
         }
@@ -98,15 +105,18 @@ int compare_txt_files(const char *file1, const char *file2, GList **discrepancie
 }
 
 // Função para imprimir os resultados das discrepâncias
-void print_discrepancies(GList *discrepancies) {
+void print_discrepancies(GList *discrepancies)
+{
     GList *node = discrepancies;
-    while (node != NULL) {
+    while (node != NULL)
+    {
         printf("%s\n", (char *)node->data);
         node = node->next;
     }
 }
 
-gint compare_files_numerically(gconstpointer a, gconstpointer b) {
+gint compare_files_numerically(gconstpointer a, gconstpointer b)
+{
     const char *file1 = (const char *)a;
     const char *file2 = (const char *)b;
 
@@ -120,11 +130,13 @@ gint compare_files_numerically(gconstpointer a, gconstpointer b) {
 }
 
 // Função para comparar todos os arquivos e reportar as discrepâncias
-int compare_all_files(const char *dir1, const char *dir2, int query_counts[]) {
+int compare_all_files(const char *dir1, const char *dir2, int query_counts[])
+{
     struct dirent *entry1;
     DIR *dp1 = opendir(dir1);
 
-    if (!dp1) {
+    if (!dp1)
+    {
         perror("Erro ao abrir o diretório");
         exit(1);
     }
@@ -136,10 +148,13 @@ int compare_all_files(const char *dir1, const char *dir2, int query_counts[]) {
     GList *files1 = NULL;
 
     // Iterar sobre os arquivos no diretório "dir1"
-    while ((entry1 = readdir(dp1)) != NULL) {
-        if (entry1->d_type == DT_REG) {  // Verifica se é um arquivo regular
+    while ((entry1 = readdir(dp1)) != NULL)
+    {
+        if (entry1->d_type == DT_REG)
+        { // Verifica se é um arquivo regular
             const char *extension = strrchr(entry1->d_name, '.');
-            if (extension && strcmp(extension, ".txt") == 0) {
+            if (extension && strcmp(extension, ".txt") == 0)
+            {
                 total_files++;
 
                 // Armazenar o nome dos arquivos
@@ -150,15 +165,17 @@ int compare_all_files(const char *dir1, const char *dir2, int query_counts[]) {
 
     // Ordenar os arquivos em ordem alfabética
     files1 = g_list_sort(files1, compare_files_numerically);
-    int query_start = 0;  // Início da comparação de cada query
+    int query_start = 0; // Início da comparação de cada query
 
     // Comparar os arquivos para cada query, de acordo com query_counts
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++)
+    {
         int query_size = query_counts[i];
         int differing_files_in_query = 0;
 
         // Comparar os arquivos da query atual, preservando a ordem correta
-        for (int j = query_start; j < query_start + query_size && j < total_files; j++) {
+        for (int j = query_start; j < query_start + query_size && j < total_files; j++)
+        {
             const char *filename = (const char *)g_list_nth_data(files1, j);
 
             // Construir os caminhos completos dos arquivos
@@ -170,7 +187,8 @@ int compare_all_files(const char *dir1, const char *dir2, int query_counts[]) {
             int result = compare_txt_files(path1, path2, &discrepancies, i + 1); // A query será dada pelo índice (i + 1)
 
             // Atualizar a contagem de arquivos com discrepância
-            if (result == 0) {
+            if (result == 0)
+            {
                 differing_files_in_query++;
             }
         }
@@ -183,7 +201,8 @@ int compare_all_files(const char *dir1, const char *dir2, int query_counts[]) {
     }
 
     // Exibir as discrepâncias
-    if (discrepancies != NULL) {
+    if (discrepancies != NULL)
+    {
         print_discrepancies(discrepancies);
     }
 
@@ -193,7 +212,7 @@ int compare_all_files(const char *dir1, const char *dir2, int query_counts[]) {
     return 0;
 }
 
-void interpreter_inputs2(FILE *file, GestorSistema *gestorsis,int query_counts[])
+void interpreter_inputs2(FILE *file, GestorSistema *gestorsis, int query_counts[])
 {
     char *buffer = NULL;
     size_t buffer_size = 0;
@@ -213,7 +232,7 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis,int query_counts[]
     char **nomesGeneros = preprocessNomesGeneros(gestorsis, &numGeneros);
     int **matriz = createMatrizClassificacaoMusicas(numUtilizadores, numGeneros);
     calculaMatrizClassificacaoMusicas(matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, gestorsis);
-    ResultadoProcessamento *resultado = processar_semanas_e_contar_artistas (gestorsis);
+    ResultadoProcessamento *resultado = processar_semanas_e_contar_artistas(gestorsis);
 
     while (getline(&buffer, &buffer_size, file) != -1)
     {
@@ -339,8 +358,8 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis,int query_counts[]
                 query_3(min_age, max_age, gestorsis, line_number, 1);
             }
         }
-        
-                else if (strcmp(token, "4") == 0)
+
+        else if (strcmp(token, "4") == 0)
         {
             g_free(token);
             token = procura_espaço2(buffer);
@@ -363,7 +382,7 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis,int query_counts[]
                 g_free(token);
             }
 
-            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 0,resultado);
+            query_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 0, resultado);
 
             g_free(data_inicial);
             g_free(data_final);
@@ -392,12 +411,12 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis,int query_counts[]
                 g_free(token);
             }
 
-            querie_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 1,resultado);
+            query_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 1, resultado);
 
             g_free(data_inicial);
             g_free(data_final);
         }
-        
+
         else if (strcmp(token, "5") == 0)
         {
             g_free(token);
@@ -436,7 +455,7 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis,int query_counts[]
                 }
             }
         }
-        
+
         else if (strcmp(token, "6") == 0)
         {
             g_free(token);
@@ -504,7 +523,8 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis,int query_counts[]
         double query_elapsed_time = ((double)(query_end_time - query_start_time)) / CLOCKS_PER_SEC;
         long query_memory_used = query_final_memory - query_initial_memory;
 
-        if (query_index >= 0 && query_index < 6) {
+        if (query_index >= 0 && query_index < 6)
+        {
             total_time[query_index] += query_elapsed_time;
             total_memory[query_index] += query_memory_used;
             query_counts[query_index]++;
@@ -512,14 +532,26 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis,int query_counts[]
 
         line_number++;
     }
+    for (int i = 0; i < numUtilizadores; i++)
+    {
+        if (idsUtilizadores[i] != NULL)
 
-    g_strfreev(idsUtilizadores);
-    g_strfreev(nomesGeneros);
+            g_free(idsUtilizadores[i]);
+    }
+    g_free(idsUtilizadores);
+    for (int j = 0; j < numGeneros; j++)
+    {
+        if (nomesGeneros[j] != NULL)
+            g_free(nomesGeneros[j]);
+    }
+    g_free(nomesGeneros);
     freeMatrizClassificacaoMusicas(matriz, numUtilizadores);
+    destruir_resultado_processamento(resultado);
     g_free(buffer);
 
     // Exibir totais por query
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++)
+    {
         printf("Query %d: Tempo: %.2f, Memória: %ld, Execuções: %d\n",
                i + 1, total_time[i], total_memory[i], query_counts[i]);
     }
@@ -546,7 +578,7 @@ int main(int argc, char *argv[])
     FILE *fileinputs = fopen(pathinputs, "r");
     if (fileinputs)
     {
-        interpreter_inputs2(fileinputs, gestor,query_counts);
+        interpreter_inputs2(fileinputs, gestor, query_counts);
         fclose(fileinputs);
     }
     else
@@ -566,8 +598,8 @@ int main(int argc, char *argv[])
     printf("Memória total: %ld MB\n", total_memory_used);
 
     // Passa query_counts para compare_all_files
-    compare_all_files("resultados", "resultados-esperados",query_counts);
-    
+    compare_all_files("resultados", "resultados-esperados", query_counts);
+
     g_free(pathinputs);
     g_free(path);
     liberar_gestor_sistema(gestor);

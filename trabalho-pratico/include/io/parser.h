@@ -4,7 +4,6 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
-#include "../include/utils/string_utils.h"
 #include "../include/gestores/gestor_sistemas.h"
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/gestores/gestor_usuarios.h"

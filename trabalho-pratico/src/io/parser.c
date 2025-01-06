@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
-#include "../include/parsing/parser.h"
+#include "../include/io/parser.h"
 #include "../include/utils/string_utils.h"
 #include "../include/entidades/artists.h"
 #include "../include/entidades/musica.h"
@@ -11,7 +11,7 @@
 #include "../include/gestores/gestor_usuarios.h"
 #include "../include/gestores/gestor_artistas.h"
 #include "../include/validacao/valida.h"
-#include "../include/write/writer.h"
+#include "../include/io/write/writer.h"
 #include "../include/gestores/gestor_albuns.h"
 #include "../include/queries/queries.h"
 
@@ -517,25 +517,10 @@ Album *preenche_album(GPtrArray *campostemp, GestorAlbuns *gestoralbuns)
         printf("erro nos []\n");
         return NULL;
     }
-    trim_parenteses_gchar(producers);
-    gchar **producers_name = g_strsplit(producers, ",", -1);
-    for (int i = 0; producers_name[i] != NULL; i++)
-    {
-        if (valida_single_quotes_lista_artistas(producers_name[i]) == 0)
-        {
-            printf("erro nos ''\n");
-            g_strfreev(producers_name);
-            return NULL;
-        }
-        trim_single_quotes_gchar(producers_name[i]);
-    }
 
-    Album *album = create_album(id, title, artist_ids, year, producers_name);
+    Album *album = create_album(id, title, artist_ids, year);
 
-    g_strfreev(producers_name);
     g_strfreev(artist_ids);
-
-    // faltam as validacoes dos albuns
 
     return album;
 }

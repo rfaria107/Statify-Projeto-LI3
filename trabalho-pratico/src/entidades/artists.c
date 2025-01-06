@@ -37,6 +37,25 @@ gchar **get_artist_id_constituent(Artista *artista)
     return copy;
 }
 
+// Função para contar o número de constituintes (membros) de um artista/grupo
+int get_num_constituents(Artista *artista)
+{
+    gchar **constituents = get_artist_id_constituent(artista);
+    int num_constituents = 0;
+
+    // Conta o número de membros
+    if (constituents)
+    {
+        while (constituents[num_constituents] != NULL)
+        {
+            num_constituents++;
+        }
+        g_strfreev(constituents); // Libera memória associada aos IDs
+    }
+
+    return num_constituents;
+}
+
 gchar *get_artist_country(Artista *artista)
 {
     return g_strdup(artista->country);
