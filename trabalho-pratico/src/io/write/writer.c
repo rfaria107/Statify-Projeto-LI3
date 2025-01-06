@@ -196,3 +196,34 @@ void escrever_cabecalho_album_erro(RowWriter *error_writer)
     // Escreve o cabeçalho com aspas ao redor de cada campo
     write_row(error_writer, ';', 5, "\"id\"", "\"title\"", "\"artists_id\"", "\"year\"", "\"producers\"");
 }
+
+
+  void print_row(RowWriter *writer, char separator, int fields, ...)
+{
+    va_list args;
+    va_start(args, fields); // Inicializa a manipulação dos argumentos variáveis
+
+    char line[BUFFER_SIZE] = "";
+    char formatting[BUFFER_SIZE] = "";
+
+    // Adiciona os formatos para cada campo, separados pelo separador
+    for (int i = 0; i < fields - 1; i++)
+    {
+        strcat(formatting, writer->format[i]);
+        char sep_str[2] = {separator, '\0'}; // Converte o separador para string
+        strcat(formatting, sep_str);
+    }
+
+    // Adiciona o último campo e a nova linha
+    strcat(formatting, writer->format[fields - 1]);
+    strcat(formatting, "\n");
+
+    // Formata os argumentos na string `line`
+    vsnprintf(line, BUFFER_SIZE, formatting, args);
+
+    // Imprime a linha no terminal
+    printf("%s", line);
+
+    va_end(args); // Finaliza a manipulação dos argumentos variáveis
+}
+

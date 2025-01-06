@@ -10,8 +10,8 @@ typedef struct Semana Semana;
 typedef struct ArtistPopularity ArtistPopularity;
 typedef struct ResultadoProcessamento ResultadoProcessamento;
 
-void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoProcessamento *resultado);
-void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char *data_inicial, char *data_final, ResultadoProcessamento *resultado);
+void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoProcessamento *resultado, int l);
+void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char *data_inicial, char *data_final, ResultadoProcessamento *resultado, int l);
 ResultadoProcessamento *processar_semanas_e_contar_artistas(GestorSistema *gestor_sistema);
 void calcular_domingos_inicial_e_final(char *data_inicial, char *data_final, char **domingo_inicial, char **domingo_final);
 int parse_data(const char *data_str, struct tm *tm);

@@ -24,7 +24,7 @@
 #include "../include/queries/query5_aux.h"
 #include "../include/queries/query6_aux.h"
 
-void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n)
+void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n, int t)
 {
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
@@ -56,14 +56,24 @@ void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n)
             char *country = user_get_country(usuario);
 
             // Escreve a linha com os dados do usuário no arquivo de saída
-            if (n == 0)
+             if (n == 0)
             {
+                if(t==0){
                 write_row(writer, ';', 5, mail, first_name, last_name, idade, country);
+                }
+                else if (t==1){
+                 print_row (writer,';',5,mail,first_name,last_name,idade,country);
+                }
             }
             else if (n == 1)
-            {
+            { if (t==0){
                 write_row(writer, '=', 5, mail, first_name, last_name, idade, country);
             }
+              else if (t==1) {
+                 print_row (writer,'=',5, mail,first_name,last_name,idade,country);
+              }
+            }
+            
 
             // Marca que algo foi escrito no arquivo
             has_written = 1;
@@ -100,13 +110,24 @@ void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n)
             double total_recipe = calcular_receita_total_artista(artista, gestorartistas, gestormusicas);
 
             if (n == 0)
-            {
+            { 
+                if (t==0) {
                 write_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
+                }
+                else if (t==1){
+                print_row(writer, ';', 5, name, type, country, num_albums, total_recipe);
+                }
             }
             else if (n == 1)
             {
+                if (t==0){
                 write_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
+                }
+                else if (t==1) {
+                print_row(writer, '=', 5, name, type, country, num_albums, total_recipe);
+                }
             }
+            
 
             // Marca que algo foi escrito no arquivo
             has_written = 1;
@@ -136,7 +157,7 @@ void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n)
     free(output_file_name);
 }
 
-void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number, int n)
+void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number, int n, int t)
 {
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
@@ -213,13 +234,22 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,
         // Converter de volta para string
         gchar *duration_str = segundos_para_duracao(duracao_total);
         if (n == 0)
-        {
+        { if (t==0) {
             write_row(writer, ';', 4, name, type, duration_str, country_artista);
         }
+        else if (t==1){
+            print_row(writer, ';', 4, name, type, duration_str, country_artista);
+        }
+        }
         if (n == 1)
-        {
+        {if (t==0) {
             write_row(writer, '=', 4, name, type, duration_str, country_artista);
         }
+        else if (t==1){
+            print_row(writer, '=', 4, name, type, duration_str, country_artista);
+        }
+        }
+        
         g_free(name);
         g_free(type);
         g_free(duration_str);
@@ -232,7 +262,7 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,
     g_list_free(lista_artistas);
 }
 
-void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number, int n)
+void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_number, int n, int t)
 {
     if (!gestor_sistema)
     {
@@ -340,12 +370,14 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
             char *genre = get_gp_genre(gp);
             int total_likes = get_gp_total_likes(gp);
             if (n == 0)
-            {
+            { if (t==0){
                 write_row(writer, ';', 2, genre, total_likes);
             }
+            }
             if (n == 1)
-            {
+            { if (t==1) {
                 write_row(writer, '=', 2, genre, total_likes);
+            }
             }
             g_free(genre);
         }
@@ -357,24 +389,23 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     g_list_free(generos_lista);
     g_hash_table_destroy(generos_likes);
 }
-
-void query_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n, ResultadoProcessamento *resultado)
+void query_4(char *data_inicial, char *data_final, GestorSistema *gestor_sistema, int line_number, int n, ResultadoProcessamento *resultado, int l )
 {
 
     if (data_final == NULL)
     {
         // Se data_final for NULL, chama a função para processar todo o histórico
-        all_historico(gestor_sistema, line_number, n, resultado);
+        all_historico(gestor_sistema, line_number, n, resultado,l);
     }
     else
     {
         // Caso contrário, chama a função para processar o intervalo de datas
-        intervalos_historico(gestor_sistema, line_number, n, data_inicial, data_final, resultado);
+        intervalos_historico(gestor_sistema, line_number, n, data_inicial, data_final, resultado,  l);
     }
 }
 
 void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizadores, char **nomesGeneros,
-             int numUtilizadores, int numGeneros, int numRecomendacoes, int line_number, int n, GestorSistema *gestorsis)
+             int numUtilizadores, int numGeneros, int numRecomendacoes, int line_number, int n, GestorSistema *gestorsis, int t)
 {
 
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
@@ -400,12 +431,23 @@ void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizad
         for (int i = 0; i < numRecomendacoes; i++)
         {
             if (n == 0)
-            {
+            {  if (t==0){
                 write_row(writer, ';', 1, utilizadores[i]);
+            }
+            else if (t==1){
+                print_row(writer, ';', 1, utilizadores[i]);
+
+            }
             }
             if (n == 1)
             {
+                if (t==0){
                 write_row(writer, '=', 1, utilizadores[i]);
+            }
+            else if (t==1){
+                print_row(writer, '=', 1, utilizadores[i]);
+
+            }
             }
         }
         free(utilizadores);
@@ -429,7 +471,7 @@ void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizad
     free(output_file_name);
 }
 
-void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_number, int n)
+void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_number, int n, int t)
 {
     char output_file_name[256];
     snprintf(output_file_name, sizeof(output_file_name), "resultados/command%d_output.txt", line_number);
@@ -649,8 +691,13 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
                 row_writer_set_formatting(writer, formatting);
 
                 // Escreve os dados no arquivo
-                write_row(writer, (n == 0 ? ';' : '='), 3, artist_id, distinct_musics, duration_string);
-
+        if(t==0){
+         // Escrever os resultados no arquivo
+        write_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);
+        }
+        else if (t==1){
+        print_row(writer, (n == 0 ? ';' : '='), 7, total_time_duracao, music_count, top_artist_id, top_day, top_genre, top_album, top_hour);}
+    
                 // Libera a memória alocada para duration_string
                 g_free(duration_string);
 

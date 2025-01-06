@@ -62,12 +62,41 @@ OBJ_TEST = $(SRC_DIR)/testes.o \
            $(SRC_DIR)/queries/query6_aux.o \
            $(RECOMENDADOR_OBJ)
 
+# Objetos para o executável interativo
+OBJ_INTERACTIVE = $(SRC_DIR)/interativo.o \
+           $(SRC_DIR)/entidades/usuario.o \
+           $(SRC_DIR)/entidades/musica.o \
+           $(SRC_DIR)/entidades/artists.o \
+           $(SRC_DIR)/entidades/albuns.o \
+           $(SRC_DIR)/entidades/history.o \
+           $(SRC_DIR)/gestores/gestor_usuarios.o \
+           $(SRC_DIR)/gestores/gestor_musicas.o \
+           $(SRC_DIR)/gestores/gestor_artistas.o \
+           $(SRC_DIR)/gestores/gestor_sistemas.o \
+           $(SRC_DIR)/gestores/gestor_albuns.o \
+           $(SRC_DIR)/gestores/gestor_histories.o \
+           $(SRC_DIR)/io/io.o \
+           $(SRC_DIR)/io/parser.o \
+           $(SRC_DIR)/utils/string_utils.o \
+           $(SRC_DIR)/utils/utils.o \
+           $(SRC_DIR)/utils/stats/stats.o \
+           $(SRC_DIR)/io/write/writer.o \
+           $(SRC_DIR)/io/write/file.o \
+           $(SRC_DIR)/validacao/valida.o \
+           $(SRC_DIR)/queries/queries.o \
+           $(SRC_DIR)/queries/query3_aux.o \
+           $(SRC_DIR)/queries/query4_aux.o \
+           $(SRC_DIR)/queries/query5_aux.o \
+           $(SRC_DIR)/queries/query6_aux.o \
+           $(RECOMENDADOR_OBJ)
+
 # Alvos (executáveis)
 TARGET = programa-principal
+INTERACTIVE_TARGET = programa-interativo
 TEST_TARGET = programa-testes
 
 # Regra padrão
-all: $(TARGET) $(TEST_TARGET)
+all: $(TARGET) $(INTERACTIVE_TARGET) $(TEST_TARGET)
 
 # Regra para compilar o executável principal
 $(TARGET): $(OBJ_MAIN)

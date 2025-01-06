@@ -88,7 +88,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                query_1(gestorsis, token, line_number, 0);
+                query_1(gestorsis, token, line_number, 0,0);
                 g_free(token);
             }
         }
@@ -99,7 +99,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
             token = procura_espaço2(buffer);
             if (token != NULL)
             {
-                query_1(gestorsis, token, line_number, 1);
+                query_1(gestorsis, token, line_number, 1,0);
                 g_free(token);
             }
         }
@@ -121,7 +121,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 country = g_strdup(token);
                 g_free(token);
             }
-            query_2(gestorsis, num, country, line_number, 0);
+            query_2(gestorsis, num, country, line_number, 0,0);
             if (country != NULL)
                 g_free(country);
         }
@@ -142,7 +142,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 country = g_strdup(token);
                 g_free(token);
             }
-            query_2(gestorsis, num, country, line_number, 1);
+            query_2(gestorsis, num, country, line_number, 1,0);
             if (country != NULL)
                 g_free(country);
         }
@@ -163,7 +163,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                     max_age = atoi(token);
                     g_free(token);
                 }
-                query_3(min_age, max_age, gestorsis, line_number, 0);
+                query_3(min_age, max_age, gestorsis, line_number, 0,0);
             }
         }
         else if (strcmp(token, "3S") == 0)
@@ -182,7 +182,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                     max_age = atoi(token);
                     g_free(token);
                 }
-                query_3(min_age, max_age, gestorsis, line_number, 1);
+                query_3(min_age, max_age, gestorsis, line_number, 1,0);
             }
         }
 
@@ -208,7 +208,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 g_free(token);
             }
 
-            query_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 0, resultado);
+            query_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 0, resultado,0);
 
             g_free(data_inicial);
             g_free(data_final);
@@ -236,7 +236,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 g_free(token);
             }
 
-            query_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 1, resultado);
+            query_4(data_inicial ? data_inicial : NULL, data_final ? data_final : NULL, gestorsis, line_number, 1, resultado,0);
 
             g_free(data_inicial);
             g_free(data_final);
@@ -255,7 +255,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 {
                     int numRecomendacoes = atoi(token);
                     g_free(token);
-                    query_5(user_id_str, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numRecomendacoes, line_number, 0, gestorsis);
+                    query_5(user_id_str, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numRecomendacoes, line_number, 0, gestorsis,0);
                     g_free(user_id_str);
                 }
             }
@@ -273,7 +273,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                 {
                     int numRecomendacoes = atoi(token);
                     g_free(token);
-                    query_5(user_id_str, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numRecomendacoes, line_number, 1, gestorsis);
+                    query_5(user_id_str, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numRecomendacoes, line_number, 1, gestorsis,0);
                     g_free(user_id_str);
                 }
             }
@@ -304,7 +304,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                         g_free(token);
                     }
                 }
-                query_6(user_id, year, N, gestorsis, line_number, 0);
+                query_6(user_id, year, N, gestorsis, line_number, 0,0);
                 // g_free(user_id);
             }
         }
@@ -333,7 +333,7 @@ void interpreter_inputs(FILE *file, GestorSistema *gestorsis)
                         g_free(token);
                     }
                 }
-                query_6(user_id, year, N, gestorsis, line_number, 1);
+                query_6(user_id, year, N, gestorsis, line_number, 1,0);
                 // g_free(user_id);
             }
         }
