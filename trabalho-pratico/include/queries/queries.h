@@ -1,3 +1,12 @@
+/**
+ * @file queries.h
+ * @brief Header das funções que executam as queries.
+ *
+ * Este arquivo contém as declarações de funções utilizadas para a execução das queries 1 a 6.
+ * Estas recebem os parâmetros e efetuam as buscas pedidas nas queries, 
+ * escrevendo o output nos ficheiros como ajuda do writer do módulo de IO.
+ */
+
 #ifndef QUERIES_H
 #define QUERIES_H
 

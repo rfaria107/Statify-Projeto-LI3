@@ -1,3 +1,11 @@
+/**
+ * @file io.h
+ * @brief Header do módulo de IO.
+ *
+ * Este módulo contém funções para iniciar a execução do programa abrindo e processando os ficheiros, 
+ * e interpretar inputs (recebê-los e retornar o devido output).
+ */
+
 #ifndef IO_H
 #define IO_H
 

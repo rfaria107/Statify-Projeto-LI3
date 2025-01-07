@@ -56,8 +56,85 @@ gint compara_duracoes_discografia(gconstpointer a, gconstpointer b)
     return r;
 }
 
+// Função para calcular os domingos relativos à data inicial e final
+void calcular_domingos_inicial_e_final(char *data_inicial, char *data_final, char **domingo_inicial, char **domingo_final)
+{
+    *domingo_inicial = calcular_domingo(data_inicial);
+    *domingo_final = calcular_domingo(data_final);
+}
 
+// Calcula o domingo da semana de uma data
+gchar *calcular_domingo(const gchar *data)
+{
+    int ano, mes, dia;
+    if (sscanf(data, "%d/%d/%d", &ano, &mes, &dia) != 3)
+    {
+        fprintf(stderr, "Erro ao fazer o parse da data.\n");
+        return NULL;
+    }
 
+    struct tm tm_data = {0};
+    tm_data.tm_year = ano - 1900;
+    tm_data.tm_mon = mes - 1;
+    tm_data.tm_mday = dia;
+    mktime(&tm_data);
 
+    int dias_para_domingo = tm_data.tm_wday;
+    tm_data.tm_mday -= dias_para_domingo;
+    mktime(&tm_data);
 
+    gchar *domingo = malloc(11 * sizeof(gchar));
+    if (domingo == NULL)
+    {
+        fprintf(stderr, "Erro ao alocar memória para a data de domingo.\n");
+        return NULL;
+    }
+
+    strftime(domingo, 11, "%Y/%m/%d", &tm_data);
+    return domingo;
+}
+
+// Calcula o sábado seguinte de uma data
+gchar *calcular_sabado_seguinte(const gchar *data)
+{
+    int ano, mes, dia;
+    if (sscanf(data, "%d/%d/%d", &ano, &mes, &dia) != 3)
+    {
+        fprintf(stderr, "Erro ao fazer o parse da data.\n");
+        return NULL;
+    }
+
+    struct tm tm_data = {0};
+    tm_data.tm_year = ano - 1900;
+    tm_data.tm_mon = mes - 1;
+    tm_data.tm_mday = dia;
+    mktime(&tm_data);
+
+    int dias_para_sabado = (6 - tm_data.tm_wday + 7) % 7;
+    tm_data.tm_mday += dias_para_sabado;
+    mktime(&tm_data);
+
+    gchar *sabado = malloc(11 * sizeof(gchar));
+    if (sabado == NULL)
+    {
+        fprintf(stderr, "Erro ao alocar memória para a data de sábado.\n");
+        return NULL;
+    }
+
+    strftime(sabado, 11, "%Y/%m/%d", &tm_data);
+    return sabado;
+}
+
+time_t get_timestamp(const char *data)
+{
+    struct tm tm_data = {0};
+    if (sscanf(data, "%d/%d/%d", &tm_data.tm_year, &tm_data.tm_mon, &tm_data.tm_mday) != 3)
+    {
+        fprintf(stderr, "Erro: Formato de data inválido.\n");
+        return -1;
+    }
+    tm_data.tm_year -= 1900;
+    tm_data.tm_mon -= 1;
+    return mktime(&tm_data);
+}
 
