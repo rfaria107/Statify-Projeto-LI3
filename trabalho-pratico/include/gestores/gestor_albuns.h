@@ -2,9 +2,9 @@
  * @file gestor_albuns.h
  * @brief Header do módulo Gestor de Álbuns.
  *
- * Este módulo define e implementa um gestor para manipulação e gerenciamento de álbuns (entidades do tipo Album).
+ * Este módulo define e implementa um gestor de álbuns (entidades do tipo Album).
  * O gestor utiliza uma GHashTable para armazenar as entidades Album e fornece funções para inicializar,
- * inserir, buscar e libertar os álbuns gerenciados.
+ * inserir, buscar e libertar os álbuns geridos.
  */
 
 #ifndef GESTOR_ALBUNS_H
@@ -17,7 +17,7 @@
  * @typedef GestorAlbuns
  * @brief Estrutura de dados que representa o gestor de álbuns (opaca).
  *
- * O GestorAlbuns é responsável por armazenar e gerenciar os álbuns numa GHashTable.
+ * O GestorAlbuns é responsável por armazenar e gerir os álbuns numa GHashTable.
  */
 typedef struct GestorAlbuns GestorAlbuns;
 
@@ -29,7 +29,7 @@ typedef struct GestorAlbuns GestorAlbuns;
 void free_album_value(gpointer value);
 
 /**
- * @brief Obtém a GHashTable que armazena os álbuns gerenciados pelo GestorAlbuns.
+ * @brief Obtém a GHashTable que armazena os álbuns geridos pelo GestorAlbuns.
  *
  * @param gestor Pointer para o GestorAlbuns.
  * @return Um pointer para a GHashTable que contém os álbuns.

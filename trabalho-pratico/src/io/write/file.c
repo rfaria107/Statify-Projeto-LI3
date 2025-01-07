@@ -3,6 +3,11 @@
 #include <stdio.h>
 #include "../include/io/write/file.h"
 
+struct FileBuffer{
+  FILE *file;
+  char *buffer;
+};
+
 FileBuffer *initialize_file_buffer(const char *file_name)
 {
     FileBuffer *buffer = malloc(sizeof(FileBuffer));

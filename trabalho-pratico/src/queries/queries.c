@@ -29,7 +29,7 @@ void query_1(GestorSistema *gestorsis, gchar *token, int line_number, int n, int
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
 
     // Flag para verificar se já escreveu algo
     int has_written = 0;
@@ -169,7 +169,7 @@ void query_2(GestorSistema *gestorsis, int num, gchar *country, int line_number,
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
 
     if (num == 0)
     {
@@ -350,7 +350,7 @@ void query_3(int min_age, int max_age, GestorSistema *gestor_sistema, int line_n
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
 
     // Mesmo que o output seja vazio, o ficheiro tem que ser criado
     if (generos_lista == NULL)
@@ -430,7 +430,7 @@ void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizad
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
     GestorUsuarios *gestoruser = get_gestor_usuarios(gestorsis);
     int user_id_int = atoi(user_id + 1);
     Usuario *user = buscar_usuario_id(gestoruser, user_id_int);
@@ -497,7 +497,7 @@ void query_6(int user_id, int year, int N, GestorSistema *gestorsis, int line_nu
 {
     char output_file_name[256];
     snprintf(output_file_name, sizeof(output_file_name), "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
 
     // Configura os nomes e formatos dos campos
     char *field_names[] = {"Total Time", "Music Count", "Top Artist ID", "Top Day", "Top Genre", "Top Album", "Top Hour"};

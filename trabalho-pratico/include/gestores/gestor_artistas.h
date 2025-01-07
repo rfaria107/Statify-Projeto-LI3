@@ -2,9 +2,9 @@
  * @file gestor_artistas.h
  * @brief Header do módulo Gestor de Artistas.
  *
- * Este módulo define e implementa um gestor para manipulação e gerenciamento de artistas (entidades do tipo Artista).
+ * Este módulo define e implementa um gestor de artistas (entidades do tipo Artista).
  * O gestor utiliza uma GHashTable para armazenar as entidades Artista e fornece funções para inicializar,
- * inserir, buscar e libertar os artistas gerenciados.
+ * inserir, buscar e libertar os artistas geridos.
  */
 
 #ifndef GESTOR_ARTISTAS_H
@@ -55,7 +55,7 @@ void liberar_gestor_artistas(GestorArtistas *gestor);
 void inserir_artista(GestorArtistas *gestor, Artista *artista);
 
 /**
- * @brief Obtém a GHashTable que armazena os artistas gerenciados pelo GestorArtistas.
+ * @brief Obtém a GHashTable que armazena os artistas geridos pelo GestorArtistas.
  *
  * @param gestor Pointer para o GestorArtistas.
  * @return Um pointer para a GHashTable que contém os artistas.

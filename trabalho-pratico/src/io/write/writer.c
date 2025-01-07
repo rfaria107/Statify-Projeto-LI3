@@ -9,6 +9,7 @@
 #define BUFFER_SIZE 1024
 #define VALUE_BUFFER_SIZE 128
 
+
 struct RowWriter
 {
     char **field_names;
@@ -16,11 +17,11 @@ struct RowWriter
     int row;
     char fields;
     FileBuffer *buffer;
-    WriteMode mode;
+    int mode; //0 para csv 1 para tabela
 };
 
 // Inicializa o RowWriter para um arquivo de saída específico
-RowWriter *initialize_row_writer(const char *output_file_name, WriteMode writeMode)
+RowWriter *initialize_row_writer(const char *output_file_name, int writeMode)
 {
     RowWriter *writer = malloc(sizeof(RowWriter));
     writer->field_names = NULL;
@@ -35,7 +36,7 @@ RowWriter *initialize_row_writer(const char *output_file_name, WriteMode writeMo
 // Inicializa o RowWriter para o arquivo de erros
 RowWriter *initialize_error_writer(const char *error_file_name)
 {
-    return initialize_row_writer(error_file_name, WRITE_MODE_CSV);
+    return initialize_row_writer(error_file_name, 0);
 }
 
 // Define os nomes dos campos e a formatação

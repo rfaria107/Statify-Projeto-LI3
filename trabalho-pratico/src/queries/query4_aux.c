@@ -33,7 +33,7 @@ void all_historico(GestorSistema *gestorsis, int line_number, int n, ResultadoPr
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
 
     char *field_names[] = {"Artist_Id", "Type", "Count"};
     char *formatting[] = {"A%07d", "%s", "%d"}; // Formatação das colunas
@@ -108,7 +108,7 @@ void intervalos_historico(GestorSistema *gestorsis, int line_number, int n, char
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
 
     char *field_names[] = {"Artist_Id", "Type", "Count"};
     char *formatting[] = {"A%07d", "%s", "%d"};
@@ -799,7 +799,7 @@ void processar_historico(char *data_incial, char *data_final, GestorSistema *ges
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
 
     // Inicializa a tabela de semanas
     GHashTable *semanas = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)destruir_semana);
@@ -961,7 +961,7 @@ void processar_historico_intervalo_de_datas(char *data_inicial, char *data_final
     int size = snprintf(NULL, 0, "resultados/command%d_output.txt", line_number) + 1;
     char *output_file_name = malloc(size);
     snprintf(output_file_name, size, "resultados/command%d_output.txt", line_number);
-    RowWriter *writer = initialize_row_writer(output_file_name, WRITE_MODE_CSV);
+    RowWriter *writer = initialize_row_writer(output_file_name, 0);
 
     // HashTable para armazenar semanas criadas
     GHashTable *semanas = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)destruir_semana);
