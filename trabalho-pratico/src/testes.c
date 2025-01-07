@@ -242,10 +242,10 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis, int query_counts[
 
         char *token = procura_espaço(buffer);
         clock_t query_start_time;
-        long query_initial_memory;
+        //long query_initial_memory;
 
         query_start_time = clock();
-        query_initial_memory = get_memory_usage_mb();
+        //query_initial_memory = get_memory_usage_mb();
 
         int query_index = -1; // Para determinar qual query foi executada
 
