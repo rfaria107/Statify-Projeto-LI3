@@ -221,7 +221,6 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis, int query_counts[
 
     // Acumuladores para tempo e memória de cada query
     double total_time[6] = {0};
-    long total_memory[6] = {0};
     // Pré-processamento
     calcular_discografia_artistas(gestorsis);
     calcula_streams(gestorsis);
@@ -519,15 +518,12 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis, int query_counts[
         }
 
         clock_t query_end_time = clock();
-        long query_final_memory = get_memory_usage_mb();
 
         double query_elapsed_time = ((double)(query_end_time - query_start_time)) / CLOCKS_PER_SEC;
-        long query_memory_used = query_final_memory - query_initial_memory;
 
         if (query_index >= 0 && query_index < 6)
         {
             total_time[query_index] += query_elapsed_time;
-            total_memory[query_index] += query_memory_used;
             query_counts[query_index]++;
         }
 
@@ -553,8 +549,8 @@ void interpreter_inputs2(FILE *file, GestorSistema *gestorsis, int query_counts[
     // Exibir totais por query
     for (int i = 0; i < 6; i++)
     {
-        printf("Query %d: Tempo: %.2f, Memória: %ld, Execuções: %d\n",
-               i + 1, total_time[i], total_memory[i], query_counts[i]);
+        printf("Query %d: Tempo: %.2f, Execuções: %d\n",
+               i + 1, total_time[i], query_counts[i]);
     }
 }
 
