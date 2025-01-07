@@ -11,7 +11,6 @@
 #include "../include/queries/query4_aux.h"
 #include "../include/queries/query5_aux.h"
 #include "../include/queries/query6_aux.h"
-
 #include "../include/io/parser.h"
 #include "../include/utils/recomendador/recomendador.h"
 #include "../include/queries/query5_aux.h"
@@ -20,15 +19,23 @@
 
 // Protótipos das funções
 void mostrar_menu_principal();
-void processar_dados(const char *diretorio, GestorSistema *gestor);
-void escolher_query(GestorSistema *gestor);
-void executar_query(int query_numero, GestorSistema *gestor);
-void preprocessar_dados_pre(GestorSistema *gestor, int *numUtilizadores, int *numGeneros, int ***matriz, char ***idsUtilizadores, char ***nomesGeneros);
+void processar_dados(const char *diretorio, GestorSistema *gestor, int *numUtilizadores, int *numGeneros,
+                     int ***matriz, char ***idsUtilizadores, char ***nomesGeneros, ResultadoProcessamento **resultado);
+void escolher_query(GestorSistema *gestor, int numUtilizadores, int numGeneros, int **matriz,
+                    char **idsUtilizadores, char **nomesGeneros, ResultadoProcessamento *resultado);
+void executar_query(int query_numero, GestorSistema *gestor, int numUtilizadores, int numGeneros, int **matriz,
+                    char **idsUtilizadores, char **nomesGeneros, ResultadoProcessamento *resultado);
 
 // Função Principal
 int main()
 {
     int opcao = 0;
+    int numUtilizadores = 0;
+    int numGeneros = 0;
+    int **matriz = NULL;
+    char **idsUtilizadores = NULL;
+    char **nomesGeneros = NULL;
+    ResultadoProcessamento *resultado = NULL;
     GestorSistema *gestor = criar_gestor_sistema(); // Inicializa o sistema
 
     do
@@ -47,28 +54,28 @@ int main()
         {
         case 1:
         {
-            char *diretorio = readline("Introduza o caminho para o dataset (Tab para completar): ");
+            char *diretorio = readline("Introduza o caminho para o dataset (até à pasta sem a /): ");
             if (!diretorio || diretorio[0] == '\0')
             {
                 printf("Nenhum caminho foi inserido.\n");
             }
             else
             {
-                processar_dados(diretorio, gestor);
+                processar_dados(diretorio, gestor, &numUtilizadores, &numGeneros, &matriz, &idsUtilizadores, &nomesGeneros, &resultado);
                 free(diretorio);
             }
             break;
         }
         case 2:
-            escolher_query(gestor);
+            escolher_query(gestor, numUtilizadores, numGeneros, matriz, idsUtilizadores, nomesGeneros, resultado);
             break;
         case 3:
             printf("\n[Sobre o Programa]\n");
             printf("Projeto de Sistema Interativo de Streaming de Música\n");
-            printf("Desenvolvido por: Seu Nome\n");
+            printf("Desenvolvido por: Chico Ricardo Rui \n");
             break;
         case 4:
-            printf("\nSaindo do programa... Até logo!\n");
+            printf("\nA sair do programa... Até logo!\n");
             liberar_gestor_sistema(gestor);
             break;
         default:
@@ -95,106 +102,57 @@ void mostrar_menu_principal()
     printf("========================================\n");
 }
 
-void processar_dados(const char *diretorio, GestorSistema *gestor)
+void processar_dados(const char *diretorio, GestorSistema *gestor, int *numUtilizadores,
+                     int *numGeneros, int ***matriz, char ***idsUtilizadores, char ***nomesGeneros, ResultadoProcessamento **resultado)
 {
-    DIR *dir = opendir(diretorio);
-    if (!dir)
-    {
-        perror("Erro ao abrir o diretório");
-        return;
-    }
+    printf("[INFO] A processar arquivos por ordem...\n");
+    printf("[INFO] A processar artists.csv...\n");
+    process_file(diretorio, "artists.csv", gestor, 'a');
 
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL)
-    {
-        if (entry->d_type == DT_REG && strstr(entry->d_name, ".csv"))
-        {
-            char caminho_completo[512];
-            if (snprintf(caminho_completo, sizeof(caminho_completo), "%s/%s", diretorio, entry->d_name) >= sizeof(caminho_completo))
-            {
-                printf("Erro: Caminho do arquivo excede o tamanho máximo permitido.\n");
-                continue;
-            }
+    printf("[INFO] A processar musics.csv...\n");
+    process_file(diretorio, "musics.csv", gestor, 'm');
 
-            FILE *file = fopen(caminho_completo, "r");
-            if (!file)
-            {
-                printf("Erro ao abrir o arquivo: %s\n", caminho_completo);
-                continue;
-            }
+    printf("[INFO] A processar users.csv...\n");
+    process_file(diretorio, "users.csv", gestor, 'u');
 
-            printf("Processando arquivo: %s\n", entry->d_name);
+    printf("[INFO] A processar history.csv...\n");
+    process_file(diretorio, "history.csv", gestor, 'h');
 
-            // Processar os arquivos específicos, agora inserindo dados no gestor
-            if (strcmp(entry->d_name, "artists.csv") == 0)
-            {
-                process_file(diretorio, "artists.csv", gestor, 'a');
-            }
-            else if (strcmp(entry->d_name, "musics.csv") == 0)
-            {
-                process_file(diretorio, "musics.csv", gestor, 'm');
-            }
-            else if (strcmp(entry->d_name, "users.csv") == 0)
-            {
-                process_file(diretorio, "users.csv", gestor, 'u');
-            }
-            else if (strcmp(entry->d_name, "history.csv") == 0)
-            {
-                process_file(diretorio, "history.csv", gestor, 'h');
-            }
-            else if (strcmp(entry->d_name, "albums.csv") == 0)
-            {
-                process_file(diretorio, "albums.csv", gestor, 'l');
-            }
-            else
-            {
-                printf("Arquivo não reconhecido: %s\n", entry->d_name);
-            }
+    printf("[INFO] A processar albuns.csv...\n");
+    process_file(diretorio, "albums.csv", gestor, 'l');
 
-            fclose(file);
-        }
-    }
+    printf("Todos os arquivos foram processados\n");
 
-    closedir(dir);
-    printf("Todos os arquivos foram processados com sucesso.\n");
-
-    // Após o processamento, chama o menu interativo
-    printf("[INFO] Iniciando menu interativo...\n");
-
-
-    escolher_query(gestor);
-}
-
-/*
-void preprocessar_dados_pre(GestorSistema *gestor, int *numUtilizadores, int *numGeneros, int ***matriz, char ***idsUtilizadores, char ***nomesGeneros) {
     printf("[INFO] Iniciando pré-processamento necessário...\n");
 
     // Calcular discografia dos artistas
     calcular_discografia_artistas(gestor);
-    
+
     // Calcular streams
     calcula_streams(gestor);
-    
+
     // Pré-processamento dos IDs dos utilizadores
     *idsUtilizadores = preprocessIdsUtilizadores(gestor, numUtilizadores);
-
+    
     // Pré-processamento dos nomes dos géneros
     *nomesGeneros = preprocessNomesGeneros(gestor, numGeneros);
 
     // Criar matriz de classificação das músicas
     *matriz = createMatrizClassificacaoMusicas(*numUtilizadores, *numGeneros);
 
-    
     // Calcular a matriz de classificação das músicas
     calculaMatrizClassificacaoMusicas(*matriz, *idsUtilizadores, *nomesGeneros, *numUtilizadores, *numGeneros, gestor);
-    
-    // Processar as semanas e contar os artistas
+
+    // pre-processamento da query 4
+    *resultado = processar_semanas_e_contar_artistas(gestor);
 
     printf("[INFO] Pré-processamento concluído.\n");
-}*/
 
-void escolher_query(GestorSistema *gestor) {
-void escolher_query(GestorSistema *gestor)
+    escolher_query(gestor, *numUtilizadores, *numGeneros, *matriz, *idsUtilizadores, *nomesGeneros, *resultado);
+}
+
+void escolher_query(GestorSistema *gestor, int numUtilizadores, int numGeneros, int **matriz,
+                    char **idsUtilizadores, char **nomesGeneros, ResultadoProcessamento *resultado)
 {
     int query_numero;
 
@@ -216,44 +174,12 @@ void escolher_query(GestorSistema *gestor)
     }
 
     // Chama a execução da query escolhida
-    executar_query(query_numero, gestor);
+    executar_query(query_numero, gestor, numUtilizadores, numGeneros, matriz, idsUtilizadores, nomesGeneros, resultado);
 }
 
-/*void imprimir_matriz(int **matriz, int numUtilizadores, int numGeneros) {
-    if (matriz == NULL) {
-        printf("A matriz é NULL.\n");
-    } else {
-        printf("Matriz de Classificação de Músicas:\n");
-        for (int i = 0; i < numUtilizadores; i++) {
-            for (int j = 0; j < numGeneros; j++) {
-                printf("%d ", matriz[i][j]);
-            }
-            printf("\n");
-        }
-    }
-}*/
-
-void executar_query(int query_numero, GestorSistema *gestor)
+void executar_query(int query_numero, GestorSistema *gestor, int numUtilizadores, int numGeneros, int **matriz,
+                    char **idsUtilizadores, char **nomesGeneros, ResultadoProcessamento *resultado)
 {
-
-    printf("[INFO] Iniciando pré-processamento necessário...\n");
-
-    calcular_discografia_artistas(gestor);
-    calcula_streams(gestor);
-    // pré-processeamento da query 5
-    int numUtilizadores = 0;
-    int numGeneros = 0;
-    char **idsUtilizadores = preprocessIdsUtilizadores(gestor, &numUtilizadores);
-    char **idsUtilizadores = preprocessIdsUtilizadores(gestor, &numUtilizadores);
-    char **nomesGeneros = preprocessNomesGeneros(gestor, &numGeneros);
-    int **matriz = createMatrizClassificacaoMusicas(numUtilizadores, numGeneros);
-    calculaMatrizClassificacaoMusicas(matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, gestor);
-    // Processar as semanas e contar os artistas
-
-
-    ResultadoProcessamento *resultado = processar_semanas_e_contar_artistas (gestor);
-    printf("[INFO] Pré-processamento concluído.\n");
-
     // Switch para executar a query selecionada
     switch (query_numero)
     {
@@ -399,55 +325,56 @@ void executar_query(int query_numero, GestorSistema *gestor)
             }
         }
 
-    // Chamar a função para processar a query com as datas fornecidas
-    query_4(data_inicial, data_final, gestor, 0, 0, resultado, 1);
+        // Chamar a função para processar a query com as datas fornecidas
+        query_4(data_inicial, data_final, gestor, 0, 0, resultado, 1);
 
         break;
     }
 
-    case 5: {
-        
-    char username[256];
-    int numero;
+    case 5:
+    {
+        char username[256];
+        int numero;
 
-         printf("Insira o nome de utilizador (username):\n> ");
-         if (scanf("%s", username) != 1) {
-             printf("[ERRO] Username inválido ou não fornecido.\n");
-             break;
-         }
+        printf("Insira o nome de utilizador (username):\n> ");
+        if (scanf("%s", username) != 1)
+        {
+            printf("[ERRO] Username inválido ou não fornecido.\n");
+            break;
+        }
 
-         printf("Insira um número:\n> ");
-         if (scanf("%d", &numero) != 1) {
-             printf("[ERRO] Número inválido ou não fornecido.\n");
-             break;
-         }
+        printf("Insira um número:\n> ");
+        if (scanf("%d", &numero) != 1)
+        {
+            printf("[ERRO] Número inválido ou não fornecido.\n");
+            break;
+        }
 
-    if (matriz != NULL && idsUtilizadores != NULL && nomesGeneros != NULL) {
         printf("[INFO] Executando Query 5 com os parâmetros fornecidos.\n");
-        query_5(username, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numero, 0,0,gestor,1);
-    } else {
-        printf("[ERRO] Ambiente de pré-processamento para Query 5 não está configurado corretamente.\n");
-    }
-    break;
-}
+        query_5(username, matriz, idsUtilizadores, nomesGeneros, numUtilizadores, numGeneros, numero, 0, 0, gestor, 1);
 
-        case 6:
-{
-    char id_utilizador[10];
-    int id_incrementado; // Para armazenar o ID convertido e incrementado
-    int ano;
-    int n = 0; // Valor padrão para N (opcional)
-    char escolha;
-
-    // Solicitar o ID do utilizador
-    printf("Insira o ID do utilizador: ");
-    while (scanf("%s", id_utilizador) != 1) {
-        printf("Entrada inválida. Por favor, insira um número válido para o ID do utilizador: ");
-        while (getchar() != '\n'); // Limpar buffer
+        break;
     }
 
-    // Converter o ID para inteiro e adicionar 1
-    id_incrementado = atoi(id_utilizador+1) ;
+    case 6:
+    {
+        char id_utilizador[10];
+        int id_incrementado; // Para armazenar o ID convertido e incrementado
+        int ano;
+        int n = 0; // Valor padrão para N (opcional)
+        char escolha;
+
+        // Solicitar o ID do utilizador
+        printf("Insira o ID do utilizador: ");
+        while (scanf("%s", id_utilizador) != 1)
+        {
+            printf("Entrada inválida. Por favor, insira um número válido para o ID do utilizador: ");
+            while (getchar() != '\n')
+                ; // Limpar buffer
+        }
+
+        // Converter o ID para inteiro e adicionar 1
+        id_incrementado = atoi(id_utilizador + 1);
 
         // Solicitar o ano
         printf("Insira o ano (aaaa): ");
@@ -478,39 +405,38 @@ void executar_query(int query_numero, GestorSistema *gestor)
             printf("N não especificado. Usando valor padrão (0).\n");
         }
 
-    // Chamada da query com os valores fornecidos
-    query_6(id_incrementado, ano, n, gestor, 0, 0, 1);
+        // Chamada da query com os valores fornecidos
+        query_6(id_incrementado, ano, n, gestor, 0, 0, 1);
 
-    printf("[INFO] Query 6 processada para o utilizador %d no ano %d com N = %d.\n", id_incrementado, ano, n);
-    break;
-}
-
+        printf("[INFO] Query 6 processada para o utilizador %d no ano %d com N = %d.\n", id_incrementado, ano, n);
+        break;
+    }
 
     default:
         printf("Query inválida. Escolha um número entre 1 e 6.\n");
     }
 
-  /* Limpeza de memória após uso
-    if (idsUtilizadores) {
-        for (int i = 0; i < numUtilizadores; i++) {
-            free(idsUtilizadores[i]);
-        }
-        free(idsUtilizadores);
-    }
+    /* Limpeza de memória após uso
+      if (idsUtilizadores) {
+          for (int i = 0; i < numUtilizadores; i++) {
+              free(idsUtilizadores[i]);
+          }
+          free(idsUtilizadores);
+      }
 
-        if (nomesGeneros) {
-            for (int i = 0; i < numGeneros; i++) {
-                free(nomesGeneros[i]);
-            }
-            free(nomesGeneros);
-        }
+          if (nomesGeneros) {
+              for (int i = 0; i < numGeneros; i++) {
+                  free(nomesGeneros[i]);
+              }
+              free(nomesGeneros);
+          }
 
-        if (matriz) {
-            for (int i = 0; i < numUtilizadores; i++) {
-                free(matriz[i]);
-            }
-            free(matriz);
-        }
+          if (matriz) {
+              for (int i = 0; i < numUtilizadores; i++) {
+                  free(matriz[i]);
+              }
+              free(matriz);
+          }
 
-        */
+          */
 }

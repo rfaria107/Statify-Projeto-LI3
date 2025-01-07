@@ -195,5 +195,4 @@ valgrind: $(TARGET)
 
 # Limpar arquivos gerados
 clean:
-	rm -f $(filter-out $(RECOMENDADOR_OBJ), $(OBJ_MAIN) $(OBJ_TEST)) $(TARGET) $(TEST_TARGET) 
-    #$(INTERACTIVE_TARGET)
+	rm -f $(filter-out $(RECOMENDADOR_OBJ), $(OBJ_MAIN) $(OBJ_TEST) $(OBJ_INTERACTIVE)) $(TARGET) $(TEST_TARGET) $(INTERACTIVE_TARGET)

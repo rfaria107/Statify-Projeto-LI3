@@ -482,11 +482,25 @@ void query_5(char *user_id, int **matrizClassificacaoMusicas, char **idsUtilizad
         row_writer_set_formatting(writer, formatting_empty);
         if (n == 0)
         {
-            write_row(writer, ';', 1, "");
+            if (t == 0)
+            {
+                write_row(writer, ';', 1, "");
+            }
+            else if (t == 1)
+            {
+                print_row(writer, ';', 1, "");
+            }
         }
         if (n == 1)
         {
-            write_row(writer, '=', 1, "");
+            if (t == 0)
+            {
+                write_row(writer, '=', 1, "");
+            }
+            else if (t == 1)
+            {
+                print_row(writer, '=', 1, "");
+            }
         }
     }
     free_and_finish_writing(writer);
