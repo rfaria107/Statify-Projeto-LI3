@@ -1,5 +1,5 @@
 # Projeto elaborado no âmbito da cadeira Laboratórios de Informática III (2024/2025)
-# 2º ano 1º semestre do curso de Engenharia Informática @ Universidade do Minho
+2º ano 1º semestre do curso de Engenharia Informática @ Universidade do Minho
 # Classificação obtida: 18 valores
 
 Membros do grupo:
